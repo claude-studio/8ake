@@ -1,0 +1,612 @@
+{
+  "version": "3.0",
+  "lastUpdated": "2026-03-25T15:03:08.323Z",
+  "activeFeatures": [
+    "ui",
+    "date-divider",
+    "news-card",
+    "header",
+    "ticker",
+    "footer",
+    "card-grid",
+    "report",
+    "dev-pulse",
+    "e2e",
+    "8ake",
+    "routes",
+    "_auth",
+    "recipe",
+    "api"
+  ],
+  "primaryFeature": "ui",
+  "features": {
+    "ui": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:37:36.590Z",
+        "lastUpdated": "2026-03-24T17:37:59.276Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/shared/ui/index.ts",
+      "stateMachine": {
+        "currentState": "do",
+        "previousState": null,
+        "stateHistory": [],
+        "retryCount": 0,
+        "maxRetries": 5,
+        "circuitBreakerOpen": false
+      },
+      "metrics": {
+        "qualityScore": null,
+        "conventionCompliance": null,
+        "apiCompliance": null,
+        "cycleTimeMs": null,
+        "iterationEfficiency": null
+      },
+      "phaseTimestamps": {},
+      "automationLevel": 2
+    },
+    "date-divider": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:38:04.680Z",
+        "lastUpdated": "2026-03-24T17:38:07.428Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/entities/date-divider/index.ts"
+    },
+    "news-card": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:38:18.431Z",
+        "lastUpdated": "2026-03-24T17:56:29.847Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/entities/news-card/vercel-card.tsx"
+    },
+    "header": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:38:37.980Z",
+        "lastUpdated": "2026-03-24T17:56:16.269Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/widgets/header/header.tsx"
+    },
+    "ticker": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:38:46.913Z",
+        "lastUpdated": "2026-03-24T17:38:49.598Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/widgets/ticker/index.ts"
+    },
+    "footer": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:38:55.647Z",
+        "lastUpdated": "2026-03-24T17:38:59.058Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/widgets/footer/index.ts"
+    },
+    "card-grid": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:39:04.716Z",
+        "lastUpdated": "2026-03-24T17:39:07.675Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/widgets/card-grid/index.ts"
+    },
+    "report": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:39:13.937Z",
+        "lastUpdated": "2026-03-24T17:39:13.937Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/src/pages/report/report-page.tsx"
+    },
+    "dev-pulse": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:39:20.248Z",
+        "lastUpdated": "2026-03-24T17:56:53.836Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/playwright.config.ts"
+    },
+    "e2e": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T17:39:51.981Z",
+        "lastUpdated": "2026-03-25T00:31:41.650Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/dev-pulse/app/e2e/responsive.spec.ts"
+    },
+    "8ake": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-25T15:00:26.747Z",
+        "lastUpdated": "2026-03-25T15:02:53.764Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/vite.config.ts"
+    },
+    "routes": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-25T15:02:59.642Z",
+        "lastUpdated": "2026-03-25T15:03:03.122Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/src/routes/_auth.tsx"
+    },
+    "_auth": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-25T15:03:03.985Z",
+        "lastUpdated": "2026-03-25T15:03:08.303Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/src/routes/_auth/ingredients.tsx"
+    },
+    "recipe": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-25T15:03:05.153Z",
+        "lastUpdated": "2026-03-25T15:03:07.542Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/src/routes/_auth/recipe/$id_.edit.tsx"
+    },
+    "api": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-25T15:03:07.697Z",
+        "lastUpdated": "2026-03-25T15:03:08.323Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/src/shared/api/index.ts"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-03-24T17:37:36.590Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-03-25T15:03:08.323Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-03-24T17:37:36.590Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:37:41.810Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:37:46.767Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:37:53.012Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:37:56.120Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:37:59.276Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:04.680Z",
+      "feature": "date-divider",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:07.428Z",
+      "feature": "date-divider",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:18.431Z",
+      "feature": "news-card",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:26.086Z",
+      "feature": "news-card",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:28.949Z",
+      "feature": "news-card",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:37.980Z",
+      "feature": "header",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:40.906Z",
+      "feature": "header",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:46.913Z",
+      "feature": "ticker",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:49.598Z",
+      "feature": "ticker",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:55.647Z",
+      "feature": "footer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:38:59.058Z",
+      "feature": "footer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:39:04.716Z",
+      "feature": "card-grid",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:39:07.675Z",
+      "feature": "card-grid",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:39:13.937Z",
+      "feature": "report",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:39:20.248Z",
+      "feature": "dev-pulse",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:39:24.071Z",
+      "feature": "dev-pulse",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:39:39.337Z",
+      "feature": "dev-pulse",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:39:51.981Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:40:00.163Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:40:05.522Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:40:41.644Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:41:01.635Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:42:36.956Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:43:36.769Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:44:42.317Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:45:38.498Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:46:08.884Z",
+      "feature": "news-card",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:46:31.873Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:48:36.153Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:48:55.318Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:49:52.638Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:51:35.762Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:56:16.269Z",
+      "feature": "header",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:56:24.927Z",
+      "feature": "news-card",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:56:29.847Z",
+      "feature": "news-card",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:56:53.836Z",
+      "feature": "dev-pulse",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T17:57:03.026Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T00:31:41.650Z",
+      "feature": "e2e",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:00:26.747Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:00:46.623Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:02:25.208Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:02:53.764Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:02:59.642Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:01.932Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:03.122Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:03.985Z",
+      "feature": "_auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:05.153Z",
+      "feature": "recipe",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:06.273Z",
+      "feature": "recipe",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:07.542Z",
+      "feature": "recipe",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:07.697Z",
+      "feature": "api",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:08.303Z",
+      "feature": "_auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:08.323Z",
+      "feature": "api",
+      "phase": "do",
+      "action": "updated"
+    }
+  ],
+  "stateMachine": {
+    "defaultWorkflow": "default",
+    "activeWorkflows": {},
+    "totalTransitions": 0
+  },
+  "automation": {
+    "globalLevel": 2,
+    "trustScore": 40,
+    "pendingApprovals": 0,
+    "lastGateResult": null
+  },
+  "team": {
+    "enabled": true,
+    "stateFile": ".bkit/runtime/agent-state.json",
+    "eventsFile": ".bkit/runtime/agent-events.jsonl"
+  }
+}
