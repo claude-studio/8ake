@@ -5,9 +5,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .pnpm-store/
+# lockfiles: pnpm-lock.yaml은 추적, 나머지는 무시
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 
 # ── Build output ─────────────────────────────────────────
 dist/

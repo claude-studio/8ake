@@ -1,6 +1,6 @@
 {
   "version": "3.0",
-  "lastUpdated": "2026-03-25T15:03:08.323Z",
+  "lastUpdated": "2026-03-25T15:07:48.501Z",
   "activeFeatures": [
     "ui",
     "date-divider",
@@ -16,7 +16,9 @@
     "routes",
     "_auth",
     "recipe",
-    "api"
+    "api",
+    "model",
+    "auth"
   ],
   "primaryFeature": "ui",
   "features": {
@@ -176,9 +178,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-25T15:00:26.747Z",
-        "lastUpdated": "2026-03-25T15:02:53.764Z"
+        "lastUpdated": "2026-03-25T15:07:48.501Z"
       },
-      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/vite.config.ts"
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/eslint.config.ts"
     },
     "routes": {
       "phase": "do",
@@ -231,6 +233,32 @@
         "lastUpdated": "2026-03-25T15:03:08.323Z"
       },
       "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/src/shared/api/index.ts"
+    },
+    "model": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-25T15:03:16.108Z",
+        "lastUpdated": "2026-03-25T15:03:16.108Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/src/shared/model/ui-store.ts"
+    },
+    "auth": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-25T15:03:19.561Z",
+        "lastUpdated": "2026-03-25T15:03:19.911Z"
+      },
+      "lastFile": "/Users/jb/Desktop/project/organization/claude-studio/8ake/src/features/auth/index.ts"
     }
   },
   "pipeline": {
@@ -241,7 +269,7 @@
   "session": {
     "startedAt": "2026-03-24T17:37:36.590Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-25T15:03:08.323Z"
+    "lastActivity": "2026-03-25T15:07:48.501Z"
   },
   "history": [
     {
@@ -589,6 +617,72 @@
     {
       "timestamp": "2026-03-25T15:03:08.323Z",
       "feature": "api",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:12.938Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:14.298Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:14.959Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:16.108Z",
+      "feature": "model",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:18.715Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:19.561Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:19.911Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:03:22.140Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:05:51.598Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:07:37.738Z",
+      "feature": "8ake",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-25T15:07:48.501Z",
+      "feature": "8ake",
       "phase": "do",
       "action": "updated"
     }
