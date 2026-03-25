@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8ake — 재료 리뷰 (시안 B)</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <style>
+    /* ─── CSS Variables ──────────────────────────────────────────── */
+    :root {
+      --bg:            #F5EDE0;
+      --card-bg:       #FEFAF4;
+      --text:          #1E1410;
+      --text-muted:    #8C7B6B;
+      --accent:        #C2673A;
+      --accent-dim:    rgba(194,103,58,0.10);
+      --accent-border: rgba(194,103,58,0.40);
+      --border:        rgba(194,103,58,0.14);
+      --surface:       #EDE3D6;
+      --shadow:        0 4px 20px rgba(100,50,20,0.08);
+      --shadow-card:   0 2px 12px rgba(100,50,20,0.06);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --rule:          rgba(194,103,58,0.08);
+    }
+    [data-theme="dark"] {
+      --bg:            #17120D;
+      --card-bg:       #221C15;
+      --text:          #F0E6D8;
+      --text-muted:    #9E8E7E;
+      --accent:        #E07B4A;
+      --accent-dim:    rgba(224,123,74,0.15);
+      --accent-border: rgba(224,123,74,0.45);
+      --border:        rgba(224,123,74,0.16);
+      --surface:       #1C1610;
+      --shadow:        0 4px 20px rgba(0,0,0,0.30);
+      --shadow-card:   0 2px 12px rgba(0,0,0,0.25);
+      --rule:          rgba(224,123,74,0.06);
+    }
+
+    /* ─── Reset & Base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ─── Paper Texture ──────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.035;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+    [data-theme="dark"] body::before { opacity: 0.055; }
+
+    /* Ruled lines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 27px,
+        var(--rule) 27px,
+        var(--rule) 28px
+      );
+    }
+
+    /* ─── Layout ─────────────────────────────────────────────────── */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px 80px;
+    }
+
+    /* ─── Note Card ──────────────────────────────────────────────── */
+    .note-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────────── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .app-logo {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .app-logo span {
+      font-size: 18px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      background: var(--accent-dim);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    /* ─── Summary Bar ────────────────────────────────────────────── */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .summary-card {
+      aspect-ratio: 1;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+    }
+    .summary-icon {
+      font-size: 26px;
+    }
+    .summary-info {}
+    .summary-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .summary-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .summary-value.accent { color: var(--accent); }
+    .summary-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* ─── Toolbar ────────────────────────────────────────────────── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .toolbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .view-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--card-bg);
+    }
+    .view-btn {
+      padding: 7px 12px;
+      font-size: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: inherit;
+    }
+    .view-btn.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .view-btn:hover:not(.active) {
+      background: var(--surface);
+      color: var(--text);
+    }
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-add:hover { opacity: 0.88; }
+    .btn-add:active { transform: scale(0.97); }
+
+    /* ─── Search & Filter ────────────────────────────────────────── */
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .search-wrap {
+      position: relative;
+      flex: 1;
+    }
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .sort-select {
+      padding: 9px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      min-width: 110px;
+    }
+    .sort-select:focus { border-color: var(--accent-border); }
+
+    /* ─── Main Content Area ──────────────────────────────────────── */
+    .content-area {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .table-section {
+      flex: 1;
+      min-width: 0;
+      transition: all 0.3s;
+    }
+
+    /* ─── Table ──────────────────────────────────────────────────── */
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead tr {
+      background: var(--surface);
+    }
+    thead th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+    thead th:first-child { border-radius: var(--radius-sm) 0 0 0; width: 36px; }
+    thead th:last-child  { border-radius: 0 var(--radius-sm) 0 0; width: 80px; }
+    tbody tr {
+      border-bottom: 1px solid var(--rule);
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+    tbody tr:nth-child(even) {
+      background: rgba(237,227,214,0.5);
+    }
+    [data-theme="dark"] tbody tr:nth-child(even) {
+      background: rgba(28,22,16,0.5);
+    }
+    tbody tr:hover {
+      background: var(--accent-dim) !important;
+    }
+    tbody tr.selected {
+      background: var(--accent-dim) !important;
+    }
+    tbody tr.selected td:first-child::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+    tbody td {
+      padding: 11px 14px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .td-num {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .td-name {
+      font-weight: 600;
+    }
+    .td-source {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .td-memo {
+      color: var(--text-muted);
+      font-size: 13px;
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .td-date {
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .td-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    tbody tr:hover .td-actions,
+    tbody tr.selected .td-actions {
+      opacity: 1;
+    }
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .action-btn:hover {
+      border-color: var(--accent-border);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .action-btn.delete:hover {
+      border-color: rgba(200,60,60,0.4);
+      color: #c83c3c;
+      background: rgba(200,60,60,0.08);
+    }
+
+    /* Rating stars (cupcake) */
+    .rating-cupcakes {
+      display: flex;
+      gap: 1px;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .cupcake-empty {
+      opacity: 0.22;
+      filter: grayscale(1);
+    }
+
+    /* ─── Side Panel ─────────────────────────────────────────────── */
+    .side-panel {
+      width: 280px;
+      flex-shrink: 0;
+      transform: translateX(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), opacity 0.25s;
+      display: none;
+    }
+    @media (min-width: 768px) {
+      .side-panel {
+        display: block;
+      }
+      .side-panel.open {
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+    .side-panel-inner {
+      position: sticky;
+      top: 72px;
+    }
+    .side-panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .side-panel-header {
+      background: var(--surface);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .side-panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .side-close {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .side-close:hover {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+    .side-panel-body {
+      padding: 20px 18px;
+    }
+    .side-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 10px;
+      letter-spacing: -0.3px;
+    }
+    .side-rating {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .side-rating-cupcakes {
+      font-size: 20px;
+      display: flex;
+      gap: 2px;
+    }
+    .side-rating-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 20px;
+      padding: 2px 8px;
+    }
+    .side-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .side-meta-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .side-meta-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      min-width: 48px;
+      padding-top: 1px;
+    }
+    .side-meta-value {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .side-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+    .side-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .side-btn {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .side-btn.edit {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .side-btn.edit:hover { opacity: 0.85; }
+    .side-btn.del {
+      background: var(--card-bg);
+      color: var(--text-muted);
+    }
+    .side-btn.del:hover {
+      background: rgba(200,60,60,0.08);
+      border-color: rgba(200,60,60,0.35);
+      color: #c83c3c;
+    }
+
+    /* ─── Card View ──────────────────────────────────────────────── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .card-grid { grid-template-columns: 1fr; }
+    }
+    .ingredient-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 16px 16px 14px;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .ingredient-card:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .card-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .card-rating-num {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .card-rating-icon {
+      font-size: 13px;
+    }
+    .card-source-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .card-memo {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--rule);
+    }
+    .card-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .card-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .ingredient-card:hover .card-actions { opacity: 1; }
+
+    /* ─── Bottom Sheet (Mobile) ──────────────────────────────────── */
+    .sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .sheet-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 201;
+      background: var(--card-bg);
+      border-radius: 16px 16px 0 0;
+      padding: 0 20px 32px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .bottom-sheet.open {
+      transform: translateY(0);
+    }
+    .sheet-handle-bar {
+      display: flex;
+      justify-content: center;
+      padding: 12px 0 8px;
+    }
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+    }
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .sheet-title-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .sheet-close {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .sheet-close:hover {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+    .sheet-body {}
+
+    /* ─── Modal ──────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 400px;
+      transform: translateY(12px);
+      transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
+    }
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+    .modal-header {
+      background: var(--surface);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .modal-close:hover {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .form-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+    /* Rating picker */
+    .rating-picker {
+      display: flex;
+      gap: 6px;
+    }
+    .rating-pick-btn {
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      transition: transform 0.15s;
+      line-height: 1;
+    }
+    .rating-pick-btn:hover { transform: scale(1.25); }
+    .rating-pick-btn.inactive { opacity: 0.2; filter: grayscale(1); }
+
+    .modal-footer {
+      padding: 14px 20px 20px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .modal-btn {
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .modal-btn.cancel {
+      background: var(--surface);
+      color: var(--text-muted);
+    }
+    .modal-btn.cancel:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+    .modal-btn.save {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .modal-btn.save:hover { opacity: 0.85; }
+
+    /* ─── Empty state ─────────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .empty-state .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+    /* ─── Toast ──────────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 500;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 767px) {
+      .td-memo, .td-date { display: none; }
+      thead th:nth-child(5), thead th:nth-child(6) { display: none; }
+    }
+    @media (max-width: 480px) {
+      .td-source { display: none; }
+      thead th:nth-child(3) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── PAGE WRAPPER ───────────────────────────────────────────── -->
+<div class="page-wrapper">
+
+  <!-- ─── HEADER ─────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <a class="app-logo" href="#">
+      <span>🧁</span> 8ake
+    </a>
+    <div class="header-right">
+      <button class="icon-btn" id="themeToggle" title="테마 전환" aria-label="테마 전환">🌙</button>
+    </div>
+  </header>
+
+  <!-- ─── SUMMARY BAR ────────────────────────────────────────────── -->
+  <div class="summary-bar">
+    <div class="note-card summary-card">
+      <div class="summary-icon">📦</div>
+      <div class="summary-info">
+        <div class="summary-label">등록 재료</div>
+        <div class="summary-value accent" id="sumTotal">6종</div>
+      </div>
+    </div>
+    <div class="note-card summary-card">
+      <div class="summary-icon">⭐</div>
+      <div class="summary-info">
+        <div class="summary-label">평균 평점</div>
+        <div class="summary-value" id="sumAvg">🧁🧁🧁🧁</div>
+        <div class="summary-sub" id="sumAvgNum">3.8 / 5</div>
+      </div>
+    </div>
+    <div class="note-card summary-card">
+      <div class="summary-icon">🏆</div>
+      <div class="summary-info">
+        <div class="summary-label">최고 재료</div>
+        <div class="summary-value" id="sumBest">얼그레이 찻잎</div>
+        <div class="summary-sub">5점 만점</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOOLBAR ────────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <h1 class="toolbar-title">재료 리뷰</h1>
+    <div class="toolbar-right">
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnTable" onclick="setView('table')">
+          ☰ 테이블
+        </button>
+        <button class="view-btn" id="btnCard" onclick="setView('card')">
+          ⊞ 카드
+        </button>
+      </div>
+      <button class="btn-add" onclick="openModal()">
+        + 재료 추가
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── SEARCH & FILTER ────────────────────────────────────────── -->
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        class="search-input"
+        id="searchInput"
+        type="text"
+        placeholder="재료명, 구매처, 메모 검색…"
+        oninput="filterIngredients()"
+      />
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="filterIngredients()">
+      <option value="date-desc">최신순</option>
+      <option value="date-asc">오래된순</option>
+      <option value="rating-desc">평점 높은순</option>
+      <option value="rating-asc">평점 낮은순</option>
+      <option value="name-asc">이름순</option>
+    </select>
+  </div>
+
+  <!-- ─── CONTENT AREA ───────────────────────────────────────────── -->
+  <div class="content-area" id="contentArea">
+
+    <!-- TABLE SECTION -->
+    <div class="table-section" id="tableSection">
+      <div class="note-card table-wrapper">
+        <table id="ingredientTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>재료명</th>
+              <th>구매처</th>
+              <th>평가</th>
+              <th>메모</th>
+              <th>날짜</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <aside class="side-panel" id="sidePanel">
+      <div class="side-panel-inner">
+        <div class="side-panel-card">
+          <div class="side-panel-header">
+            <span class="side-panel-title">재료 상세</span>
+            <button class="side-close" onclick="closeSidePanel()" aria-label="닫기">✕</button>
+          </div>
+          <div class="side-panel-body" id="sidePanelBody">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- CARD GRID (hidden by default) -->
+  <div id="cardSection" style="display:none;">
+    <div class="card-grid" id="cardGrid"></div>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<!-- ─── BOTTOM SHEET (Mobile) ─────────────────────────────────── -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="sheet-handle-bar"><div class="sheet-handle"></div></div>
+  <div class="sheet-header">
+    <span class="sheet-title-text">재료 상세</span>
+    <button class="sheet-close" onclick="closeSheet()" aria-label="닫기">✕</button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+</div>
+
+<!-- ─── ADD / EDIT MODAL ───────────────────────────────────────── -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">재료 추가</span>
+      <button class="modal-close" onclick="closeModal()" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="fieldName">재료명</label>
+        <input class="form-input" id="fieldName" type="text" placeholder="예: 버터(무염)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fieldSource">구매처</label>
+        <input class="form-input" id="fieldSource" type="text" placeholder="예: 이마트" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">평가</label>
+        <div class="rating-picker" id="ratingPicker">
+          <button class="rating-pick-btn" data-val="1" onclick="setRating(1)">🧁</button>
+          <button class="rating-pick-btn" data-val="2" onclick="setRating(2)">🧁</button>
+          <button class="rating-pick-btn" data-val="3" onclick="setRating(3)">🧁</button>
+          <button class="rating-pick-btn" data-val="4" onclick="setRating(4)">🧁</button>
+          <button class="rating-pick-btn" data-val="5" onclick="setRating(5)">🧁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fieldMemo">메모</label>
+        <textarea class="form-textarea" id="fieldMemo" placeholder="사용 후기, 주의사항 등을 적어보세요"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn cancel" onclick="closeModal()">취소</button>
+      <button class="modal-btn save" onclick="saveIngredient()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ──────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ─── JAVASCRIPT ─────────────────────────────────────────────── -->
+<script>
+  /* ── Data ─────────────────────────────────────────────────────── */
+  let ingredients = [
+    { id: 1, name: '밀가루(박력분)', source: '쿠팡 로켓', rating: 5, memo: '곰표 박력밀 1kg, 가성비 최고', date: '2026-03-10' },
+    { id: 2, name: '버터(무염)',     source: '이마트',    rating: 4, memo: '앵커버터, 풍미 좋음. 냉동 보관 필수', date: '2026-03-08' },
+    { id: 3, name: '바닐라 익스트랙', source: '마켓컬리',  rating: 3, memo: '인공향 느낌 있음, 천연 제품 탐색 중', date: '2026-03-05' },
+    { id: 4, name: '얼그레이 찻잎',  source: '티웨이 온라인', rating: 5, memo: 'TWG 얼그레이, 향이 진함', date: '2026-03-01' },
+    { id: 5, name: '초콜릿(다크)',   source: '이마트',    rating: 4, memo: '발로나 62%, 가나슈용으로 최적', date: '2026-02-25' },
+    { id: 6, name: '베이킹파우더',   source: '쿠팡',      rating: 2, memo: '유통기한 확인 필수. 케이크 부풀음 부족했음', date: '2026-02-20' },
+  ];
+
+  let nextId = 7;
+  let selectedId = null;
+  let editingId = null;
+  let currentRating = 3;
+  let currentView = 'table';
+
+  /* ── Helpers ──────────────────────────────────────────────────── */
+  function cupcakes(n, total = 5, size = '') {
+    let html = '';
+    for (let i = 1; i <= total; i++) {
+      html += `<span class="${i <= n ? '' : 'cupcake-empty'}">🧁</span>`;
+    }
+    return html;
+  }
+
+  function formatDate(d) {
+    return d.replace(/-/g, '.');
+  }
+
+  /* ── Render ───────────────────────────────────────────────────── */
+  function getFiltered() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const sort = document.getElementById('sortSelect').value;
+    let list = ingredients.filter(i =>
+      i.name.toLowerCase().includes(q) ||
+      i.source.toLowerCase().includes(q) ||
+      i.memo.toLowerCase().includes(q)
+    );
+    list.sort((a, b) => {
+      if (sort === 'rating-desc') return b.rating - a.rating;
+      if (sort === 'rating-asc')  return a.rating - b.rating;
+      if (sort === 'name-asc')    return a.name.localeCompare(b.name);
+      if (sort === 'date-asc')    return a.date.localeCompare(b.date);
+      return b.date.localeCompare(a.date); // date-desc
+    });
+    return list;
+  }
+
+  function renderTable() {
+    const list = getFiltered();
+    const tbody = document.getElementById('tableBody');
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🔍</div>일치하는 재료가 없습니다</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map((item, idx) => `
+      <tr
+        data-id="${item.id}"
+        class="${selectedId === item.id ? 'selected' : ''}"
+        onclick="selectRow(${item.id})"
+      >
+        <td class="td-num">${idx + 1}</td>
+        <td class="td-name">${item.name}</td>
+        <td class="td-source">${item.source}</td>
+        <td>
+          <div class="rating-cupcakes">${cupcakes(item.rating)}</div>
+        </td>
+        <td class="td-memo">${item.memo}</td>
+        <td class="td-date">${formatDate(item.date)}</td>
+        <td>
+          <div class="td-actions">
+            <button class="action-btn" onclick="editItem(${item.id}, event)" title="수정">✏️</button>
+            <button class="action-btn delete" onclick="deleteItem(${item.id}, event)" title="삭제">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderCards() {
+    const list = getFiltered();
+    const grid = document.getElementById('cardGrid');
+    if (list.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div>일치하는 재료가 없습니다</div>`;
+      return;
+    }
+    grid.innerHTML = list.map(item => `
+      <div class="ingredient-card" onclick="openDetailSheet(${item.id})">
+        <div class="card-top">
+          <div class="card-name">${item.name}</div>
+          <div class="card-rating">
+            <span class="card-rating-num">${item.rating}.0</span>
+            <span class="card-rating-icon">🧁</span>
+          </div>
+        </div>
+        <div class="card-source-pill">${item.source}</div>
+        <div class="card-memo">${item.memo}</div>
+        <div class="card-footer">
+          <span class="card-date">${formatDate(item.date)}</span>
+          <div class="card-actions">
+            <button class="action-btn" onclick="editItem(${item.id}, event)" title="수정">✏️</button>
+            <button class="action-btn delete" onclick="deleteItem(${item.id}, event)" title="삭제">🗑️</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderAll() {
+    if (currentView === 'table') renderTable();
+    else renderCards();
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const total = ingredients.length;
+    const avg = total > 0 ? (ingredients.reduce((s, i) => s + i.rating, 0) / total) : 0;
+    const best = [...ingredients].sort((a, b) => b.rating - a.rating)[0];
+
+    document.getElementById('sumTotal').textContent = total + '종';
+    document.getElementById('sumAvg').innerHTML = cupcakes(Math.round(avg));
+    document.getElementById('sumAvgNum').textContent = avg.toFixed(1) + ' / 5';
+    document.getElementById('sumBest').textContent = best ? best.name : '—';
+  }
+
+  /* ── View toggle ──────────────────────────────────────────────── */
+  function setView(v) {
+    currentView = v;
+    document.getElementById('btnTable').classList.toggle('active', v === 'table');
+    document.getElementById('btnCard').classList.toggle('active', v === 'card');
+    document.getElementById('tableSection').style.display = v === 'table' ? '' : 'none';
+    document.getElementById('cardSection').style.display = v === 'card' ? '' : 'none';
+    // hide side panel on card view
+    if (v === 'card') closeSidePanel();
+    renderAll();
+  }
+
+  /* ── Row select / Side panel ──────────────────────────────────── */
+  function selectRow(id) {
+    if (window.innerWidth < 768) {
+      openDetailSheet(id);
+      return;
+    }
+    if (selectedId === id) {
+      closeSidePanel();
+      return;
+    }
+    selectedId = id;
+    renderTable();
+    openSidePanel(id);
+  }
+
+  function openSidePanel(id) {
+    const item = ingredients.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('sidePanelBody').innerHTML = detailHTML(item);
+    document.getElementById('sidePanel').classList.add('open');
+  }
+
+  function closeSidePanel() {
+    selectedId = null;
+    document.getElementById('sidePanel').classList.remove('open');
+    renderTable();
+  }
+
+  /* ── Bottom sheet ─────────────────────────────────────────────── */
+  function openDetailSheet(id) {
+    const item = ingredients.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('sheetBody').innerHTML = detailHTML(item);
+    document.getElementById('sheetOverlay').classList.add('open');
+    document.getElementById('bottomSheet').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSheet() {
+    document.getElementById('sheetOverlay').classList.remove('open');
+    document.getElementById('bottomSheet').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function detailHTML(item) {
+    return `
+      <div class="side-name">${item.name}</div>
+      <div class="side-rating">
+        <div class="side-rating-cupcakes">${cupcakes(item.rating)}</div>
+        <span class="side-rating-num">${item.rating}.0</span>
+      </div>
+      <div class="side-meta">
+        <div class="side-meta-row">
+          <span class="side-meta-label">구매처</span>
+          <span class="side-meta-value">${item.source}</span>
+        </div>
+        <div class="side-meta-row">
+          <span class="side-meta-label">날짜</span>
+          <span class="side-meta-value">${formatDate(item.date)}</span>
+        </div>
+        <div class="side-meta-row">
+          <span class="side-meta-label">메모</span>
+          <span class="side-meta-value">${item.memo}</span>
+        </div>
+      </div>
+      <div class="side-divider"></div>
+      <div class="side-actions">
+        <button class="side-btn edit" onclick="editItem(${item.id}, event)">✏️ 수정</button>
+        <button class="side-btn del" onclick="deleteItem(${item.id}, event)">🗑️ 삭제</button>
+      </div>
+    `;
+  }
+
+  /* ── Filter ───────────────────────────────────────────────────── */
+  function filterIngredients() {
+    renderAll();
+  }
+
+  /* ── Modal ────────────────────────────────────────────────────── */
+  function openModal(item) {
+    editingId = item ? item.id : null;
+    document.getElementById('modalTitle').textContent = item ? '재료 수정' : '재료 추가';
+    document.getElementById('fieldName').value = item ? item.name : '';
+    document.getElementById('fieldSource').value = item ? item.source : '';
+    document.getElementById('fieldMemo').value = item ? item.memo : '';
+    currentRating = item ? item.rating : 3;
+    updateRatingPicker();
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('fieldName').focus(), 100);
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  function saveIngredient() {
+    const name = document.getElementById('fieldName').value.trim();
+    const source = document.getElementById('fieldSource').value.trim();
+    const memo = document.getElementById('fieldMemo').value.trim();
+    if (!name) {
+      document.getElementById('fieldName').focus();
+      document.getElementById('fieldName').style.borderColor = 'rgba(200,60,60,0.6)';
+      setTimeout(() => document.getElementById('fieldName').style.borderColor = '', 1200);
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    if (editingId) {
+      const idx = ingredients.findIndex(i => i.id === editingId);
+      if (idx >= 0) {
+        ingredients[idx] = { ...ingredients[idx], name, source, memo, rating: currentRating };
+        showToast('재료가 수정되었습니다');
+        if (selectedId === editingId) openSidePanel(editingId);
+      }
+    } else {
+      ingredients.unshift({ id: nextId++, name, source, rating: currentRating, memo, date: today });
+      showToast('재료가 추가되었습니다');
+    }
+    closeModal();
+    renderAll();
+  }
+
+  /* ── Rating picker ────────────────────────────────────────────── */
+  function setRating(n) {
+    currentRating = n;
+    updateRatingPicker();
+  }
+
+  function updateRatingPicker() {
+    document.querySelectorAll('.rating-pick-btn').forEach(btn => {
+      const v = parseInt(btn.dataset.val);
+      btn.classList.toggle('inactive', v > currentRating);
+    });
+  }
+
+  /* ── Edit / Delete ────────────────────────────────────────────── */
+  function editItem(id, e) {
+    if (e) e.stopPropagation();
+    const item = ingredients.find(i => i.id === id);
+    if (item) openModal(item);
+  }
+
+  function deleteItem(id, e) {
+    if (e) e.stopPropagation();
+    if (!confirm('이 재료를 삭제하시겠습니까?')) return;
+    ingredients = ingredients.filter(i => i.id !== id);
+    if (selectedId === id) closeSidePanel();
+    closeSheet();
+    showToast('재료가 삭제되었습니다');
+    renderAll();
+  }
+
+  /* ── Theme ────────────────────────────────────────────────────── */
+  const themeBtn = document.getElementById('themeToggle');
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('8ake-theme', t);
+  }
+  themeBtn.addEventListener('click', () => {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  (function initTheme() {
+    const saved = localStorage.getItem('8ake-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+  })();
+
+  /* ── Toast ────────────────────────────────────────────────────── */
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ── Init ─────────────────────────────────────────────────────── */
+  renderAll();
+</script>
+</body>
+</html>

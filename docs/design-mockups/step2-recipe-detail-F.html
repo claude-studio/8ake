@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8ake — 레시피 상세 (시안 F)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #F5EDE0;
+      --card-bg:     #FEFAF4;
+      --text:        #1E1410;
+      --text-muted:  #8C7B6B;
+      --accent:      #C2673A;
+      --accent-dim:  rgba(194,103,58,0.10);
+      --border:      rgba(194,103,58,0.14);
+      --surface:     #EDE3D6;
+      --shadow:      0 4px 20px rgba(100,50,20,0.08);
+      --radius:      12px;
+      --header-h:    56px;
+      --tab-h:       48px;
+      --transition:  0.25s cubic-bezier(.4,0,.2,1);
+      --noise-opacity: 0.04;
+    }
+    [data-theme="dark"] {
+      --bg:          #17120D;
+      --card-bg:     #221C15;
+      --text:        #F0E6D8;
+      --text-muted:  #9E8E7E;
+      --accent:      #E07B4A;
+      --accent-dim:  rgba(224,123,74,0.15);
+      --border:      rgba(224,123,74,0.16);
+      --surface:     #1C1610;
+      --shadow:      0 4px 24px rgba(0,0,0,0.50);
+      --noise-opacity: 0.06;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+      position: relative;
+    }
+
+    /* SVG Noise Texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: var(--noise-opacity);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+
+    /* Wrapper for max-width centering */
+    .page-wrapper {
+      max-width: 1024px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Header Bar ─────────────────────────────────────────── */
+    .header-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-h);
+      z-index: 200;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .header-inner {
+      max-width: 1024px;
+      margin: 0 auto;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 20px;
+      transition: background var(--transition), color var(--transition);
+    }
+    .header-btn:hover { background: var(--accent-dim); }
+    .header-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+    .header-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .theme-toggle-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .theme-toggle-btn:hover { background: var(--accent-dim); }
+
+    /* ─── Hero Area ──────────────────────────────────────────── */
+    .hero {
+      margin-top: var(--header-h);
+      height: 380px;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    @media (min-width: 768px) {
+      .hero { height: 440px; }
+    }
+
+    /* Parallax background */
+    .hero-parallax-bg {
+      position: absolute;
+      inset: -60px 0 -60px 0;
+      background: var(--surface);
+      will-change: transform;
+      transition: background var(--transition);
+    }
+    .hero-parallax-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(194,103,58,0.08) 0%, transparent 60%);
+    }
+
+    /* Gallery top half */
+    .hero-gallery {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 55%;
+      overflow: hidden;
+    }
+    .polaroid-placeholder {
+      background: linear-gradient(135deg, #D4956A 0%, #B8714A 50%, #9A5535 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      border-radius: 1px;
+    }
+    .photo-layout {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+    .photo-main {
+      background: #fff;
+      padding: 7px 7px 24px 7px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.12);
+      border-radius: 2px;
+      transform: rotate(-1.5deg);
+      transition: transform 0.3s ease;
+      flex: 0 0 auto;
+    }
+    .photo-main:hover { transform: rotate(0deg) scale(1.02); }
+    .photo-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    .thumbnail-mark {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+      z-index: 1;
+    }
+    .photo-main .polaroid-placeholder {
+      width: 190px;
+      height: 142px;
+    }
+    @media (min-width: 768px) {
+      .photo-main .polaroid-placeholder { width: 230px; height: 172px; }
+    }
+    .photo-sub {
+      background: #fff;
+      padding: 6px 6px 20px 6px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.12);
+      border-radius: 2px;
+      transform: rotate(2deg);
+      transition: transform 0.3s ease;
+      flex: 0 0 auto;
+      align-self: flex-end;
+      margin-bottom: 8px;
+    }
+    .photo-sub:hover { transform: rotate(0deg) scale(1.02); }
+    .photo-sub .polaroid-placeholder {
+      width: 110px;
+      height: 82px;
+    }
+    @media (min-width: 768px) {
+      .photo-sub .polaroid-placeholder { width: 130px; height: 97px; }
+    }
+    /* 사진 1장만 있을 때 */
+    .photo-layout.single .photo-main {
+      transform: rotate(-1deg);
+    }
+    .photo-layout.single .photo-main .polaroid-placeholder {
+      width: 210px;
+      height: 157px;
+    }
+
+    /* Info card overlay bottom half */
+    .hero-info-card {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px 16px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+      transition: background var(--transition);
+    }
+    .hero-menu-name {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    @media (min-width: 768px) { .hero-menu-name { font-size: 28px; } }
+
+    .visibility-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.2px;
+    }
+    .visibility-badge.private {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .visibility-badge.public {
+      background: rgba(80,160,100,0.12);
+      color: #3a8a52;
+      border: 1px solid rgba(80,160,100,0.25);
+    }
+    [data-theme="dark"] .visibility-badge.public {
+      color: #6dba88;
+      border-color: rgba(109,186,136,0.25);
+    }
+
+    .hero-badges-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .source-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .source-type-icon {
+      font-size: 15px;
+    }
+    .source-type-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .source-dot {
+      color: var(--text-muted);
+    }
+    .source-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .source-link:hover {
+      border-bottom-color: var(--accent);
+    }
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .hero-meta-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .meta-item {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+      border: 1px solid var(--border);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .meta-icon { font-size: 18px; margin-bottom: 2px; }
+    .meta-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .meta-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ─── Tab Bar ────────────────────────────────────────────── */
+    .tab-bar {
+      position: sticky;
+      top: var(--header-h);
+      z-index: 150;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .tab-bar-inner {
+      max-width: 1024px;
+      margin: 0 auto;
+      display: flex;
+      height: var(--tab-h);
+      padding: 0 16px;
+    }
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: color var(--transition);
+      letter-spacing: -0.2px;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 8px;
+      right: 8px;
+      height: 2.5px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* ─── Tab Content ────────────────────────────────────────── */
+    .tab-content-area {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+    .tab-panel {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .tab-panel.active {
+      display: block;
+      opacity: 1;
+    }
+    .tab-panel.fade-in {
+      animation: fadeIn 0.2s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Note Card Base ──────────────────────────────────────── */
+    .note-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+    .note-card-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .note-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ─── Ingredient Card ─────────────────────────────────────── */
+    .ingredient-list {
+      padding: 8px 0;
+    }
+    /* Ruled lines background */
+    .ruled-bg {
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 31px,
+        var(--border) 31px,
+        var(--border) 32px
+      );
+      background-position: 0 12px;
+    }
+    .ingredient-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      min-height: 32px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .ingredient-item:last-child { border-bottom: none; }
+    .ingredient-bullet {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .ingredient-name {
+      font-size: 14px;
+      color: var(--text);
+      flex: 1;
+    }
+    .ingredient-amount {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      min-width: 56px;
+      text-align: right;
+    }
+
+    /* ─── Steps Card ──────────────────────────────────────────── */
+    .steps-body {
+      padding: 16px;
+    }
+    .step-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      padding-top: 2px;
+    }
+
+    /* Memo box */
+    .memo-box {
+      margin: 4px 16px 16px;
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: var(--surface);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .memo-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+    .memo-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ─── Baking Log Tab ──────────────────────────────────────── */
+    .log-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .log-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .add-log-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .add-log-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .add-log-btn:active { transform: translateY(0); }
+
+    /* Retrospective card */
+    .retro-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+    .retro-card-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .retro-date-stamp {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.2px;
+    }
+    .retro-score {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .retro-card-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .retro-action-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .retro-action-btn:hover { background: var(--accent-dim); color: var(--accent); }
+    .retro-card-body {
+      padding: 16px;
+    }
+
+    /* Radar Chart */
+    .radar-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .radar-svg {
+      overflow: visible;
+    }
+    .radar-grid-poly {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 1;
+    }
+    .radar-axis-line {
+      stroke: var(--border);
+      stroke-width: 1;
+    }
+    .radar-data-poly {
+      fill: var(--accent-dim);
+      stroke: var(--accent);
+      stroke-width: 2;
+      transition: fill 0.3s;
+    }
+    .radar-data-dot {
+      fill: var(--accent);
+      r: 3.5;
+    }
+    .radar-label {
+      font-family: 'Pretendard', sans-serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      fill: var(--text-muted);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    /* Review text */
+    .retro-review-text {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    /* Storage memo box */
+    .storage-memo-box {
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: var(--surface);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .storage-memo-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+      letter-spacing: 0.4px;
+    }
+    .storage-memo-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .empty-state-notebook {
+      width: 80px;
+      height: 96px;
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .empty-state-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .empty-state-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ─── Delete Modal ───────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px 20px;
+      max-width: 320px;
+      width: 100%;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.22);
+      transform: scale(0.95) translateY(8px);
+      transition: transform 0.2s ease, background var(--transition);
+    }
+    .modal-overlay.visible .modal-box {
+      transform: scale(1) translateY(0);
+    }
+    /* Notebook-style top decoration */
+    .modal-box::before {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .modal-icon { text-align: center; font-size: 32px; margin-bottom: 12px; }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .modal-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 11px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .modal-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .modal-btn.cancel {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .modal-btn.confirm {
+      background: #C0392B;
+      color: #fff;
+    }
+    .modal-btn.cancel:hover { background: var(--accent-dim); }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (min-width: 768px) {
+      .tab-content-area { padding: 24px 24px 80px; }
+      .hero-info-card { padding: 24px 24px 20px; }
+      .hero-menu-name { font-size: 26px; }
+    }
+    @media (min-width: 1024px) {
+      .tab-content-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 24px;
+        align-items: start;
+      }
+      /* For recipe tab, single column still */
+      #panel-recipe .tab-content-area {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Header Bar ─────────────────────────────────────────── -->
+  <header class="header-bar">
+    <div class="header-inner">
+      <button class="header-btn" onclick="history.back()" aria-label="뒤로가기">&#8592;</button>
+      <span class="header-title">레시피 상세</span>
+      <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggle" aria-label="테마 전환">☀</button>
+        <button class="header-btn" aria-label="수정">✏</button>
+        <button class="header-btn" onclick="openModal()" aria-label="삭제">🗑</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Hero Area ──────────────────────────────────────────── -->
+  <div class="hero" id="hero">
+    <div class="hero-parallax-bg" id="parallaxBg"></div>
+
+    <!-- Gallery -->
+    <div class="hero-gallery">
+      <div class="photo-layout" id="photoLayout">
+        <!-- 사진 있을 때: photo-main + photo-sub -->
+        <div class="photo-main">
+          <div class="photo-wrapper">
+            <div class="thumbnail-mark">★ 썸네일</div>
+            <div class="polaroid-placeholder">🧁</div>
+          </div>
+        </div>
+        <div class="photo-sub">
+          <div class="polaroid-placeholder">🍰</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Card Overlay -->
+    <div class="hero-info-card">
+      <div class="hero-menu-name">얼그레이 라즈베리 컵케이크</div>
+      <!-- 출처 행 -->
+      <div class="source-row">
+        <span class="source-type-icon">🎬</span>
+        <span class="source-type-label">유튜브</span>
+        <span class="source-dot">·</span>
+        <a class="source-link" href="#" target="_blank">만개의레시피 스콘 영상 ↗</a>
+      </div>
+      <div class="hero-badges-row">
+        <span class="visibility-badge private">🔒 비공개</span>
+        <span class="tag-badge">#홈베이킹</span>
+        <span class="tag-badge">#티타임</span>
+        <span class="tag-badge">#중급</span>
+      </div>
+      <div class="hero-meta-row">
+        <div class="meta-item">
+          <div class="meta-icon">🌡</div>
+          <div class="meta-label">오븐 온도</div>
+          <div class="meta-value">175°C</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-icon">⏱</div>
+          <div class="meta-label">굽는 시간</div>
+          <div class="meta-value">22분</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-icon">🍰</div>
+          <div class="meta-label">분량</div>
+          <div class="meta-value">12개</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Tab Bar ──────────────────────────────────────────────── -->
+  <div class="tab-bar" id="tabBar">
+    <div class="tab-bar-inner">
+      <button class="tab-btn active" data-tab="recipe" id="tabRecipe">레시피</button>
+      <button class="tab-btn" data-tab="log" id="tabLog">베이킹 기록</button>
+    </div>
+  </div>
+
+  <!-- ─── Recipe Panel ─────────────────────────────────────────── -->
+  <div id="panel-recipe" class="tab-panel active fade-in">
+    <div class="tab-content-area">
+
+      <!-- Ingredient Card -->
+      <div class="note-card">
+        <div class="note-card-header">
+          <span class="note-card-title">📋 재료</span>
+          <span style="font-size:12px;color:var(--text-muted)">12개 기준</span>
+        </div>
+        <div class="ingredient-list ruled-bg" id="ingredientList">
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">박력분</span>
+            <span class="ingredient-amount">150g</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">얼그레이 티백</span>
+            <span class="ingredient-amount">3개</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">버터 (실온)</span>
+            <span class="ingredient-amount">120g</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">설탕</span>
+            <span class="ingredient-amount">130g</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">달걀 (실온)</span>
+            <span class="ingredient-amount">2개</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">우유</span>
+            <span class="ingredient-amount">80ml</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">베이킹파우더</span>
+            <span class="ingredient-amount">1.5 tsp</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">소금</span>
+            <span class="ingredient-amount">¼ tsp</span>
+          </div>
+          <div class="ingredient-item" style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px;border-bottom:none;">
+            <span class="ingredient-bullet"></span>
+            <span class="ingredient-name" style="color:var(--text-muted);font-style:italic;font-size:12px;">— 라즈베리 버터크림 —</span>
+            <span class="ingredient-amount"></span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">버터 (실온)</span>
+            <span class="ingredient-amount">200g</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">슈가파우더</span>
+            <span class="ingredient-amount">300g</span>
+          </div>
+          <div class="ingredient-item">
+            <span class="ingredient-bullet">·</span>
+            <span class="ingredient-name">라즈베리 퓨레</span>
+            <span class="ingredient-amount">3 tbsp</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps Card -->
+      <div class="note-card">
+        <div class="note-card-header">
+          <span class="note-card-title">📝 만드는 법</span>
+        </div>
+        <div class="steps-body ruled-bg">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <p class="step-text">얼그레이 티백을 따뜻한 우유(80ml)에 10분간 담가 향을 우려낸 뒤 티백을 꺼내 식혀둡니다.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <p class="step-text">박력분, 베이킹파우더, 소금을 체에 쳐서 혼합해 두세요. 버터는 완전한 실온 상태여야 합니다.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <p class="step-text">실온 버터와 설탕을 핸드믹서로 3~4분간 희고 부드럽게 될 때까지 크리밍합니다.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <p class="step-text">달걀을 하나씩 넣어 섞고, 얼그레이 우유를 2회에 나눠 넣으며 가루류와 번갈아 접어 섞습니다.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">5</div>
+            <p class="step-text">컵케이크 틀에 70% 채우고 175°C 예열된 오븐에서 20~22분 굽습니다. 이쑤시개가 깨끗하면 완성.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">6</div>
+            <p class="step-text">버터크림: 버터를 충분히 크리밍한 뒤 슈가파우더를 나눠 넣고 라즈베리 퓨레를 추가해 색과 향을 냅니다.</p>
+          </div>
+          <div class="step-item" style="margin-bottom:4px;">
+            <div class="step-num">7</div>
+            <p class="step-text">완전히 식은 컵케이크에 버터크림을 짤주머니로 얹어 마무리합니다. 냉장 30분 휴지 후 서빙.</p>
+          </div>
+        </div>
+        <div class="memo-box">
+          <div class="memo-label">✍ 메모</div>
+          <div class="memo-text">라즈베리 퓨레가 없으면 냉동 라즈베리를 해동해 체에 걸러 사용. 버터크림에 레몬즙 1 tsp 추가하면 더 상큼함. 오버믹싱 금지!</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── Baking Log Panel ──────────────────────────────────────── -->
+  <div id="panel-log" class="tab-panel">
+    <div class="tab-content-area" style="display:block;">
+
+      <div class="log-header-row">
+        <span class="log-section-title">총 3회 기록</span>
+        <button class="add-log-btn">+ 회고 추가</button>
+      </div>
+
+      <!-- Retro Card 1 -->
+      <div class="retro-card">
+        <div class="retro-card-header">
+          <span class="retro-date-stamp">2026. 03. 15 (일)</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="retro-score">🧁 4.2 / 5</span>
+            <div class="retro-card-actions">
+              <button class="retro-action-btn" title="수정">✏</button>
+              <button class="retro-action-btn" title="삭제" onclick="openModal()">🗑</button>
+            </div>
+          </div>
+        </div>
+        <div class="retro-card-body">
+          <!-- Radar Chart 1 -->
+          <div class="radar-wrapper">
+            <svg class="radar-svg" width="220" height="220" id="radar1"></svg>
+          </div>
+          <p class="retro-review-text">얼그레이 향이 진하게 나서 정말 만족스러웠다. 버터크림 색이 예뻐서 선물용으로도 딱 좋을 것 같음. 반죽을 약간 오버믹싱 했더니 결이 조금 조밀해진 것 같다. 다음엔 좀 더 가볍게 섞어볼 것.</p>
+          <div class="storage-memo-box">
+            <div class="storage-memo-label">📦 보관 메모</div>
+            <div class="storage-memo-text">밀폐 용기에 담아 냉장 3일. 먹기 30분 전 꺼내 실온 보관하면 버터크림이 부드러워짐.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retro Card 2 -->
+      <div class="retro-card">
+        <div class="retro-card-header">
+          <span class="retro-date-stamp">2026. 02. 28 (토)</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="retro-score">🧁 3.6 / 5</span>
+            <div class="retro-card-actions">
+              <button class="retro-action-btn" title="수정">✏</button>
+              <button class="retro-action-btn" title="삭제" onclick="openModal()">🗑</button>
+            </div>
+          </div>
+        </div>
+        <div class="retro-card-body">
+          <!-- Radar Chart 2 -->
+          <div class="radar-wrapper">
+            <svg class="radar-svg" width="220" height="220" id="radar2"></svg>
+          </div>
+          <p class="retro-review-text">처음 만들어봤는데 생각보다 어렵지 않았다. 다만 라즈베리 퓨레를 구하기가 힘들었음. 냉동 라즈베리로 대체해서 만들었는데 색이 약간 연하게 나왔다. 맛은 괜찮았지만 모양새는 좀 아쉬움.</p>
+          <div class="storage-memo-box">
+            <div class="storage-memo-label">📦 보관 메모</div>
+            <div class="storage-memo-text">냉동 가능. 버터크림 없는 상태로 냉동하고 먹기 전날 해동 후 크림 올리기 추천.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retro Card 3 -->
+      <div class="retro-card">
+        <div class="retro-card-header">
+          <span class="retro-date-stamp">2026. 01. 12 (일)</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="retro-score">🧁 4.8 / 5</span>
+            <div class="retro-card-actions">
+              <button class="retro-action-btn" title="수정">✏</button>
+              <button class="retro-action-btn" title="삭제" onclick="openModal()">🗑</button>
+            </div>
+          </div>
+        </div>
+        <div class="retro-card-body">
+          <!-- Radar Chart 3 -->
+          <div class="radar-wrapper">
+            <svg class="radar-svg" width="220" height="220" id="radar3"></svg>
+          </div>
+          <p class="retro-review-text">3번째 도전. 드디어 원하던 결과! 우유에 얼그레이를 충분히 우려낸 게 포인트였다. 버터크림도 거품 충분히 내서 완성도가 높아짐. 지인들에게 선물했더니 매우 좋아했다 🎉</p>
+          <div class="storage-memo-box">
+            <div class="storage-memo-label">📦 보관 메모</div>
+            <div class="storage-memo-text">선물용은 개별 포장 후 종이 박스에. 실온 당일, 냉장 2일 이내 섭취 권장.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── Delete Confirm Modal ──────────────────────────────────── -->
+  <div class="modal-overlay" id="deleteModal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-box">
+      <div class="modal-icon">🗑️</div>
+      <div class="modal-title">정말 삭제할까요?</div>
+      <div class="modal-desc">삭제된 내용은 되돌릴 수 없습니다.<br>노트에서 완전히 지워집니다.</div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeModal()">취소</button>
+        <button class="modal-btn confirm" onclick="closeModal()">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ─── Theme Toggle ──────────────────────────────────────── */
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+
+    function updateThemeIcon() {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      themeToggle.textContent = isDark ? '☀' : '🌙';
+    }
+    updateThemeIcon();
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      updateThemeIcon();
+      // Re-render radar charts with new colors
+      setTimeout(renderAllRadars, 50);
+    });
+
+    /* ─── Tab Switching ─────────────────────────────────────── */
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panels = {
+      recipe: document.getElementById('panel-recipe'),
+      log:    document.getElementById('panel-log'),
+    };
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        Object.entries(panels).forEach(([key, panel]) => {
+          if (key === target) {
+            panel.style.display = 'block';
+            panel.classList.remove('active');
+            requestAnimationFrame(() => {
+              panel.classList.add('active', 'fade-in');
+            });
+            setTimeout(() => panel.classList.remove('fade-in'), 250);
+          } else {
+            panel.classList.remove('active', 'fade-in');
+            panel.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    /* ─── Parallax ──────────────────────────────────────────── */
+    const parallaxBg = document.getElementById('parallaxBg');
+    const hero = document.getElementById('hero');
+
+    function updateParallax() {
+      const heroRect = hero.getBoundingClientRect();
+      const scrolled = -heroRect.top;
+      if (scrolled > -200 && scrolled < heroRect.height + 200) {
+        const offset = scrolled * 0.35;
+        parallaxBg.style.transform = `translateY(${offset}px)`;
+      }
+    }
+    window.addEventListener('scroll', updateParallax, { passive: true });
+
+    /* ─── Delete Modal ──────────────────────────────────────── */
+    const deleteModal = document.getElementById('deleteModal');
+    function openModal()  { deleteModal.classList.add('visible'); }
+    function closeModal() { deleteModal.classList.remove('visible'); }
+    function closeModalOnOverlay(e) { if (e.target === deleteModal) closeModal(); }
+
+    /* ─── Radar Chart (SVG) ─────────────────────────────────── */
+    function polarToCartesian(cx, cy, r, angleDeg) {
+      const rad = (angleDeg - 90) * Math.PI / 180;
+      return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+    }
+
+    function makeRadarChart(svgEl, scores) {
+      // scores: [맛, 보관용이성, 레시피간편성, 재료수급용이성, 당도]
+      const labels = ['맛', '보관용이성', '레시피\n간편성', '재료수급\n용이성', '당도'];
+      const N = 5;
+      const cx = 110, cy = 110, R = 72;
+      const steps = [0.33, 0.66, 1.0];
+      const angles = Array.from({ length: N }, (_, i) => i * (360 / N));
+
+      svgEl.innerHTML = '';
+      const ns = 'http://www.w3.org/2000/svg';
+
+      // Grid polygons
+      steps.forEach(step => {
+        const pts = angles.map(a => polarToCartesian(cx, cy, R * step, a));
+        const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + ' Z';
+        const poly = document.createElementNS(ns, 'path');
+        poly.setAttribute('d', d);
+        poly.setAttribute('class', 'radar-grid-poly');
+        svgEl.appendChild(poly);
+      });
+
+      // Axis lines
+      angles.forEach(a => {
+        const end = polarToCartesian(cx, cy, R, a);
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+        line.setAttribute('x2', end.x.toFixed(1)); line.setAttribute('y2', end.y.toFixed(1));
+        line.setAttribute('class', 'radar-axis-line');
+        svgEl.appendChild(line);
+      });
+
+      // Data polygon
+      const dataPts = angles.map((a, i) => polarToCartesian(cx, cy, R * (scores[i] / 5), a));
+      const dataD = dataPts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + ' Z';
+      const dataPoly = document.createElementNS(ns, 'path');
+      dataPoly.setAttribute('d', dataD);
+      dataPoly.setAttribute('class', 'radar-data-poly');
+      svgEl.appendChild(dataPoly);
+
+      // Data dots
+      dataPts.forEach(p => {
+        const circle = document.createElementNS(ns, 'circle');
+        circle.setAttribute('cx', p.x.toFixed(1));
+        circle.setAttribute('cy', p.y.toFixed(1));
+        circle.setAttribute('r', '3.5');
+        circle.setAttribute('class', 'radar-data-dot');
+        svgEl.appendChild(circle);
+      });
+
+      // Labels
+      const labelOffset = R + 22;
+      angles.forEach((a, i) => {
+        const pos = polarToCartesian(cx, cy, labelOffset, a);
+        const lines = labels[i].split('\n');
+        const textEl = document.createElementNS(ns, 'text');
+        textEl.setAttribute('x', pos.x.toFixed(1));
+        textEl.setAttribute('y', pos.y.toFixed(1));
+        textEl.setAttribute('class', 'radar-label');
+
+        if (lines.length === 1) {
+          textEl.textContent = lines[0];
+        } else {
+          lines.forEach((line, li) => {
+            const tspan = document.createElementNS(ns, 'tspan');
+            tspan.setAttribute('x', pos.x.toFixed(1));
+            tspan.setAttribute('dy', li === 0 ? `-${(lines.length - 1) * 6}` : '13');
+            tspan.textContent = line;
+            textEl.appendChild(tspan);
+          });
+        }
+        svgEl.appendChild(textEl);
+      });
+    }
+
+    function renderAllRadars() {
+      makeRadarChart(document.getElementById('radar1'), [4.5, 4.0, 3.8, 3.5, 4.0]);
+      makeRadarChart(document.getElementById('radar2'), [3.8, 3.5, 3.8, 2.5, 3.8]);
+      makeRadarChart(document.getElementById('radar3'), [5.0, 4.5, 4.2, 3.8, 4.5]);
+    }
+
+    renderAllRadars();
+  </script>
+</body>
+</html>

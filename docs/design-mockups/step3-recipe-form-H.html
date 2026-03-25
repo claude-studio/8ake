@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8ake — 레시피 수정 (시안 H)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #F5EDE0;
+      --card-bg:     #FEFAF4;
+      --text:        #1E1410;
+      --text-muted:  #8C7B6B;
+      --accent:      #C2673A;
+      --accent-dim:  rgba(194,103,58,0.10);
+      --accent-border: rgba(194,103,58,0.40);
+      --border:      rgba(194,103,58,0.14);
+      --surface:     #EDE3D6;
+      --shadow:      0 4px 20px rgba(100,50,20,0.08);
+      --shadow-card: 0 2px 12px rgba(100,50,20,0.06);
+      --radius:      12px;
+      --radius-sm:   8px;
+      --header-h:    56px;
+      --progress-h:  52px;
+      --action-h:    64px;
+      --transition:  0.25s cubic-bezier(.4,0,.2,1);
+      --noise-opacity: 0.04;
+      --error:       #C0392B;
+      --error-bg:    rgba(192,57,43,0.07);
+    }
+    [data-theme="dark"] {
+      --bg:          #17120D;
+      --card-bg:     #221C15;
+      --text:        #F0E6D8;
+      --text-muted:  #9E8E7E;
+      --accent:      #E07B4A;
+      --accent-dim:  rgba(224,123,74,0.15);
+      --accent-border: rgba(224,123,74,0.45);
+      --border:      rgba(224,123,74,0.16);
+      --surface:     #1C1610;
+      --shadow:      0 4px 24px rgba(0,0,0,0.50);
+      --shadow-card: 0 2px 12px rgba(0,0,0,0.30);
+      --noise-opacity: 0.06;
+      --error:       #E05C4A;
+      --error-bg:    rgba(224,92,74,0.10);
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: calc(var(--action-h) + 24px);
+      transition: background var(--transition), color var(--transition);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: var(--noise-opacity);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+
+    .page-wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Header Bar ──────────────────────────────────────── */
+    .header-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      z-index: 200;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .header-inner {
+      max-width: 1024px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+    .back-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .header-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      flex: 1;
+    }
+    .mode-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 20px;
+      padding: 2px 10px;
+    }
+
+    /* ─── Theme Toggle ────────────────────────────────────── */
+    .theme-toggle {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: all var(--transition);
+    }
+    .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ─── Progress Bar ────────────────────────────────────── */
+    .progress-bar {
+      position: fixed;
+      top: var(--header-h);
+      left: 0; right: 0;
+      height: var(--progress-h);
+      z-index: 190;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .progress-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      position: relative;
+    }
+    .progress-track {
+      position: absolute;
+      top: 18px; /* step-dot 중심에 맞춤 (dot height 28px, padding-top ~4px) */
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 80px);
+      max-width: 560px;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.4s ease;
+    }
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 580px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      z-index: 2;
+    }
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      position: relative;
+      z-index: 2;
+    }
+    .step-item.active .step-dot {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 0 0 4px var(--accent-dim);
+    }
+    .step-item.done .step-dot {
+      border-color: var(--accent);
+      background: var(--card-bg);
+      color: var(--accent);
+    }
+    .step-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      transition: color var(--transition);
+    }
+    .step-item.active .step-label { color: var(--accent); font-weight: 600; }
+    .step-item.done .step-label { color: var(--text-muted); }
+    .step-item:hover .step-dot { border-color: var(--accent); }
+
+    /* ─── Main Content ────────────────────────────────────── */
+    .main-content {
+      padding-top: calc(var(--header-h) + var(--progress-h) + 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ─── Note Card ───────────────────────────────────────── */
+    .note-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .note-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 24px;
+      right: 24px; height: 3px;
+      background: var(--accent);
+      opacity: 0.4;
+      border-radius: 0 0 4px 4px;
+      transform: scaleX(0);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .note-card.is-active::before {
+      transform: scaleX(1);
+      opacity: 0.6;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .optional-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 7px;
+    }
+
+    /* ─── Form Fields ─────────────────────────────────────── */
+    .field-group {
+      margin-bottom: 16px;
+    }
+    .field-group:last-child { margin-bottom: 0; }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .field-label.required::after {
+      content: ' *';
+      color: var(--accent);
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    .form-input::placeholder { color: var(--text-muted); opacity: 0.6; }
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+      background: var(--card-bg);
+    }
+    .form-input.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px var(--error-bg);
+    }
+    .form-input.input-xl {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 12px 16px;
+    }
+
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 5px;
+      font-weight: 500;
+    }
+    .form-input.error + .error-msg { display: block; }
+
+    /* textarea 룰드라인 */
+    .textarea-ruled {
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.8;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent calc(1.8em - 1px),
+        var(--border) calc(1.8em - 1px),
+        var(--border) calc(1.8em)
+      );
+      background-size: 100% 1.8em;
+      background-attachment: local;
+    }
+    .textarea-memo {
+      resize: vertical;
+      min-height: 80px;
+      border-style: dashed;
+    }
+    .textarea-memo:focus { border-style: solid; }
+
+    /* ─── Pill Source Selector ────────────────────────────── */
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .pill-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    /* ─── Tag Input ───────────────────────────────────────── */
+    .tag-input-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      min-height: 44px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      cursor: text;
+    }
+    .tag-input-area:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 20px;
+      padding: 3px 10px 3px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .tag-chip-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      opacity: 0.6;
+      display: flex;
+      align-items: center;
+      padding: 0;
+      line-height: 1;
+      font-size: 14px;
+      transition: opacity var(--transition);
+    }
+    .tag-chip-remove:hover { opacity: 1; }
+    .tag-text-input {
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      min-width: 80px;
+      flex: 1;
+    }
+    .tag-text-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    /* ─── Privacy Toggle ──────────────────────────────────── */
+    .privacy-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+    }
+    .privacy-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .privacy-icon { font-size: 18px; }
+    .privacy-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .privacy-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .slide-toggle {
+      position: relative;
+      width: 44px; height: 24px;
+      flex-shrink: 0;
+    }
+    .slide-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .slide-track {
+      display: block;
+      width: 44px; height: 24px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+    }
+    .slide-track::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all var(--transition);
+    }
+    .slide-toggle input:checked + .slide-track {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .slide-toggle input:checked + .slide-track::after {
+      transform: translateX(20px);
+      background: white;
+    }
+
+    /* ─── Ingredient Table ────────────────────────────────── */
+    .ingredient-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ingredient-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 120px 36px;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 0;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .ingredient-row.removing {
+      animation: fadeOut 0.2s ease forwards;
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateY(-4px); }
+    }
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-muted);
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      transition: opacity var(--transition);
+      user-select: none;
+    }
+    .ingredient-row:hover .drag-handle { opacity: 1; }
+    .ingredient-row .form-input {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+    .btn-icon-sm {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .btn-icon-sm:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-bg);
+    }
+
+    .add-ingredient-btn {
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed var(--accent-border);
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .add-ingredient-btn:hover {
+      background: var(--accent-dim);
+      border-style: solid;
+    }
+
+    /* ─── 3-column Bake Info ──────────────────────────────── */
+    .bake-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .bake-info-cell { display: flex; flex-direction: column; gap: 4px; }
+    .bake-info-cell .field-label { margin-bottom: 0; }
+    .bake-info-cell .form-input { text-align: center; }
+
+    /* ─── Photo Upload ────────────────────────────────────── */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .upload-zone {
+      border: 2px dashed var(--accent-border);
+      border-radius: var(--radius);
+      padding: 24px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--surface);
+      position: relative;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .upload-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .upload-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .upload-count {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 6px;
+      display: block;
+    }
+
+    .photo-previews {
+      display: contents;
+    }
+
+    /* ── 사진 프리뷰 카드 ── */
+    .photo-polaroid {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: var(--shadow-card);
+    }
+    .photo-polaroid img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* 하단 오버레이: 썸네일 뱃지용 그라디언트 */
+    .photo-polaroid-label { display: none; }
+    /* 삭제 버튼: 이미지 우상단 내부 */
+    .photo-delete {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.45);
+      color: white;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+    }
+    .photo-delete:hover { background: var(--error); }
+    /* 대표 뱃지: 좌하단 */
+    .thumb-badge {
+      position: absolute;
+      bottom: 6px; left: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      color: white;
+      background: var(--accent);
+      border-radius: 4px;
+      padding: 2px 6px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+    /* 대표 지정 버튼: 좌하단 */
+    .set-thumb-btn {
+      position: absolute;
+      bottom: 6px; left: 6px;
+      font-size: 9px;
+      font-weight: 600;
+      color: white;
+      background: rgba(0,0,0,0.40);
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+    .set-thumb-btn:hover { background: var(--accent); }
+
+    /* ─── Rating Stars ────────────────────────────────────── */
+    .star-group {
+      display: flex;
+      gap: 6px;
+    }
+    .star-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 2px;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      filter: grayscale(1) opacity(0.3);
+      line-height: 1;
+    }
+    .star-btn.active {
+      filter: none;
+    }
+    .star-btn:hover { transform: scale(1.2); }
+
+    /* ─── Range Sliders ───────────────────────────────────── */
+    .radar-sliders {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .slider-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 28px;
+      gap: 8px;
+      align-items: center;
+    }
+    .slider-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .slider-input {
+      -webkit-appearance: none;
+      height: 5px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .slider-input::-moz-range-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+    }
+    .slider-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    /* ─── Radar Chart Placeholder ────────────────────────── */
+    .radar-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+    }
+    .radar-placeholder {
+      width: 220px;
+      height: 220px;
+      border: 2px dashed var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      background: var(--surface);
+    }
+
+    /* ─── Two-col date+score ──────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    /* 회고 섹션 내부 블록 여백 */
+    #section-4 .field-group {
+      margin-bottom: 24px;
+    }
+    #section-4 .field-group + .field-group {
+      padding-top: 4px;
+    }
+
+    /* 회고 서브섹션 타이틀 — field-label과 동일 */
+    .retro-section-title {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    #section-4 .radar-wrap {
+      margin: 20px 0 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    /* ─── Skip Link ───────────────────────────────────────── */
+    .skip-link {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .skip-link:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ─── Bottom Action Bar ───────────────────────────────── */
+    .action-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--action-h);
+      z-index: 200;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 20px rgba(100,50,20,0.08);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .action-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .action-left, .action-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .btn-primary {
+      background: var(--accent);
+      border: 1.5px solid var(--accent);
+      color: white;
+      min-width: 100px;
+      justify-content: center;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.07);
+      box-shadow: 0 4px 12px var(--accent-dim);
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      filter: none;
+    }
+
+    /* Save spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-primary.loading .btn-label { display: none; }
+    .btn-primary.loading .spinner { display: block; }
+    .btn-primary.done .btn-label { display: none; }
+    .btn-primary.done .check-icon { display: block; }
+    .check-icon { display: none; }
+
+    /* ─── Responsive ──────────────────────────────────────── */
+    @media (max-width: 767px) {
+      .page-wrapper { padding: 0 12px; }
+      .note-card { padding: 16px; }
+      .bake-info-grid { grid-template-columns: 1fr 1fr; }
+      .bake-info-grid .bake-info-cell:last-child { grid-column: span 2; }
+      .two-col { grid-template-columns: 1fr; }
+      .slider-row { grid-template-columns: 80px 1fr 24px; }
+      .ingredient-row { grid-template-columns: 24px 1fr 90px 32px; }
+      .progress-steps { max-width: 100%; }
+      .step-label { font-size: 9px; }
+      .btn { padding: 8px 12px; font-size: 13px; }
+    }
+    @media (max-width: 480px) {
+      .step-label { display: none; }
+    }
+    @media (min-width: 1024px) {
+      .page-wrapper { max-width: 720px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────── -->
+<header class="header-bar">
+  <div class="header-inner">
+    <button class="back-btn" onclick="history.back()" aria-label="뒤로">&#8592;</button>
+    <h1 class="header-title">레시피 수정</h1>
+    <span class="mode-badge">수정 모드</span>
+    <button class="theme-toggle" id="themeToggle" title="테마 전환" aria-label="테마 전환">☀️</button>
+  </div>
+</header>
+
+<!-- ── Progress Bar ────────────────────────────────────── -->
+<nav class="progress-bar" id="progressBar">
+  <div class="progress-inner">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="step-item" data-step="0" onclick="scrollToSection(0)">
+        <div class="step-dot">1</div>
+        <span class="step-label">기본정보</span>
+      </div>
+      <div class="step-item" data-step="1" onclick="scrollToSection(1)">
+        <div class="step-dot">2</div>
+        <span class="step-label">재료</span>
+      </div>
+      <div class="step-item" data-step="2" onclick="scrollToSection(2)">
+        <div class="step-dot">3</div>
+        <span class="step-label">만드는법</span>
+      </div>
+      <div class="step-item" data-step="3" onclick="scrollToSection(3)">
+        <div class="step-dot">4</div>
+        <span class="step-label">사진</span>
+      </div>
+      <div class="step-item" data-step="4" onclick="scrollToSection(4)">
+        <div class="step-dot">5</div>
+        <span class="step-label">회고</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main Form ───────────────────────────────────────── -->
+<div class="page-wrapper">
+  <main class="main-content">
+
+    <!-- ── Card 1: 기본정보 ── -->
+    <section class="note-card" id="section-0" data-section="0">
+      <div class="card-header">
+        <div class="card-title-row">
+          <div class="card-num">1</div>
+          <h2 class="card-title">기본정보</h2>
+        </div>
+      </div>
+
+      <!-- 메뉴명 -->
+      <div class="field-group">
+        <label class="field-label required" for="menuName">메뉴명</label>
+        <input
+          type="text"
+          id="menuName"
+          class="form-input input-xl"
+          placeholder="예: 얼그레이 레몬 마들렌"
+          value="얼그레이 레몬 마들렌"
+        />
+        <div class="error-msg">메뉴명을 입력해주세요.</div>
+      </div>
+
+      <!-- 출처 타입 -->
+      <div class="field-group">
+        <label class="field-label">출처 타입</label>
+        <div class="pill-group" id="sourceTypePills">
+          <button class="pill-btn selected" data-source="youtube" onclick="selectSource(this, 'youtube')">
+            🎬 YouTube
+          </button>
+          <button class="pill-btn" data-source="blog" onclick="selectSource(this, 'blog')">
+            📝 블로그
+          </button>
+          <button class="pill-btn" data-source="book" onclick="selectSource(this, 'book')">
+            📚 책
+          </button>
+          <button class="pill-btn" data-source="etc" onclick="selectSource(this, 'etc')">
+            ✏️ 기타
+          </button>
+        </div>
+      </div>
+
+      <!-- 출처 URL/텍스트 -->
+      <div class="field-group">
+        <label class="field-label" for="sourceInput">출처</label>
+        <input
+          type="text"
+          id="sourceInput"
+          class="form-input"
+          placeholder="YouTube URL을 입력하세요"
+          value="https://www.youtube.com/watch?v=xQ4baking123"
+        />
+      </div>
+
+      <!-- 태그 -->
+      <div class="field-group">
+        <label class="field-label">태그</label>
+        <div class="tag-input-area" id="tagArea" onclick="document.getElementById('tagInput').focus()">
+          <div class="tag-chip">마들렌<button class="tag-chip-remove" onclick="removeTag(this, event)">×</button></div>
+          <div class="tag-chip">얼그레이<button class="tag-chip-remove" onclick="removeTag(this, event)">×</button></div>
+          <div class="tag-chip">버터케이크<button class="tag-chip-remove" onclick="removeTag(this, event)">×</button></div>
+          <div class="tag-chip">프랑스과자<button class="tag-chip-remove" onclick="removeTag(this, event)">×</button></div>
+          <input
+            type="text"
+            id="tagInput"
+            class="tag-text-input"
+            placeholder="태그 입력 후 Enter"
+            onkeydown="handleTagInput(event)"
+          />
+        </div>
+        <div class="error-msg" id="tagError" style="display:none"></div>
+      </div>
+
+      <!-- 공개/비공개 -->
+      <div class="field-group">
+        <label class="field-label">공개 설정</label>
+        <div class="privacy-row">
+          <div class="privacy-info">
+            <span class="privacy-icon" id="privacyIcon">🔒</span>
+            <div>
+              <div class="privacy-label" id="privacyLabel">비공개</div>
+              <div class="privacy-sub" id="privacySub">나만 볼 수 있어요</div>
+            </div>
+          </div>
+          <label class="slide-toggle">
+            <input type="checkbox" id="privacyToggle" onchange="updatePrivacy(this)">
+            <span class="slide-track"></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Card 2: 재료 ── -->
+    <section class="note-card" id="section-1" data-section="1">
+      <div class="card-header">
+        <div class="card-title-row">
+          <div class="card-num">2</div>
+          <h2 class="card-title">재료</h2>
+        </div>
+        <button class="add-ingredient-btn" onclick="addIngredient()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          재료 추가
+        </button>
+      </div>
+
+      <div class="ingredient-list" id="ingredientList">
+        <!-- rows injected by JS -->
+      </div>
+    </section>
+
+    <!-- ── Card 3: 만드는 법 ── -->
+    <section class="note-card" id="section-2" data-section="2">
+      <div class="card-header">
+        <div class="card-title-row">
+          <div class="card-num">3</div>
+          <h2 class="card-title">만드는 법</h2>
+        </div>
+      </div>
+
+      <!-- 오븐 정보 3열 -->
+      <div class="bake-info-grid">
+        <div class="bake-info-cell">
+          <label class="field-label" for="ovenTemp">오븐 온도</label>
+          <input type="text" id="ovenTemp" class="form-input" value="170°C" placeholder="예: 180°C" />
+        </div>
+        <div class="bake-info-cell">
+          <label class="field-label" for="bakeTime">굽는 시간</label>
+          <input type="text" id="bakeTime" class="form-input" value="13분" placeholder="예: 15분" />
+        </div>
+        <div class="bake-info-cell">
+          <label class="field-label" for="servings">분량</label>
+          <input type="text" id="servings" class="form-input" value="12개" placeholder="예: 12개" />
+        </div>
+      </div>
+
+      <!-- 만드는 법 textarea -->
+      <div class="field-group">
+        <label class="field-label required" for="recipeSteps">만드는 법</label>
+        <textarea id="recipeSteps" class="form-input textarea-ruled" rows="8">1. 버터를 중탕으로 녹인 후 식혀둔다.
+2. 계란과 설탕을 거품기로 크림색이 될 때까지 잘 섞는다.
+3. 박력분, 베이킹파우더, 얼그레이 찻잎을 체에 걸러 넣는다.
+4. 레몬 제스트와 레몬즙을 넣고 고루 섞는다.
+5. 녹인 버터를 조금씩 넣어 윤기나게 반죽한다.
+6. 랩을 덮어 냉장고에서 최소 1시간 휴지한다.
+7. 마들렌 틀에 버터를 바르고 반죽을 2/3 정도 채운다.
+8. 예열된 오븐 170°C에서 13분 굽는다.</textarea>
+        <div class="error-msg">만드는 법을 입력해주세요.</div>
+      </div>
+
+      <!-- 메모 textarea -->
+      <div class="field-group">
+        <label class="field-label" for="recipeMemo">메모</label>
+        <textarea id="recipeMemo" class="form-input textarea-memo" rows="3" placeholder="팁이나 변형 방법 등 자유롭게 메모하세요...">얼그레이 찻잎은 잘게 갈아서 사용할 것. 레몬 제스트는 흰 부분 없이 노란 껍질만. 반죽 충분히 휴지해야 봉긋하게 올라옴.</textarea>
+      </div>
+    </section>
+
+    <!-- ── Card 4: 사진 ── -->
+    <section class="note-card" id="section-3" data-section="3">
+      <div class="card-header">
+        <div class="card-title-row">
+          <div class="card-num">4</div>
+          <h2 class="card-title">사진</h2>
+        </div>
+      </div>
+
+      <!-- 사진 그리드: 미리보기 + 빈 슬롯 나란히 -->
+      <div class="photo-grid" id="photoGrid">
+        <!-- 미리보기 -->
+        <div class="photo-previews" id="photoPreviews">
+          <div class="photo-polaroid" id="photo-0">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23f0d8c0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='40' fill='%23c2673a'%3E🧁%3C/text%3E%3C/svg%3E" alt="마들렌 사진" />
+            <span class="thumb-badge">대표</span>
+            <button class="photo-delete" onclick="removePhoto(0)" title="삭제">×</button>
+          </div>
+        </div>
+        <!-- 업로드 슬롯 (1장 추가 가능한 경우 표시) -->
+        <div class="upload-zone" id="uploadZone"
+          ondragover="handleDragOver(event)"
+          ondragleave="handleDragLeave(event)"
+          ondrop="handleDrop(event)">
+          <input type="file" accept="image/*" multiple onchange="handleFileInput(event)" id="fileInput" />
+          <span class="upload-icon">📷</span>
+          <div class="upload-text">사진 추가</div>
+          <div class="upload-sub">JPG · PNG · WEBP</div>
+          <span class="upload-count" id="uploadCount">1 / 2</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Card 5: 회고 ── -->
+    <section class="note-card" id="section-4" data-section="4">
+      <div class="card-header">
+        <div class="card-title-row">
+          <div class="card-num">5</div>
+          <h2 class="card-title">회고</h2>
+          <span class="optional-badge">선택사항</span>
+        </div>
+      </div>
+
+      <!-- 날짜 + 종합점수 -->
+      <div class="two-col">
+        <div class="field-group">
+          <span class="retro-section-title">날짜</span>
+          <input type="date" id="retroDate" class="form-input" value="2026-03-20" />
+        </div>
+        <div class="field-group">
+          <span class="retro-section-title">종합 점수</span>
+          <div class="star-group" id="starGroup">
+            <button class="star-btn active" data-val="1" onclick="setRating(1)">🧁</button>
+            <button class="star-btn active" data-val="2" onclick="setRating(2)">🧁</button>
+            <button class="star-btn active" data-val="3" onclick="setRating(3)">🧁</button>
+            <button class="star-btn active" data-val="4" onclick="setRating(4)">🧁</button>
+            <button class="star-btn" data-val="5" onclick="setRating(5)">🧁</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 레이더 슬라이더 -->
+      <div class="field-group">
+        <span class="retro-section-title">세부 평가</span>
+        <div class="radar-sliders" id="radarSliders">
+          <div class="slider-row">
+            <span class="slider-label">맛</span>
+            <input type="range" class="slider-input" min="1" max="5" value="5" data-axis="0">
+            <span class="slider-val">5</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">보관용이성</span>
+            <input type="range" class="slider-input" min="1" max="5" value="3" data-axis="1">
+            <span class="slider-val">3</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">레시피간편성</span>
+            <input type="range" class="slider-input" min="1" max="5" value="4" data-axis="2">
+            <span class="slider-val">4</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">재료수급</span>
+            <input type="range" class="slider-input" min="1" max="5" value="4" data-axis="3">
+            <span class="slider-val">4</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">당도</span>
+            <input type="range" class="slider-input" min="1" max="5" value="4" data-axis="4">
+            <span class="slider-val">4</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 레이더 차트 placeholder -->
+      <div class="radar-wrap">
+        <div class="radar-placeholder">오각형 차트 영역</div>
+      </div>
+
+      <!-- 후기 + 보관 메모 -->
+      <div class="field-group">
+        <label class="field-label" for="retroNote">후기</label>
+        <textarea id="retroNote" class="form-input textarea-ruled" rows="4" placeholder="이번 베이킹의 소감을 적어보세요...">얼그레이 향이 은은하게 배어 정말 만족스러운 결과물. 다음엔 레몬 커드 필링 버전도 시도해보고 싶다. 틀에 버터 코팅을 더 꼼꼼히 해야 분리가 잘 될 것 같다.</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="storageNote">보관 메모</label>
+        <textarea id="storageNote" class="form-input textarea-memo" rows="2" placeholder="보관 방법이나 유통기한 메모...">밀폐용기에 담아 실온 3일, 냉동 2주. 냉동 후 에어프라이어 160°C 3분이면 갓 구운 듯한 식감.</textarea>
+      </div>
+
+      <a href="#" class="skip-link" onclick="return false;">회고 건너뛰기</a>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── Bottom Action Bar ──────────────────────────────── -->
+<div class="action-bar">
+  <div class="action-inner">
+    <div class="action-left">
+      <button class="btn btn-ghost" onclick="history.back()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M9 11L5 7l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        취소
+      </button>
+    </div>
+    <div class="action-right">
+      <button class="btn btn-primary" id="saveBtn" onclick="handleSave()">
+        <span class="btn-label">저장하기</span>
+        <div class="spinner"></div>
+        <span class="check-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8l4 4 6-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ─────────────────────────────────────────── -->
+<script>
+  /* ── Theme Toggle ────────────────────────────── */
+  const html = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+
+  function updateThemeIcons() {
+    const isDark = html.dataset.theme === 'dark';
+    if (themeToggle) themeToggle.textContent = isDark ? '☀️' : '🌙';
+  }
+  updateThemeIcons();
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+      updateThemeIcons();
+    });
+  }
+
+  /* ── Progress / IntersectionObserver ─────────── */
+  const sections = document.querySelectorAll('.note-card[data-section]');
+  const stepItems = document.querySelectorAll('.step-item');
+  let activeSection = 0;
+
+  function setActiveStep(idx) {
+    activeSection = idx;
+    stepItems.forEach((s, i) => {
+      s.classList.toggle('active', i === idx);
+      s.classList.toggle('done', i < idx);
+    });
+    sections.forEach((s, i) => {
+      s.classList.toggle('is-active', i === idx);
+    });
+    // progress fill: between steps
+    const pct = idx === 0 ? 0 : (idx / (stepItems.length - 1)) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = parseInt(entry.target.dataset.section);
+        setActiveStep(idx);
+      }
+    });
+  }, {
+    rootMargin: `-${56 + 52 + 20}px 0px -50% 0px`,
+    threshold: 0
+  });
+
+  sections.forEach(s => observer.observe(s));
+  setActiveStep(0);
+
+  function scrollToSection(idx) {
+    const section = document.getElementById('section-' + idx);
+    if (!section) return;
+    const top = section.getBoundingClientRect().top + window.scrollY - (56 + 52 + 12);
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  /* ── Source Type ─────────────────────────────── */
+  const sourcePlaceholders = {
+    youtube: 'YouTube URL을 입력하세요',
+    blog: '블로그 URL을 입력하세요',
+    book: '책 제목 / 저자를 입력하세요',
+    etc: '출처를 자유롭게 입력하세요',
+  };
+
+  function selectSource(btn, type) {
+    document.querySelectorAll('#sourceTypePills .pill-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('sourceInput').placeholder = sourcePlaceholders[type] || '';
+  }
+
+  /* ── Tags ────────────────────────────────────── */
+  function handleTagInput(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const input = document.getElementById('tagInput');
+      const val = input.value.trim();
+      if (!val) return;
+      addTagChip(val);
+      input.value = '';
+    }
+  }
+
+  function addTagChip(text) {
+    const area = document.getElementById('tagArea');
+    const input = document.getElementById('tagInput');
+    const chip = document.createElement('div');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${text}<button class="tag-chip-remove" onclick="removeTag(this, event)">×</button>`;
+    area.insertBefore(chip, input);
+  }
+
+  function removeTag(btn, e) {
+    e.stopPropagation();
+    btn.closest('.tag-chip').remove();
+  }
+
+  /* ── Privacy ─────────────────────────────────── */
+  function updatePrivacy(checkbox) {
+    const icon = document.getElementById('privacyIcon');
+    const label = document.getElementById('privacyLabel');
+    const sub = document.getElementById('privacySub');
+    if (checkbox.checked) {
+      icon.textContent = '🌐';
+      label.textContent = '공개';
+      sub.textContent = '모든 사용자가 볼 수 있어요';
+    } else {
+      icon.textContent = '🔒';
+      label.textContent = '비공개';
+      sub.textContent = '나만 볼 수 있어요';
+    }
+  }
+
+  /* ── Ingredients ─────────────────────────────── */
+  const defaultIngredients = [
+    { name: '박력분', amount: '150g' },
+    { name: '버터', amount: '150g' },
+    { name: '계란', amount: '3개' },
+    { name: '설탕', amount: '130g' },
+    { name: '얼그레이 찻잎', amount: '2ts' },
+    { name: '레몬 제스트', amount: '1개분' },
+    { name: '레몬즙', amount: '1ts' },
+    { name: '베이킹파우더', amount: '1/2ts' },
+  ];
+
+  function renderIngredients() {
+    const list = document.getElementById('ingredientList');
+    list.innerHTML = '';
+    defaultIngredients.forEach((ing, i) => {
+      list.appendChild(createIngredientRow(i + 1, ing.name, ing.amount));
+    });
+  }
+
+  function createIngredientRow(num, name, amount) {
+    const row = document.createElement('div');
+    row.className = 'ingredient-row';
+    row.innerHTML = `
+      <div class="drag-handle" title="드래그해 순서 변경">⠿</div>
+      <input type="text" class="form-input" value="${name}" placeholder="재료명" />
+      <input type="text" class="form-input" value="${amount}" placeholder="분량" />
+      <button class="btn-icon-sm" title="삭제" onclick="removeIngredientRow(this)">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <path d="M2 4h10M5 4V2h4v2M6 7v4M8 7v4M3 4l1 8h6l1-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    `;
+    return row;
+  }
+
+  function addIngredient() {
+    const list = document.getElementById('ingredientList');
+    const rows = list.querySelectorAll('.ingredient-row');
+    const row = createIngredientRow(rows.length + 1, '', '');
+    list.appendChild(row);
+    row.querySelector('input').focus();
+  }
+
+  function removeIngredientRow(btn) {
+    const row = btn.closest('.ingredient-row');
+    row.classList.add('removing');
+    setTimeout(() => row.remove(), 200);
+  }
+
+  renderIngredients();
+
+  /* ── Photo Upload ─────────────────────────────── */
+  let photos = [{ id: 0, isThumb: true, src: null, name: '마들렌' }];
+  const MAX_PHOTOS = 2;
+
+  function updateUploadCount() {
+    document.getElementById('uploadCount').textContent = `${photos.length} / ${MAX_PHOTOS}`;
+    // 2장 꽉 차면 업로드 존 숨김
+    const zone = document.getElementById('uploadZone');
+    if (photos.length >= MAX_PHOTOS) {
+      zone.style.display = 'none';
+    } else {
+      zone.style.display = '';
+    }
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.add('dragover');
+  }
+  function handleDragLeave(e) {
+    document.getElementById('uploadZone').classList.remove('dragover');
+  }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.remove('dragover');
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    processFiles(files);
+  }
+  function handleFileInput(e) {
+    const files = Array.from(e.target.files);
+    processFiles(files);
+    e.target.value = '';
+  }
+
+  function processFiles(files) {
+    files.forEach(file => {
+      if (photos.length >= MAX_PHOTOS) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const id = Date.now();
+        photos.push({ id, isThumb: false, src: e.target.result, name: file.name });
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function removePhoto(id) {
+    photos = photos.filter(p => p.id !== id);
+    if (photos.length > 0 && !photos.some(p => p.isThumb)) {
+      photos[0].isThumb = true;
+    }
+    renderPreviews();
+  }
+
+  function setThumb(id) {
+    photos.forEach(p => p.isThumb = (p.id === id));
+    renderPreviews();
+  }
+
+  function renderPreviews() {
+    const container = document.getElementById('photoPreviews');
+    container.innerHTML = '';
+    photos.forEach((photo, i) => {
+      const div = document.createElement('div');
+      div.className = 'photo-polaroid';
+      const imgSrc = photo.src || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23f0d8c0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='40' fill='%23c2673a'%3E🧁%3C/text%3E%3C/svg%3E`;
+      const thumbEl = photo.isThumb
+        ? `<span class="thumb-badge">대표</span>`
+        : `<button class="set-thumb-btn" onclick="setThumb(${photo.id})">대표 지정</button>`;
+      div.innerHTML = `
+        <img src="${imgSrc}" alt="${photo.name}" />
+        ${thumbEl}
+        <button class="photo-delete" onclick="removePhoto(${photo.id})" title="삭제">×</button>
+      `;
+      container.appendChild(div);
+    });
+    updateUploadCount();
+  }
+
+  renderPreviews();
+
+  /* ── Star Rating ──────────────────────────────── */
+  let currentRating = 4;
+  function setRating(val) {
+    currentRating = val;
+    document.querySelectorAll('#starGroup .star-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i < val);
+    });
+  }
+
+
+  /* ── Save / Temp Save ─────────────────────────── */
+  let saveTimer = null;
+
+  function handleSave() {
+    // Validate required fields
+    let valid = true;
+
+    const menuName = document.getElementById('menuName');
+    if (!menuName.value.trim()) {
+      menuName.classList.add('error');
+      valid = false;
+    } else {
+      menuName.classList.remove('error');
+    }
+
+    const recipeSteps = document.getElementById('recipeSteps');
+    if (!recipeSteps.value.trim()) {
+      recipeSteps.classList.add('error');
+      valid = false;
+    } else {
+      recipeSteps.classList.remove('error');
+    }
+
+    if (!valid) {
+      // Scroll to first error
+      const firstError = document.querySelector('.form-input.error');
+      if (firstError) {
+        const top = firstError.getBoundingClientRect().top + window.scrollY - (56 + 52 + 20);
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    // Simulate save
+    const btn = document.getElementById('saveBtn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      btn.classList.remove('loading');
+      btn.classList.add('done');
+      setTimeout(() => {
+        btn.classList.remove('done');
+        btn.disabled = false;
+      }, 2000);
+    }, 1500);
+  }
+
+  // Remove error on input
+  document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('input', () => input.classList.remove('error'));
+  });
+
+</script>
+</body>
+</html>

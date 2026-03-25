@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8ake — 레시피 노트</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <style>
+    /* ─── CSS Variables ─────────────────────────────────────────── */
+    :root {
+      --bg:           #E8DFD0;
+      --card-bg:      #F2EBE0;
+      --text:         #2D2015;
+      --text-muted:   rgba(45,32,21,0.5);
+      --accent:       #8B3A2A;
+      --accent-light: rgba(139,58,42,0.12);
+      --rule:         rgba(45,32,21,0.08);
+      --rule-mid:     rgba(45,32,21,0.14);
+      --border:       rgba(45,32,21,0.18);
+      --shadow:       rgba(45,32,21,0.12);
+      --shadow-card:  0 2px 8px rgba(45,32,21,0.10), 0 1px 2px rgba(45,32,21,0.08);
+      --polaroid-bg:  #FDFAF6;
+      --stamp-border: rgba(139,58,42,0.55);
+      --dashed:       rgba(45,32,21,0.22);
+      --fab-bg:       #8B3A2A;
+      --fab-text:     #FDF6EE;
+    }
+    [data-theme="dark"] {
+      --bg:           #1C1610;
+      --card-bg:      #251E15;
+      --text:         #E8DFD0;
+      --text-muted:   rgba(232,223,208,0.45);
+      --accent:       #C4604A;
+      --accent-light: rgba(196,96,74,0.14);
+      --rule:         rgba(232,223,208,0.06);
+      --rule-mid:     rgba(232,223,208,0.10);
+      --border:       rgba(232,223,208,0.12);
+      --shadow:       rgba(0,0,0,0.35);
+      --shadow-card:  0 2px 12px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25);
+      --polaroid-bg:  #2E2519;
+      --stamp-border: rgba(196,96,74,0.55);
+      --dashed:       rgba(232,223,208,0.20);
+      --fab-bg:       #C4604A;
+      --fab-text:     #FDF6EE;
+    }
+
+    /* ─── Reset & Base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ─── Paper Texture (SVG noise filter) ───────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.035;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+    [data-theme="dark"] body::before { opacity: 0.055; }
+
+    /* Ruled lines on body background */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 27px,
+        var(--rule) 27px,
+        var(--rule) 28px
+      );
+      background-attachment: fixed;
+    }
+
+    /* ─── Layout wrapper ─────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 0 16px 120px;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0 14px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--bg);
+      transition: background-color 0.3s;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 1px;
+      background: var(--border);
+      opacity: 0.5;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+      line-height: 1;
+      text-decoration: none;
+    }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px; height: 22px;
+      border: 1.5px solid var(--accent);
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+      transform: rotate(-3deg);
+      flex-shrink: 0;
+    }
+    .header-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-date {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 3px;
+      transform: rotate(0.5deg);
+    }
+    .theme-toggle {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); background: var(--accent-light); }
+
+    /* ─── Search & Sort Bar ──────────────────────────────────────── */
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      align-items: center;
+    }
+    .search-wrap {
+      flex: 1;
+      position: relative;
+    }
+    /* Lined paper background for search */
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border: none;
+      border-bottom: 2px solid var(--border);
+      border-radius: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 23px,
+        var(--rule-mid) 23px,
+        var(--rule-mid) 24px
+      );
+      background-color: var(--card-bg);
+      color: var(--text);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      outline: none;
+      letter-spacing: 0.02em;
+      border-radius: 6px 6px 0 0;
+      transition: border-color 0.2s, background-color 0.3s;
+    }
+    .search-input::placeholder { color: var(--text-muted); font-weight: 400; }
+    .search-input:focus { border-bottom-color: var(--accent); }
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .sort-select {
+      padding: 9px 10px 9px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--card-bg);
+      color: var(--text);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      transition: border-color 0.2s, background-color 0.3s;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238B3A2A' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 26px;
+    }
+    [data-theme="dark"] .sort-select {
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23C4604A' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+    .sort-select:focus { border-color: var(--accent); }
+
+    /* ─── Recipe Count ───────────────────────────────────────────── */
+    .recipe-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      font-weight: 500;
+      margin-bottom: 14px;
+      padding-left: 2px;
+    }
+    .recipe-count span { color: var(--accent); font-weight: 700; }
+
+    /* ─── Card Grid ──────────────────────────────────────────────── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    @media (min-width: 600px) {
+      .card-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    }
+
+    /* ─── Recipe Card ────────────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      opacity: 0;
+      transform: translateY(-24px);
+      animation: cardFall 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
+      transition: background-color 0.3s, border-color 0.3s;
+      cursor: pointer;
+    }
+    .card:hover {
+      box-shadow: 0 6px 20px var(--shadow), 0 2px 6px var(--shadow);
+      transform: translateY(-2px) !important;
+    }
+    @keyframes cardFall {
+      from { opacity: 0; transform: translateY(-24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Polaroid thumbnail */
+    .card-polaroid {
+      background: var(--polaroid-bg);
+      padding: 8px 8px 20px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      transition: background-color 0.3s;
+    }
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+      border-radius: 2px;
+    }
+    .card-thumb-placeholder {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, rgba(139,58,42,0.08) 0%, rgba(139,58,42,0.04) 100%);
+      border-radius: 2px;
+      color: var(--accent);
+    }
+    .card-thumb-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Card body */
+    .card-body {
+      padding: 14px 16px 0;
+    }
+
+    /* Title row */
+    .card-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    /* Stamp date */
+    .card-stamp {
+      flex-shrink: 0;
+      border: 1.5px solid var(--stamp-border);
+      border-radius: 4px;
+      padding: 3px 7px;
+      transform: rotate(-3.5deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.2;
+      background: transparent;
+    }
+    .stamp-month {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .stamp-day {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stamp-year {
+      font-size: 0.56rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    /* Score */
+    .card-score {
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    /* Source badge */
+    .card-source {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1.5px solid var(--stamp-border);
+      padding: 2px 7px;
+      border-radius: 2px;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+
+    /* Dashed divider */
+    .card-divider {
+      border: none;
+      border-top: 1.5px dashed var(--dashed);
+      margin: 0 -16px;
+    }
+
+    /* Tags */
+    .card-footer {
+      padding: 10px 16px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .tag {
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: var(--accent-light);
+      border-radius: 2px;
+      padding: 2px 7px;
+    }
+
+    /* ─── Load More button ───────────────────────────────────────── */
+    .load-more-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 32px;
+    }
+    .load-more-btn {
+      padding: 12px 36px;
+      border: 2px dashed var(--dashed);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .load-more-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+    .load-more-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* ─── FAB ────────────────────────────────────────────────────── */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 20px;
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: var(--fab-bg);
+      color: var(--fab-text);
+      border: none;
+      cursor: pointer;
+      font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(139,58,42,0.4);
+      z-index: 200;
+      transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    }
+    .fab:hover {
+      transform: scale(1.08) rotate(-5deg);
+      box-shadow: 0 6px 24px rgba(139,58,42,0.5);
+    }
+    [data-theme="dark"] .fab { box-shadow: 0 4px 16px rgba(196,96,74,0.4); }
+
+    /* ─── Empty state ────────────────────────────────────────────── */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      gap: 10px;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+    }
+    .empty-state .empty-icon { font-size: 2.5rem; }
+    .empty-state.visible { display: flex; }
+
+    /* ─── Desktop centering ──────────────────────────────────────── */
+    @media (min-width: 1025px) {
+      .wrapper { padding-left: 32px; padding-right: 32px; }
+    }
+
+    /* ─── Scrollbar ──────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ─── Selection ──────────────────────────────────────────────── */
+    ::selection { background: var(--accent-light); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- SVG noise filter (fallback inline definition) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="paper-noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply" result="blend"/>
+      <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="wrapper">
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-left">
+      <a href="#" class="logo">8ake</a>
+      <span class="logo-badge">NB</span>
+      <div>
+        <div class="header-subtitle">BAKING NOTEBOOK</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-date" id="headerDate"></div>
+      <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">🌙</button>
+    </div>
+  </header>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">✏️</span>
+      <input
+        class="search-input"
+        id="searchInput"
+        type="search"
+        placeholder="레시피 검색..."
+        autocomplete="off"
+      />
+    </div>
+    <select class="sort-select" id="sortSelect">
+      <option value="newest">최신순</option>
+      <option value="oldest">오래된순</option>
+      <option value="score-high">점수 높은순</option>
+      <option value="score-low">점수 낮은순</option>
+      <option value="alpha">가나다순</option>
+    </select>
+  </div>
+
+  <div class="recipe-count" id="recipeCount"><span id="visibleCount">0</span>개의 레시피</div>
+
+  <!-- ── Card Grid ── -->
+  <div class="card-grid" id="cardGrid"></div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <span class="empty-icon">📭</span>
+    <span>검색 결과가 없어요</span>
+  </div>
+
+  <!-- Load More -->
+  <div class="load-more-wrap">
+    <button class="load-more-btn" id="loadMoreBtn">더 보기 ···</button>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" title="새 레시피 추가">✍️</button>
+
+<script>
+  /* ─── Data ──────────────────────────────────────────────────────── */
+  const recipes = [
+    {
+      id: 1,
+      title: "버터 크루아상",
+      emoji: "🥐",
+      date: "2026-01-15",
+      score: 5,
+      source: "직접 개발",
+      tags: ["발효반죽", "라미네이션", "프랑스식"],
+    },
+    {
+      id: 2,
+      title: "소금빵",
+      emoji: "🫓",
+      date: "2026-01-28",
+      score: 5,
+      source: "유튜브 참고",
+      tags: ["짭조름", "일본식", "버터"],
+    },
+    {
+      id: 3,
+      title: "흑임자 쉬폰케이크",
+      emoji: "🍰",
+      date: "2025-12-08",
+      score: 4,
+      source: "베이킹 클래스",
+      tags: ["쉬폰", "흑임자", "담백한"],
+    },
+    {
+      id: 4,
+      title: "말차 마들렌",
+      emoji: "🍵",
+      date: "2025-12-20",
+      score: 4,
+      source: "책 참고",
+      tags: ["말차", "마들렌", "프랑스"],
+    },
+    {
+      id: 5,
+      title: "얼그레이 스콘",
+      emoji: "🫖",
+      date: "2026-02-03",
+      score: 4,
+      source: "직접 개발",
+      tags: ["홍차", "영국식", "클로티드크림"],
+    },
+    {
+      id: 6,
+      title: "레몬 타르트",
+      emoji: "🍋",
+      date: "2026-01-10",
+      score: 5,
+      source: "잡지 스크랩",
+      tags: ["타르트", "상큼", "레몬커드"],
+    },
+    {
+      id: 7,
+      title: "딸기 쇼트케이크",
+      emoji: "🍓",
+      date: "2026-02-14",
+      score: 5,
+      source: "직접 개발",
+      tags: ["생크림", "딸기", "시트"],
+    },
+    {
+      id: 8,
+      title: "초콜릿 브라우니",
+      emoji: "🍫",
+      date: "2025-11-22",
+      score: 4,
+      source: "유튜브 참고",
+      tags: ["진한", "다크초콜릿", "퍼지"],
+    },
+    {
+      id: 9,
+      title: "밤 몽블랑",
+      emoji: "🌰",
+      date: "2025-11-05",
+      score: 3,
+      source: "베이킹 클래스",
+      tags: ["밤크림", "몽블랑", "가을"],
+    },
+    {
+      id: 10,
+      title: "팥소 도라야키",
+      emoji: "🥞",
+      date: "2026-02-20",
+      score: 4,
+      source: "책 참고",
+      tags: ["팥앙금", "화과자", "일본식"],
+    },
+    {
+      id: 11,
+      title: "카야 코코넛잼 토스트",
+      emoji: "🍞",
+      date: "2026-03-01",
+      score: 3,
+      source: "여행 영감",
+      tags: ["코코넛", "싱가포르식", "브런치"],
+    },
+    {
+      id: 12,
+      title: "뺑 오 쇼콜라",
+      emoji: "🍫",
+      date: "2026-01-05",
+      score: 5,
+      source: "직접 개발",
+      tags: ["라미네이션", "초콜릿", "비에누아즈리"],
+    },
+    {
+      id: 13,
+      title: "오렌지 올리브오일 케이크",
+      emoji: "🍊",
+      date: "2025-10-18",
+      score: 4,
+      source: "잡지 스크랩",
+      tags: ["올리브오일", "촉촉한", "이탈리아식"],
+    },
+    {
+      id: 14,
+      title: "팥버터 브레드",
+      emoji: "🍡",
+      date: "2026-03-10",
+      score: 4,
+      source: "직접 개발",
+      tags: ["팥앙금", "버터", "식빵"],
+    },
+  ];
+
+  /* ─── State ──────────────────────────────────────────────────────── */
+  const PAGE_SIZE = 8;
+  let visibleCount = PAGE_SIZE;
+  let filtered = [...recipes];
+  let currentSort = "newest";
+  let currentQuery = "";
+
+  /* ─── Helpers ─────────────────────────────────────────────────────── */
+  function parseDate(str) { return new Date(str); }
+
+  function formatStamp(dateStr) {
+    const d = parseDate(dateStr);
+    const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    return {
+      month: months[d.getMonth()],
+      day: String(d.getDate()).padStart(2,'0'),
+      year: d.getFullYear(),
+    };
+  }
+
+  function scoreEmoji(n) {
+    return "🧁".repeat(n) + "·".repeat(5 - n);
+  }
+
+  function sortRecipes(arr, method) {
+    const copy = [...arr];
+    if (method === "newest") return copy.sort((a,b) => parseDate(b.date) - parseDate(a.date));
+    if (method === "oldest") return copy.sort((a,b) => parseDate(a.date) - parseDate(b.date));
+    if (method === "score-high") return copy.sort((a,b) => b.score - a.score || parseDate(b.date) - parseDate(a.date));
+    if (method === "score-low") return copy.sort((a,b) => a.score - b.score || parseDate(b.date) - parseDate(a.date));
+    if (method === "alpha") return copy.sort((a,b) => a.title.localeCompare(b.title, 'ko'));
+    return copy;
+  }
+
+  function filterRecipes(arr, query) {
+    if (!query.trim()) return arr;
+    const q = query.trim().toLowerCase();
+    return arr.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      r.source.toLowerCase().includes(q) ||
+      r.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  /* ─── Render ──────────────────────────────────────────────────────── */
+  function renderCards() {
+    const grid = document.getElementById("cardGrid");
+    const emptyState = document.getElementById("emptyState");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    const sorted = sortRecipes(filtered, currentSort);
+    const toShow = sorted.slice(0, visibleCount);
+
+    if (toShow.length === 0) {
+      grid.innerHTML = "";
+      emptyState.classList.add("visible");
+      loadMoreBtn.style.display = "none";
+    } else {
+      emptyState.classList.remove("visible");
+      loadMoreBtn.style.display = "";
+    }
+
+    // Re-render only new cards (or full rebuild on filter/sort change)
+    const existingIds = Array.from(grid.children).map(c => c.dataset.id);
+    const newIds = toShow.map(r => String(r.id));
+    const needsRebuild = existingIds.join(",") !== newIds.join(",");
+
+    if (needsRebuild) {
+      grid.innerHTML = "";
+      toShow.forEach((recipe, idx) => {
+        const card = buildCard(recipe, idx);
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById("visibleCount").textContent = filtered.length;
+    loadMoreBtn.disabled = visibleCount >= filtered.length;
+    loadMoreBtn.textContent = visibleCount >= filtered.length ? "모두 표시됨" : "더 보기 ···";
+  }
+
+  function buildCard(recipe, idx) {
+    const stamp = formatStamp(recipe.date);
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.id = recipe.id;
+    card.style.animationDelay = `${idx * 60}ms`;
+
+    card.innerHTML = `
+      <div class="card-polaroid">
+        <div class="card-thumb-placeholder">
+          <span>${recipe.emoji}</span>
+          <span class="card-thumb-label">${recipe.title}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title-row">
+          <div class="card-title">${recipe.title}</div>
+          <div class="card-stamp">
+            <span class="stamp-month">${stamp.month}</span>
+            <span class="stamp-day">${stamp.day}</span>
+            <span class="stamp-year">${stamp.year}</span>
+          </div>
+        </div>
+        <div class="card-score">${scoreEmoji(recipe.score)}</div>
+        <div class="card-source">${recipe.source}</div>
+      </div>
+      <hr class="card-divider" />
+      <div class="card-footer">
+        ${recipe.tags.map(t => `<span class="tag">#${t}</span>`).join("")}
+      </div>
+    `;
+
+    return card;
+  }
+
+  /* ─── Header Date ─────────────────────────────────────────────────── */
+  function setHeaderDate() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById("headerDate").textContent =
+      `${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())}`;
+  }
+
+  /* ─── Theme Toggle ────────────────────────────────────────────────── */
+  const html = document.documentElement;
+  const toggleBtn = document.getElementById("themeToggle");
+
+  function setTheme(dark) {
+    html.setAttribute("data-theme", dark ? "dark" : "light");
+    toggleBtn.textContent = dark ? "☀️" : "🌙";
+    localStorage.setItem("8ake-theme", dark ? "dark" : "light");
+  }
+
+  toggleBtn.addEventListener("click", () => {
+    setTheme(html.getAttribute("data-theme") !== "dark");
+  });
+
+  // Init theme
+  const saved = localStorage.getItem("8ake-theme");
+  if (saved) {
+    setTheme(saved === "dark");
+  } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    setTheme(true);
+  }
+
+  /* ─── Search ──────────────────────────────────────────────────────── */
+  document.getElementById("searchInput").addEventListener("input", e => {
+    currentQuery = e.target.value;
+    filtered = filterRecipes(recipes, currentQuery);
+    visibleCount = PAGE_SIZE;
+    renderCards();
+  });
+
+  /* ─── Sort ────────────────────────────────────────────────────────── */
+  document.getElementById("sortSelect").addEventListener("change", e => {
+    currentSort = e.target.value;
+    visibleCount = PAGE_SIZE;
+    renderCards();
+  });
+
+  /* ─── Load More ───────────────────────────────────────────────────── */
+  document.getElementById("loadMoreBtn").addEventListener("click", () => {
+    visibleCount += PAGE_SIZE;
+    renderCards();
+  });
+
+  /* ─── FAB ─────────────────────────────────────────────────────────── */
+  document.getElementById("fab").addEventListener("click", () => {
+    alert("새 레시피 추가 기능은 준비 중이에요 ✍️");
+  });
+
+  /* ─── Init ────────────────────────────────────────────────────────── */
+  setHeaderDate();
+  filtered = [...recipes];
+  renderCards();
+</script>
+</body>
+</html>
