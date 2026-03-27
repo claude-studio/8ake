@@ -353,7 +353,7 @@ export function RecipeForm({ mode, recipeId }: Props) {
         {/* Section 5: Retrospective */}
         <section className="note-card-accent" style={noteCardStyle}>
           <CardHeader index={4} />
-          <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          <p className="text-sm text-muted-foreground">
             레시피 저장 후 상세 페이지에서 베이킹 기록을 추가할 수 있어요.
           </p>
         </section>

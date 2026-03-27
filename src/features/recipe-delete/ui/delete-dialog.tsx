@@ -51,7 +51,7 @@ export function DeleteDialog({ recipeId, open: controlledOpen, onOpenChange, tri
         <DialogTrigger asChild>{trigger}</DialogTrigger>
       ) : (
         !isControlled && (
-          <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="pt-4 border-t border-border">
             <DialogTrigger asChild>
               <Button variant="destructive" size="sm">
                 레시피 삭제

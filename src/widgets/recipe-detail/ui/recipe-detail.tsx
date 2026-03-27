@@ -62,10 +62,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
   if (isLoading) {
     return (
-      <div
-        className="flex items-center justify-center py-12"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
+      <div className="flex items-center justify-center py-12 text-muted-foreground">
         불러오는 중...
       </div>
     )
@@ -73,10 +70,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
   if (error || !recipe) {
     return (
-      <div
-        className="flex items-center justify-center py-12"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
+      <div className="flex items-center justify-center py-12 text-muted-foreground">
         레시피를 찾을 수 없습니다.
       </div>
     )
@@ -104,22 +98,21 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
         {/* Source row */}
         {recipe.source_type && (
-          <div className="flex items-center gap-1.5 text-sm" style={{ marginBottom: 10 }}>
-            <span style={{ color: 'var(--muted-foreground)' }}>
+          <div className="flex items-center gap-1.5 text-sm mb-2.5">
+            <span className="text-muted-foreground">
               {SOURCE_ICONS[recipe.source_type] ?? <ExternalLink size={14} />}
             </span>
-            <span className="font-semibold" style={{ color: 'var(--muted-foreground)' }}>
+            <span className="font-semibold text-muted-foreground">
               {SOURCE_LABELS[recipe.source_type] ?? recipe.source_type}
             </span>
             {recipe.source_url && (
               <>
-                <span style={{ color: 'var(--muted-foreground)' }}>·</span>
+                <span className="text-muted-foreground">·</span>
                 <a
                   href={recipe.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium"
-                  style={{ color: 'var(--primary)', borderBottom: '1px solid transparent' }}
+                  className="font-medium text-primary border-b border-transparent"
                 >
                   링크 ↗
                 </a>
@@ -181,7 +174,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
       </PhotoGallery>
 
       {/* Tab bar */}
-      <div className="sticky top-(--subheader-h) z-150 border-b border-(--border) bg-(--background)">
+      <div className="sticky top-(--subheader-h) z-150 border-b border-border bg-background">
         <div className="mx-auto flex h-11 max-w-[1024px] px-4">
           {(['recipe', 'reviews'] as const).map((t) => (
             <button
@@ -190,14 +183,12 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
               onClick={() => setTab(t)}
               className={cn(
                 'relative flex flex-1 items-center justify-center text-sm tracking-[-0.2px] transition-colors duration-150',
-                tab === t
-                  ? 'font-bold text-[var(--primary)]'
-                  : 'font-medium text-[var(--muted-foreground)]'
+                tab === t ? 'font-bold text-primary' : 'font-medium text-muted-foreground'
               )}
             >
               {t === 'recipe' ? '레시피' : '베이킹 기록'}
               {tab === t && (
-                <span className="absolute bottom-0 inset-x-2  h-[2.5px] rounded-t-sm bg-(--primary)" />
+                <span className="absolute bottom-0 inset-x-2  h-[2.5px] rounded-t-sm bg-primary" />
               )}
             </button>
           ))}
@@ -220,20 +211,12 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                   overflow: 'hidden',
                 }}
               >
-                <div
-                  className="flex items-center justify-between"
-                  style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border)' }}
-                >
-                  <h2
-                    className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase"
-                    style={{ color: 'var(--primary)', margin: 0 }}
-                  >
+                <div className="flex items-center justify-between px-4 pb-2.5 pt-3.5 border-b border-border">
+                  <h2 className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase text-primary m-0">
                     <ClipboardList size={13} /> 재료
                   </h2>
                   {recipe.quantity && (
-                    <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      {recipe.quantity} 기준
-                    </span>
+                    <span className="text-xs text-muted-foreground">{recipe.quantity} 기준</span>
                   )}
                 </div>
                 <ul
@@ -305,10 +288,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                     borderBottom: '1px solid var(--border)',
                   }}
                 >
-                  <h2
-                    className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase"
-                    style={{ color: 'var(--primary)', margin: 0 }}
-                  >
+                  <h2 className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase text-primary m-0">
                     <ScrollText size={13} /> 만드는 법
                   </h2>
                 </div>
@@ -343,21 +323,14 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                           >
                             {match[1]}
                           </span>
-                          <span
-                            className="text-sm"
-                            style={{ color: 'var(--foreground)', lineHeight: 1.7, paddingTop: 2 }}
-                          >
+                          <span className="text-sm text-foreground leading-[1.7] pt-0.5">
                             {match[2]}
                           </span>
                         </div>
                       )
                     }
                     return (
-                      <p
-                        key={i}
-                        className="text-sm"
-                        style={{ color: 'var(--foreground)', lineHeight: 1.7, marginBottom: 8 }}
-                      >
+                      <p key={i} className="text-sm text-foreground leading-[1.7] mb-2">
                         {line}
                       </p>
                     )
@@ -374,18 +347,10 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                       backgroundColor: 'var(--surface)',
                     }}
                   >
-                    <div
-                      className="font-bold text-xs tracking-wide uppercase"
-                      style={{ color: 'var(--primary)', marginBottom: 6, letterSpacing: '0.5px' }}
-                    >
+                    <div className="font-bold text-xs uppercase text-primary mb-1.5 tracking-[0.5px]">
                       <PenLine size={11} /> 메모
                     </div>
-                    <p
-                      className="text-sm/relaxed "
-                      style={{ color: 'var(--muted-foreground)', margin: 0 }}
-                    >
-                      {recipe.memo}
-                    </p>
+                    <p className="text-sm/relaxed text-muted-foreground m-0">{recipe.memo}</p>
                   </div>
                 )}
               </div>
@@ -423,12 +388,8 @@ function MetaCard({ icon, label, value }: { icon: React.ReactNode; label: string
       >
         {icon}
       </div>
-      <div className="text-xs" style={{ color: 'var(--muted-foreground)', marginBottom: 4 }}>
-        {label}
-      </div>
-      <div className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>
-        {value}
-      </div>
+      <div className="text-xs text-muted-foreground mb-1">{label}</div>
+      <div className="text-sm font-bold text-foreground">{value}</div>
     </div>
   )
 }

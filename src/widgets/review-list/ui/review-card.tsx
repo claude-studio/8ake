@@ -18,18 +18,10 @@ export function ReviewCard({ review, onEdit, onDelete }: Props) {
   ]
 
   return (
-    <div
-      className="p-4 space-y-3"
-      style={{
-        backgroundColor: 'var(--card)',
-        border: '1px solid var(--border)',
-        borderRadius: '12px',
-        boxShadow: 'var(--shadow-card)',
-      }}
-    >
+    <div className="p-4 space-y-3 bg-card border border-border rounded-xl shadow-(--shadow-card)">
       {/* Header: date + score */}
       <div className="flex items-center justify-between">
-        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+        <span className="text-sm text-muted-foreground">
           {review.date ?? review.created_at.split('T')[0]}
         </span>
         {review.total_score != null && <CupcakeScore value={review.total_score} size="sm" />}
@@ -40,19 +32,12 @@ export function ReviewCard({ review, onEdit, onDelete }: Props) {
 
       {/* Comment */}
       {review.comment && (
-        <p
-          className="text-sm/relaxed "
-          style={{ color: 'var(--foreground)', whiteSpace: 'pre-wrap' }}
-        >
-          {review.comment}
-        </p>
+        <p className="text-sm/relaxed text-foreground whitespace-pre-wrap">{review.comment}</p>
       )}
 
       {/* Storage memo */}
       {review.storage_memo && (
-        <p className="text-sm italic" style={{ color: 'var(--muted-foreground)' }}>
-          보관: {review.storage_memo}
-        </p>
+        <p className="text-sm italic text-muted-foreground">보관: {review.storage_memo}</p>
       )}
 
       {/* Actions */}
@@ -60,25 +45,14 @@ export function ReviewCard({ review, onEdit, onDelete }: Props) {
         <button
           type="button"
           onClick={() => onEdit(review)}
-          className="text-xs px-3 py-1 rounded-lg"
-          style={{
-            backgroundColor: 'var(--muted)',
-            color: 'var(--muted-foreground)',
-            transition: '0.25s cubic-bezier(.4,0,.2,1)',
-          }}
+          className="text-xs px-3 py-1 rounded-lg bg-muted text-muted-foreground transition-opacity"
         >
           수정
         </button>
         <button
           type="button"
           onClick={() => onDelete(review.id)}
-          className="text-xs px-3 py-1 rounded-lg"
-          style={{
-            backgroundColor: 'var(--destructive)',
-            color: 'var(--primary-foreground)',
-            opacity: 0.8,
-            transition: '0.25s cubic-bezier(.4,0,.2,1)',
-          }}
+          className="text-xs px-3 py-1 rounded-lg bg-destructive text-primary-foreground opacity-80"
         >
           삭제
         </button>

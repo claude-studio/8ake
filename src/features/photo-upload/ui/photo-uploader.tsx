@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ImagePlus, Star, X } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { cn } from '@/shared/lib/utils'
+
 const MAX_FILES = 5
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -130,18 +132,11 @@ export function PhotoUploader({ onChange }: Props) {
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors"
-        style={{
-          border: '2px dashed var(--primary-border)',
-          backgroundColor: 'var(--surface)',
-          color: 'var(--muted-foreground)',
-        }}
+        className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-(--primary-border) bg-(--surface) text-muted-foreground"
       >
-        <ImagePlus size={28} style={{ color: 'var(--primary)' }} />
+        <ImagePlus size={28} className="text-primary" />
         <span className="text-sm">클릭 또는 드래그하여 사진 추가</span>
-        <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-          최대 {MAX_FILES}장, 각 5MB 이하
-        </span>
+        <span className="text-xs text-muted-foreground">최대 {MAX_FILES}장, 각 5MB 이하</span>
       </button>
 
       <input
@@ -159,11 +154,10 @@ export function PhotoUploader({ onChange }: Props) {
           {photos.map((photo, index) => (
             <div
               key={photo.preview}
-              className="relative aspect-square rounded-lg overflow-hidden group"
-              style={{
-                border:
-                  index === thumbnailIndex ? '2px solid var(--primary)' : '1px solid var(--border)',
-              }}
+              className={cn(
+                'relative aspect-square rounded-lg overflow-hidden group',
+                index === thumbnailIndex ? 'border-2 border-primary' : 'border border-border'
+              )}
             >
               <img
                 src={photo.preview}
@@ -182,10 +176,8 @@ export function PhotoUploader({ onChange }: Props) {
                 >
                   <Star
                     size={18}
-                    fill={index === thumbnailIndex ? 'var(--primary)' : 'none'}
-                    style={{
-                      color: index === thumbnailIndex ? 'var(--primary)' : '#fff',
-                    }}
+                    fill={index === thumbnailIndex ? 'currentColor' : 'none'}
+                    className={index === thumbnailIndex ? 'text-primary' : 'text-white'}
                   />
                 </button>
 
@@ -193,23 +185,16 @@ export function PhotoUploader({ onChange }: Props) {
                 <button
                   type="button"
                   onClick={() => handleRemove(index)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5"
-                  style={{ backgroundColor: 'var(--overlay-bg)' }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 bg-(--overlay-bg)"
                   title="삭제"
                 >
-                  <X size={14} color="var(--primary-foreground)" />
+                  <X size={14} className="text-primary-foreground" />
                 </button>
               </div>
 
               {/* Thumbnail badge */}
               {index === thumbnailIndex && (
-                <div
-                  className="absolute bottom-0 inset-x-0  text-center text-[10px] py-0.5 font-medium"
-                  style={{
-                    backgroundColor: 'var(--primary)',
-                    color: 'var(--primary-foreground)',
-                  }}
-                >
+                <div className="absolute bottom-0 inset-x-0 text-center text-[10px] py-0.5 font-medium bg-primary text-primary-foreground">
                   썸네일
                 </div>
               )}

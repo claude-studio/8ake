@@ -57,19 +57,17 @@ function IngredientRow({
         className="cursor-pointer transition-colors hover:opacity-80"
         onClick={() => setExpanded(!expanded)}
       >
-        <td className="w-10 border-b border-(--border) p-3  text-sm text-(--muted-foreground)">
-          {index}
-        </td>
-        <td className="border-b border-(--border) px-4 py-3 text-sm font-semibold text-(--foreground)">
+        <td className="w-10 border-b border-border p-3  text-sm text-muted-foreground">{index}</td>
+        <td className="border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
           {ingredient.name}
         </td>
-        <td className="border-b border-(--border) px-4 py-3 text-sm text-(--muted-foreground)">
+        <td className="border-b border-border px-4 py-3 text-sm text-muted-foreground">
           {latestReview?.purchase_place ?? '-'}
         </td>
-        <td className="border-b border-(--border) px-4 py-3">
+        <td className="border-b border-border px-4 py-3">
           {latestReview ? <CupcakeScore value={latestReview.score ?? 0} size="sm" /> : '-'}
         </td>
-        <td className="border-b border-(--border) px-4 py-3">
+        <td className="border-b border-border px-4 py-3">
           <div className="flex items-center gap-1">
             <Button
               size="icon-xs"
@@ -92,7 +90,7 @@ function IngredientRow({
                 setDeleteIngredientOpen(true)
               }}
               aria-label="재료 삭제"
-              className="text-(--destructive)"
+              className="text-destructive"
             >
               <Trash2 size={14} />
             </Button>
@@ -102,11 +100,9 @@ function IngredientRow({
 
       {expanded && (
         <tr>
-          <td colSpan={5} className="border-b border-(--border) px-4 pb-4 pt-2">
+          <td colSpan={5} className="border-b border-border px-4 pb-4 pt-2">
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-medium text-(--foreground)">
-                리뷰 ({reviews.length})
-              </span>
+              <span className="text-sm font-medium text-foreground">리뷰 ({reviews.length})</span>
               <Button
                 size="xs"
                 onClick={() => {
@@ -119,7 +115,7 @@ function IngredientRow({
             </div>
 
             {showForm && (
-              <div className="mb-4 rounded-lg border border-(--border) p-3">
+              <div className="mb-4 rounded-lg border border-border p-3">
                 <IngredientReviewForm
                   onSubmit={handleCreateReview}
                   onCancel={() => setShowForm(false)}
@@ -128,14 +124,14 @@ function IngredientRow({
             )}
 
             {isLoading ? (
-              <p className="text-sm text-(--muted-foreground)">불러오는 중...</p>
+              <p className="text-sm text-muted-foreground">불러오는 중...</p>
             ) : reviews.length === 0 ? (
-              <p className="text-sm text-(--muted-foreground)">아직 리뷰가 없습니다</p>
+              <p className="text-sm text-muted-foreground">아직 리뷰가 없습니다</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {reviews.map((review) =>
                   editingId === review.id ? (
-                    <div key={review.id} className="rounded-lg border border-(--border) p-3">
+                    <div key={review.id} className="rounded-lg border border-border p-3">
                       <IngredientReviewForm
                         defaultValues={{
                           score: review.score ?? 3,
@@ -149,19 +145,17 @@ function IngredientRow({
                   ) : (
                     <div
                       key={review.id}
-                      className="flex items-start justify-between rounded-lg border border-(--border) p-3"
+                      className="flex items-start justify-between rounded-lg border border-border p-3"
                     >
                       <div className="flex flex-col gap-1">
                         <CupcakeScore value={review.score ?? 0} size="sm" />
                         {review.purchase_place && (
-                          <span className="text-xs text-(--muted-foreground)">
+                          <span className="text-xs text-muted-foreground">
                             {review.purchase_place}
                           </span>
                         )}
-                        {review.memo && (
-                          <p className="text-sm text-(--foreground)">{review.memo}</p>
-                        )}
-                        <span className="text-xs text-(--muted-foreground)">
+                        {review.memo && <p className="text-sm text-foreground">{review.memo}</p>}
+                        <span className="text-xs text-muted-foreground">
                           {new Date(review.created_at).toLocaleDateString('ko-KR')}
                         </span>
                       </div>
@@ -173,7 +167,7 @@ function IngredientRow({
                           size="xs"
                           variant="ghost"
                           onClick={() => setDeletingReviewId(review.id)}
-                          className="text-(--muted-foreground)"
+                          className="text-muted-foreground"
                         >
                           삭제
                         </Button>
@@ -230,23 +224,23 @@ function IngredientRow({
 
 export function IngredientTableView({ ingredients, onRefetch }: Props) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-(--border)">
-      <table className="w-full bg-(--card)">
+    <div className="overflow-x-auto rounded-xl border border-border">
+      <table className="w-full bg-card">
         <thead>
           <tr className="bg-(--surface)">
-            <th className="w-10 border-b border-(--border) p-3  text-left text-xs font-semibold text-(--muted-foreground)">
+            <th className="w-10 border-b border-border p-3  text-left text-xs font-semibold text-muted-foreground">
               #
             </th>
-            <th className="border-b border-(--border) px-4 py-3 text-left text-xs font-semibold text-(--muted-foreground)">
+            <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
               재료명
             </th>
-            <th className="border-b border-(--border) px-4 py-3 text-left text-xs font-semibold text-(--muted-foreground)">
+            <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
               구매처
             </th>
-            <th className="border-b border-(--border) px-4 py-3 text-left text-xs font-semibold text-(--muted-foreground)">
+            <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
               평가
             </th>
-            <th className="border-b border-(--border) px-4 py-3 text-left text-xs font-semibold text-(--muted-foreground)">
+            <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
               액션
             </th>
           </tr>

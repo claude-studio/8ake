@@ -94,11 +94,9 @@ export function BasicInfoSection({ control, errors }: Props) {
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150',
                   {
-                    'border-[var(--youtube)] bg-[var(--youtube)] text-white': isActive && isYoutube,
-                    'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]':
-                      isActive && !isYoutube,
-                    'border-[var(--border)] bg-[var(--surface)] text-[var(--muted-foreground)]':
-                      !isActive,
+                    'border-(--youtube) bg-(--youtube) text-white': isActive && isYoutube,
+                    'border-primary bg-primary text-primary-foreground': isActive && !isYoutube,
+                    'border-border bg-(--surface) text-muted-foreground': !isActive,
                   }
                 )}
               >
@@ -222,15 +220,15 @@ export function BasicInfoSection({ control, errors }: Props) {
           >
             <div className="flex items-center gap-2">
               {field.value ? (
-                <Globe size={18} className="text-(--primary)" />
+                <Globe size={18} className="text-primary" />
               ) : (
-                <Lock size={18} className="text-(--muted-foreground)" />
+                <Lock size={18} className="text-muted-foreground" />
               )}
               <div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--foreground)' }}>
+                <div className="text-sm font-medium text-foreground">
                   {field.value ? '공개' : '비공개'}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>
+                <div className="text-xs text-muted-foreground">
                   {field.value ? '다른 사람이 볼 수 있어요' : '나만 볼 수 있어요'}
                 </div>
               </div>

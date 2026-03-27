@@ -21,9 +21,9 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
   const displayed = activePhoto ?? mainPhoto
 
   return (
-    <div className="bg-(--background) px-4 pb-2 pt-4">
+    <div className="bg-background px-4 pb-2 pt-4">
       {/* 이미지 컨테이너 — 카드처럼 rounded */}
-      <div className="overflow-hidden rounded-2xl border border-(--border) bg-(--card) shadow-(--shadow-card)">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-(--shadow-card)">
         {/* 메인 이미지 */}
         <div className="relative aspect-4/3 w-full overflow-hidden">
           {displayed ? (
@@ -35,7 +35,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
             />
           ) : (
             <div className="flex size-full  items-center justify-center bg-(--surface)">
-              <ImageOff size={36} className="text-(--muted-foreground) opacity-30" />
+              <ImageOff size={36} className="text-muted-foreground opacity-30" />
             </div>
           )}
 
@@ -49,15 +49,13 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
 
         {/* 서브 썸네일 */}
         {subPhotos.length > 0 && (
-          <div className="flex gap-1.5 bg-(--card) px-3 py-2.5">
+          <div className="flex gap-1.5 bg-card px-3 py-2.5">
             <button
               type="button"
               onClick={() => setActivePhoto(null)}
               className={cn(
                 'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
-                !activePhoto
-                  ? 'border-[var(--primary)]'
-                  : 'border-transparent opacity-50 hover:opacity-75'
+                !activePhoto ? 'border-primary' : 'border-transparent opacity-50 hover:opacity-75'
               )}
             >
               {mainPhoto ? (
@@ -68,7 +66,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                 />
               ) : (
                 <div className="flex size-full  items-center justify-center bg-(--surface)">
-                  <ImageOff size={14} className="text-(--muted-foreground)" />
+                  <ImageOff size={14} className="text-muted-foreground" />
                 </div>
               )}
             </button>
@@ -80,7 +78,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                 className={cn(
                   'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
                   activePhoto?.id === photo.id
-                    ? 'border-[var(--primary)]'
+                    ? 'border-primary'
                     : 'border-transparent opacity-50 hover:opacity-75'
                 )}
               >

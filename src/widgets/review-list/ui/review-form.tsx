@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -33,7 +33,6 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
     register,
     formState: { errors, isSubmitting, isDirty },
@@ -51,29 +50,29 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
     },
   })
 
-  const dateStr = watch('date')
+  const dateStr = useWatch({ control, name: 'date' })
   const dateValue = dateStr ? new Date(dateStr) : undefined
   const [calOpen, setCalOpen] = useState(false)
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-5 rounded-xl border border-(--border) bg-(--card) p-4 shadow-(--shadow-card)"
+      className="space-y-5 rounded-xl border border-border bg-card p-4 shadow-(--shadow-card)"
     >
       {/* Date */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-(--foreground)">날짜</label>
+        <label className="text-sm font-medium text-foreground">날짜</label>
         <Popover open={calOpen} onOpenChange={setCalOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"
               className={cn(
-                'flex h-10 w-full items-center justify-between rounded-xl border border-(--border) bg-(--background) px-3 text-sm transition-colors',
-                !dateValue && 'text-[var(--muted-foreground)]'
+                'flex h-10 w-full items-center justify-between rounded-xl border border-border bg-background px-3 text-sm transition-colors',
+                !dateValue && 'text-muted-foreground'
               )}
             >
               {dateValue ? format(dateValue, 'yyyy년 M월 d일 (eee)', { locale: ko }) : '날짜 선택'}
-              <CalendarIcon size={15} className="text-(--muted-foreground)" />
+              <CalendarIcon size={15} className="text-muted-foreground" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -91,12 +90,12 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
             />
           </PopoverContent>
         </Popover>
-        {errors.date && <p className="text-xs text-(--destructive)">{errors.date.message}</p>}
+        {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
       </div>
 
       {/* Total score */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-(--foreground)">총점</label>
+        <label className="text-sm font-medium text-foreground">총점</label>
         <Controller
           name="total_score"
           control={control}
@@ -106,10 +105,10 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
 
       {/* 5-axis scores */}
       <div className="space-y-3">
-        <p className="text-sm font-medium text-(--foreground)">세부 점수</p>
+        <p className="text-sm font-medium text-foreground">세부 점수</p>
         {SCORE_FIELDS.map(({ name, label }) => (
           <div key={name} className="flex items-center justify-between">
-            <span className="text-sm text-(--muted-foreground)">{label}</span>
+            <span className="text-sm text-muted-foreground">{label}</span>
             <Controller
               name={name}
               control={control}
@@ -121,7 +120,7 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
 
       {/* Comment */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-(--foreground)">코멘트</label>
+        <label className="text-sm font-medium text-foreground">코멘트</label>
         <Textarea
           {...register('comment')}
           rows={3}
@@ -132,7 +131,7 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
 
       {/* Storage memo */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-(--foreground)">보관 메모</label>
+        <label className="text-sm font-medium text-foreground">보관 메모</label>
         <Textarea
           {...register('storage_memo')}
           rows={2}

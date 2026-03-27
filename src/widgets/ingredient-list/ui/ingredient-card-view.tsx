@@ -51,37 +51,35 @@ function IngredientCard({
   const latestReview = reviews[0]
 
   return (
-    <div className="rounded-xl border border-(--border) bg-(--card) transition-shadow hover:shadow-md">
+    <div className="rounded-xl border border-border bg-card transition-shadow hover:shadow-md">
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
         className="flex w-full items-center justify-between p-4 text-left"
       >
         <div className="flex flex-col gap-1">
-          <span className="font-semibold text-(--foreground)">{ingredient.name}</span>
+          <span className="font-semibold text-foreground">{ingredient.name}</span>
           {latestReview && (
             <div className="flex items-center gap-2">
               <CupcakeScore value={latestReview.score ?? 0} size="sm" />
               {latestReview.purchase_place && (
-                <span className="text-xs text-(--muted-foreground)">
-                  {latestReview.purchase_place}
-                </span>
+                <span className="text-xs text-muted-foreground">{latestReview.purchase_place}</span>
               )}
             </div>
           )}
         </div>
         <ChevronDown
           size={16}
-          className={cn('text-(--muted-foreground) transition-transform duration-200', {
+          className={cn('text-muted-foreground transition-transform duration-200', {
             'rotate-180': expanded,
           })}
         />
       </button>
 
       {expanded && (
-        <div className="border-t border-(--border) px-4 pb-4 pt-3">
+        <div className="border-t border-border px-4 pb-4 pt-3">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium text-(--foreground)">리뷰 ({reviews.length})</span>
+            <span className="text-sm font-medium text-foreground">리뷰 ({reviews.length})</span>
             <div className="flex gap-2">
               <Button
                 size="xs"
@@ -104,7 +102,7 @@ function IngredientCard({
           </div>
 
           {showForm && (
-            <div className="mb-4 rounded-lg border border-(--border) p-3">
+            <div className="mb-4 rounded-lg border border-border p-3">
               <IngredientReviewForm
                 onSubmit={handleCreateReview}
                 onCancel={() => setShowForm(false)}
@@ -113,14 +111,14 @@ function IngredientCard({
           )}
 
           {isLoading ? (
-            <p className="text-sm text-(--muted-foreground)">불러오는 중...</p>
+            <p className="text-sm text-muted-foreground">불러오는 중...</p>
           ) : reviews.length === 0 ? (
-            <p className="text-sm text-(--muted-foreground)">아직 리뷰가 없습니다</p>
+            <p className="text-sm text-muted-foreground">아직 리뷰가 없습니다</p>
           ) : (
             <div className="flex flex-col gap-3">
               {reviews.map((review) =>
                 editingId === review.id ? (
-                  <div key={review.id} className="rounded-lg border border-(--border) p-3">
+                  <div key={review.id} className="rounded-lg border border-border p-3">
                     <IngredientReviewForm
                       defaultValues={{
                         score: review.score ?? 3,
@@ -134,17 +132,17 @@ function IngredientCard({
                 ) : (
                   <div
                     key={review.id}
-                    className="flex items-start justify-between rounded-lg border border-(--border) p-3"
+                    className="flex items-start justify-between rounded-lg border border-border p-3"
                   >
                     <div className="flex flex-col gap-1">
                       <CupcakeScore value={review.score ?? 0} size="sm" />
                       {review.purchase_place && (
-                        <span className="text-xs text-(--muted-foreground)">
+                        <span className="text-xs text-muted-foreground">
                           {review.purchase_place}
                         </span>
                       )}
-                      {review.memo && <p className="text-sm text-(--foreground)">{review.memo}</p>}
-                      <span className="text-xs text-(--muted-foreground)">
+                      {review.memo && <p className="text-sm text-foreground">{review.memo}</p>}
+                      <span className="text-xs text-muted-foreground">
                         {new Date(review.created_at).toLocaleDateString('ko-KR')}
                       </span>
                     </div>
@@ -156,7 +154,7 @@ function IngredientCard({
                         size="xs"
                         variant="ghost"
                         onClick={() => setDeletingReviewId(review.id)}
-                        className="text-(--muted-foreground)"
+                        className="text-muted-foreground"
                       >
                         삭제
                       </Button>

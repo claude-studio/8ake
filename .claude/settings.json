@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/naming-guard.sh",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/fsd-guard.sh",
             "timeout": 5
           }
         ]
@@ -18,17 +18,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/fsd-validate.sh",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/style-guard.sh",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/token-check/scripts/token-validate.sh",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/markup-guard.sh",
             "timeout": 10
           }
         ]

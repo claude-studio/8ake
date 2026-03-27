@@ -29,7 +29,7 @@ export function RecipeDetailPage({ recipeId }: Props) {
         size="icon-sm"
         onClick={() => setDeleteOpen(true)}
         title="삭제"
-        className="text-(--destructive)"
+        className="text-destructive"
       >
         <Trash2 size={16} />
       </Button>

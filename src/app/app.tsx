@@ -29,14 +29,8 @@ export function App() {
 
   if (isLoading) {
     return (
-      <div
-        className="flex items-center justify-center min-h-screen"
-        style={{ backgroundColor: 'var(--background)' }}
-      >
-        <div
-          className="size-8  rounded-full border-2 border-t-transparent animate-spin"
-          style={{ borderColor: 'var(--primary)', borderTopColor: 'transparent' }}
-        />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     )
   }

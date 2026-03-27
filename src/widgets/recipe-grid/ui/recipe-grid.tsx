@@ -49,13 +49,12 @@ export function RecipeGrid() {
       {/* Empty state */}
       {!isLoading && items.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-sm mb-4" style={{ color: 'var(--muted-foreground)' }}>
+          <p className="text-sm mb-4 text-muted-foreground">
             아직 레시피가 없어요. 첫 레시피를 추가해보세요!
           </p>
           <Link
             to="/recipe/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
-            style={{ backgroundColor: 'var(--primary)' }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors bg-primary"
           >
             <Plus size={16} />
             레시피 추가
@@ -65,18 +64,8 @@ export function RecipeGrid() {
 
       {/* Recipe count */}
       {!isLoading && items.length > 0 && (
-        <p
-          style={{
-            fontSize: '0.75rem',
-            color: 'var(--muted-foreground)',
-            letterSpacing: '0.06em',
-            fontWeight: 500,
-            marginBottom: 14,
-            marginTop: 16,
-            paddingLeft: 2,
-          }}
-        >
-          <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{items.length}</span>
+        <p className="text-xs tracking-wide font-medium text-muted-foreground mb-3.5 mt-4 pl-0.5">
+          <span className="font-bold text-primary">{items.length}</span>
           개의 레시피
         </p>
       )}

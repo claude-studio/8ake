@@ -74,7 +74,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
                 >
                   <motion.div
                     ref={tooltipRef}
-                    className="inline-flex h-6 items-center whitespace-nowrap rounded-lg border border-(--border) bg-(--card)/95 px-2.5 text-[11px] font-medium text-(--foreground) shadow-[0_0_0_1px_rgba(0,0,0,0.06)] backdrop-blur-sm"
+                    className="inline-flex h-6 items-center whitespace-nowrap rounded-lg border border-border bg-card/95 px-2.5 text-[11px] font-medium text-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06)] backdrop-blur-sm"
                     initial={{ x: tooltipLeft }}
                     animate={{ x: tooltipLeft }}
                     transition={springConfig}
@@ -88,7 +88,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
             {/* Pill container */}
             <div
               ref={menuRef}
-              className="inline-flex h-12 items-center gap-1 rounded-full border border-(--border) bg-(--card)/95 px-2 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_8px_24px_-4px_rgba(0,0,0,0.12)] backdrop-blur-xl"
+              className="inline-flex h-12 items-center gap-1 rounded-full border border-border bg-card/95 px-2 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_8px_24px_-4px_rgba(0,0,0,0.12)] backdrop-blur-xl"
             >
               {/* 레시피 */}
               <PillItem
@@ -136,7 +136,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
               {/* FAB — pill 내부, primary 배경 */}
               <Link
                 to="/recipe/new"
-                className="flex size-9 items-center justify-center rounded-full bg-(--primary) text-(--primary-foreground) transition-transform duration-150 hover:scale-110 active:scale-95"
+                className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform duration-150 hover:scale-110 active:scale-95"
                 aria-label="새 레시피 추가"
                 onMouseEnter={() => handleHover(3)}
                 onMouseLeave={() => handleHover(null)}
@@ -173,8 +173,8 @@ function PillItem({ as, to, active, onHover, onClick, children }: PillItemProps)
   const cls = cn(
     'flex size-9 items-center justify-center rounded-full transition-colors duration-150',
     active
-      ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
-      : 'text-[var(--muted-foreground)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]'
+      ? 'bg-primary text-primary-foreground'
+      : 'text-muted-foreground hover:bg-(--surface) hover:text-foreground'
   )
 
   if (as === 'link') {

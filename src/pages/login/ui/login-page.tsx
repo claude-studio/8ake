@@ -39,13 +39,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-(--background) px-4">
-      <div className="w-full max-w-[360px] rounded-2xl border border-(--border) bg-(--card) p-8 shadow-(--shadow)">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-[360px] rounded-2xl border border-border bg-card p-8 shadow-(--shadow)">
         <div className="mb-8 text-center">
-          <div className="text-[2rem] font-extrabold leading-none tracking-[-0.04em] text-(--primary)">
+          <div className="text-[2rem] font-extrabold leading-none tracking-[-0.04em] text-primary">
             8ake
           </div>
-          <div className="mt-1.5 text-[0.7rem] font-medium tracking-[0.12em] text-(--muted-foreground)">
+          <div className="mt-1.5 text-[0.7rem] font-medium tracking-[0.12em] text-muted-foreground">
             BAKING NOTEBOOK
           </div>
         </div>

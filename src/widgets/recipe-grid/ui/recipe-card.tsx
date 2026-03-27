@@ -170,15 +170,10 @@ export function RecipeCard({
         </div>
 
         {/* Content area below polaroid border */}
-        <div className="mt-2 px-1" style={{ borderTop: '1px solid var(--border)', paddingTop: 8 }}>
+        <div className="mt-2 border-t border-border px-1 pt-2">
           {/* Title row + date stamp */}
           <div className="flex items-start justify-between gap-1">
-            <h3
-              className="font-bold truncate"
-              style={{ color: 'var(--foreground)', fontSize: '0.88rem', fontWeight: 800 }}
-            >
-              {name}
-            </h3>
+            <h3 className="truncate text-foreground text-[0.88rem] font-extrabold">{name}</h3>
             <div style={dateWrapStyle}>
               <div style={dateMonthStyle}>{month}</div>
               <div style={dateDayStyle}>{day}</div>

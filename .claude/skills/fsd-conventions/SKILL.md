@@ -84,6 +84,38 @@ slice-name/
 - **아이콘**: `lucide-react`만 사용 — 이모지 금지
 - **폰트**: Pretendard (`--font-sans`)
 
+### className 조건부 분기는 반드시 cn() 사용
+
+className에 조건부 클래스를 적용할 때는 **반드시 `cn()` 함수**를 사용하세요. template literal이나 배열 join은 금지합니다.
+
+```tsx
+// ❌ 금지 — template literal
+className={`base-class ${condition ? 'active' : ''}`}
+
+// ❌ 금지 — 배열 join
+className={['base-class', condition ? 'active' : 'inactive'].join(' ')}
+
+// ✅ 대체 — cn() 객체 문법 (조건이 명확)
+className={cn('base-class', { 'active': condition, 'inactive': !condition })}
+
+// ✅ 대체 — cn() 혼합 문법 (base + 조건부)
+className={cn(
+  'base-class',
+  {
+    'youtube-style': isActive && isYoutube,
+    'primary-style': isActive && !isYoutube,
+    'inactive-style': !isActive,
+  }
+)}
+```
+
+`cn()`은 `clsx` 기반으로 다음을 모두 지원합니다:
+
+- 문자열: `cn('a', 'b')`
+- 조건부 객체: `cn({ 'class': condition })`
+- 조건부 문자열: `cn(condition && 'class')`
+- 혼합: `cn('base', { 'active': isOn }, condition && 'extra')`
+
 ### 불필요한 wrapper div 금지
 
 `<div>` 하나만 있고 자식이 레이아웃 없이 렌더될 때, `flex flex-col gap-*`가 필요한 경우라면 `<div className="flex flex-col gap-*">`으로 처리하세요. 레이아웃 목적 없는 빈 `<div>` wrapper에 `mt-*` 등 margin을 자식에 걸지 마세요.

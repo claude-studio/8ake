@@ -82,18 +82,14 @@ export function ReviewList({ recipeId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="py-8 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>
-        회고를 불러오는 중...
-      </div>
+      <div className="py-8 text-center text-sm text-muted-foreground">회고를 불러오는 중...</div>
     )
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg" style={{ color: 'var(--foreground)' }}>
-          회고
-        </h2>
+        <h2 className="font-bold text-lg text-foreground">회고</h2>
         {!showForm && !editingReview && (
           <Button size="sm" onClick={() => setShowForm(true)}>
             + 회고 추가
@@ -125,7 +121,7 @@ export function ReviewList({ recipeId }: Props) {
 
       {/* Review cards */}
       {reviews.length === 0 && !showForm ? (
-        <div className="py-8 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>
+        <div className="py-8 text-center text-sm text-muted-foreground">
           아직 회고가 없습니다. 첫 회고를 작성해보세요!
         </div>
       ) : (
