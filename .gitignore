@@ -95,3 +95,4 @@ Desktop.ini
 .supabase/
 supabase/.temp/
 supabase/migrations/*.local.sql
+.vercel
