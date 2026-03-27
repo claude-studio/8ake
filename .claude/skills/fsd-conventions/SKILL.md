@@ -32,8 +32,11 @@ app(0) → routes(1) → pages(2) → widgets(3) → features(4) → entities(5)
 **레이어 규칙**
 
 - 같은 레이어 간 import 금지 — `widgets/a`가 `widgets/b`를 import하면 위반
+  - 예외: `shared` 레이어 내부는 상호 참조 허용 (FSD 공식 규칙)
 - 하위 레이어에서 상위 레이어 import 금지 — `entities`가 `features`를 import하면 위반
 - `src/components/ui/` (shadcn 원본)는 직접 수정 금지 — `src/shared/ui/`에서 래핑해서 사용
+
+> **참고**: `routes` 레이어는 FSD 공식에는 없으며, TanStack Router 파일 기반 라우팅을 구조화하기 위한 **프로젝트 커스텀 계층**입니다. FSD 공식에서는 라우팅이 `app` 레이어에 포함됩니다.
 
 **Public API 원칙**
 
@@ -77,8 +80,9 @@ slice-name/
 
 - **TailwindCSS v4**: `tailwind.config.js` 없음, CSS `@theme {}` 방식 사용
 - **색상**: `src/shared/styles/tokens.css`의 CSS 변수만 사용 — 하드코딩 금지
-  - ✅ `className="bg-[var(--card)]"` 또는 Tailwind 토큰 클래스
-  - ❌ `className="bg-[#F5EDE0]"`
+  - ✅ `className="bg-card"` (canonical Tailwind 클래스)
+  - ❌ `className="bg-[#F5EDE0]"` (하드코딩)
+  - ❌ `className="bg-[var(--card)]"` (구식 — `bg-card`로 대체)
 - **다크모드**: `[data-theme="dark"]` 속성 기반 — `dark:` 접두사 대신 CSS 변수가 자동 전환
 - **반응형**: mobile-first, `md:` (768px+) 브레이크포인트
 - **아이콘**: `lucide-react`만 사용 — 이모지 금지
@@ -151,36 +155,10 @@ className={cn(
 style={{ backgroundColor: 'var(--primary)', borderRadius: 8, padding: '6px 12px' }}
 
 // ✅ 대체
-className="bg-[var(--primary)] rounded-lg px-3 py-1.5"
+className="bg-primary rounded-lg px-3 py-1.5"
 ```
 
-**CSS 변수 색상 Tailwind 클래스 치트시트:**
-
-```
-배경:   bg-[var(--background)]  bg-[var(--card)]  bg-[var(--surface)]
-텍스트: text-[var(--foreground)]  text-[var(--muted-foreground)]  text-[var(--primary)]
-테두리: border-[var(--border)]
-주색상: bg-[var(--primary)] text-[var(--primary-foreground)]
-파괴:   bg-[var(--destructive)] text-[var(--destructive-foreground)]
-```
-
-**자주 쓰는 패턴:**
-
-```tsx
-// 카드
-className = 'rounded-xl border border-[var(--border)] bg-[var(--card)] p-4'
-
-// 주요 버튼 (shadcn Button 사용이 우선)
-className =
-  'rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] px-4 py-2 text-sm font-medium'
-
-// 뮤트 텍스트
-className = 'text-xs text-[var(--muted-foreground)]'
-
-// sticky 헤더
-className =
-  'sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)] backdrop-blur-md'
-```
+> 스타일 치트시트와 canonical 클래스 패턴은 `markup-conventions` 스킬을 참조하세요.
 
 ## 데이터 패칭
 
@@ -190,4 +168,5 @@ className =
 
 ## 상세 참조
 
-레이어 계층 상세와 위반 패턴은 `fsd-layers.md`를 참고하세요.
+- FSD 공식 문서: https://feature-sliced.design/docs/
+- TailwindCSS v4 공식 문서: https://tailwindcss.com/docs/

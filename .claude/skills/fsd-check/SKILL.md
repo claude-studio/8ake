@@ -1,6 +1,6 @@
 ---
 name: fsd-check
-description: "FSD 아키텍처 규칙 위반을 전체 src/ 코드베이스에서 검사. /fsd-check 명령 시 레이어 의존성 방향, public API 우회, routes/pages 역할 초과, kebab-case 파일명을 전수 검사하여 위반 리포트를 출력. 코드 구현 중 의심스러운 import가 있거나, 리팩토링 전후, PR 전 최종 확인 시 사용."
+description: 'FSD 아키텍처 규칙 위반을 전체 src/ 코드베이스에서 검사. /fsd-check 명령 시 레이어 의존성 방향, public API 우회, routes/pages 역할 초과, kebab-case 파일명을 전수 검사하여 위반 리포트를 출력. 코드 구현 중 의심스러운 import가 있거나, 리팩토링 전후, PR 전 최종 확인 시 사용.'
 context: fork
 agent: Explore
 user-invocable: true
@@ -23,17 +23,24 @@ user-invocable: true
 @/components/ui/ → 6 (shadcn, shared 취급)
 ```
 
-## 검사 항목 (4가지)
+## 검사 항목
+
+> **구현 현황:**
+>
+> - ✅ 자동 검사 (fsd-guard.py): 레이어 의존성(1), 파일명 kebab-case(4)
+> - 📋 명세만 있음 (수동 확인 필요): Public API 우회(2), 역할 초과(3)
 
 ### 1. 레이어 의존성 방향
 
 각 `.ts` / `.tsx` 파일의 `@/` import를 추출해 다음을 확인:
+
 - **같은 레이어 참조**: `src_layer === imp_layer` (단, shared → shared는 허용)
 - **역방향 참조**: `src_layer > imp_layer` (하위가 상위를 참조)
 
 ### 2. Public API 우회
 
 슬라이스 외부에서 내부 파일을 직접 import하는 경우:
+
 ```
 # 위반 패턴 예시
 import { X } from '@/entities/recipe/ui/recipe-card'   ← ui/ 직접 참조
@@ -49,11 +56,13 @@ import { X } from '@/entities/recipe'                  ← index.ts 경유
 ### 3. routes/pages 역할 초과
 
 **routes 파일** (`src/routes/` 내):
+
 - `useState`, `useEffect`, `useCallback`, `useMemo` 사용 → 위반
 - `fetch(`, `supabase.` 호출 → 위반
 - `@/entities/`, `@/features/` import → 위반 (pages를 거치지 않음)
 
 **pages 파일** (`src/pages/` 내):
+
 - `use` 로 시작하는 커스텀 훅 중 `@/entities/` 또는 `@/features/` 에서 가져온 것 → 위반
 - `supabase.` 직접 호출 → 위반
 
@@ -73,7 +82,8 @@ import { X } from '@/entities/recipe'                  ← index.ts 경유
 
 ### 검사 범위
 - 파일 수: N개
-- 검사 항목: 레이어 의존성, Public API, 역할 초과, 파일명
+- 자동 검사: 레이어 의존성, 파일명 kebab-case
+- 수동 확인: Public API 우회, 역할 초과
 
 ---
 

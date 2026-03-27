@@ -1,6 +1,6 @@
 ---
 name: token-check
-description: "디자인 토큰 사용 현황을 전체 src/ 코드베이스에서 검증. /token-check 명령 시 하드코딩 색상(hex/rgb/hsl), 미정의 CSS 변수 참조, TailwindCSS v4 규칙 위반, 다크모드 누락을 전수 검사하여 리포트를 출력. 스타일 작업 중 또는 PR 전 확인 시 사용."
+description: '디자인 토큰 사용 현황을 전체 src/ 코드베이스에서 검증. /token-check 명령 시 하드코딩 색상(hex/rgb/hsl), 미정의 CSS 변수 참조, TailwindCSS v4 규칙 위반, 다크모드 누락을 전수 검사하여 리포트를 출력. 스타일 작업 중 또는 PR 전 확인 시 사용.'
 context: fork
 agent: Explore
 user-invocable: true
@@ -15,17 +15,24 @@ user-invocable: true
 먼저 `src/shared/styles/tokens.css`를 읽어 정의된 CSS 변수 목록을 수집하세요.
 이 파일에 정의된 `--<name>` 변수만 유효한 토큰입니다.
 
-## 검사 항목 (4가지)
+## 검사 항목
+
+> **구현 현황:**
+>
+> - ✅ 자동 검사 (token-validate.py): 하드코딩 색상(1), inline style CSS 변수 사용
+> - 📋 명세만 있음 (수동 확인 필요): 미정의 CSS 변수 참조(2), TailwindCSS v4 위반(3), 다크모드 토큰 누락(4)
 
 ### 1. 하드코딩 색상
 
 다음 패턴이 `className`, `style`, CSS 파일에 사용된 경우 위반:
+
 - HEX: `#[0-9a-fA-F]{3,8}`
 - RGB/RGBA: `rgb(`, `rgba(`
 - HSL/HSLA: `hsl(`, `hsla(`
 - Tailwind 임의 색상: `bg-[#`, `text-[#`, `border-[#`, `fill-[#`, `stroke-[#`
 
 **예외 (검사 제외):**
+
 - `src/shared/styles/tokens.css` — 토큰 정의 파일
 - `src/shared/styles/shadcn-theme.css` — shadcn 테마 파일
 - `src/components/ui/` — shadcn 원본 (수정 금지 대상, 검사 제외)
@@ -64,7 +71,7 @@ user-invocable: true
 #### 1. 하드코딩 색상 (N건)
 | 파일 | 라인 | 내용 | 수정 방향 |
 |------|------|------|----------|
-| src/widgets/header/ui/header.tsx | 12 | bg-[#F5EDE0] | bg-[var(--card)] 또는 Tailwind 토큰 사용 |
+| src/widgets/header/ui/header.tsx | 12 | bg-[#F5EDE0] | bg-card 등 canonical 클래스 사용 |
 
 #### 2. 미정의 CSS 변수 (N건)
 | 파일 | 라인 | 변수명 |
