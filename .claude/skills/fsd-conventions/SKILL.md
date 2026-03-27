@@ -1,8 +1,8 @@
 ---
 name: fsd-conventions
-description: "FSD(Feature-Sliced Design) 아키텍처 레이어 규칙과 8ake 코딩 컨벤션. src/ 하위 파일 작업 시 자동 로드되며, 레이어 의존성 방향, public API 원칙, 파일 네이밍, 스타일링 규칙을 Claude 컨텍스트에 주입합니다."
+description: 'FSD(Feature-Sliced Design) 아키텍처 레이어 규칙과 8ake 코딩 컨벤션. src/ 하위 파일 작업 시 자동 로드되며, 레이어 의존성 방향, public API 원칙, 파일 네이밍, 스타일링 규칙을 Claude 컨텍스트에 주입합니다.'
 user-invocable: false
-paths: "src/**"
+paths: 'src/**'
 ---
 
 # 8ake FSD 아키텍처 컨벤션
@@ -17,47 +17,54 @@ app(0) → routes(1) → pages(2) → widgets(3) → features(4) → entities(5)
 
 각 레이어의 번호가 **낮을수록 상위**입니다. 의존은 항상 **상위 → 하위** 방향만 허용됩니다.
 
-| 레이어 | 역할 | 허용 의존 |
-|--------|------|----------|
-| `app` | 진입점, 프로바이더, 전역 CSS | 모든 레이어 |
-| `routes` | TanStack Router 파일 라우트 | pages 이하 |
-| `pages` | widget 조합 + 레이아웃 | widgets 이하 |
-| `widgets` | 독립 UI 블록 | features, entities, shared |
-| `features` | 사용자 인터랙션 단위 | entities, shared |
-| `entities` | 도메인 타입 + API 훅 | shared |
-| `shared` | 공통 유틸, UI 프리미티브 | 없음 |
+| 레이어     | 역할                         | 허용 의존                  |
+| ---------- | ---------------------------- | -------------------------- |
+| `app`      | 진입점, 프로바이더, 전역 CSS | 모든 레이어                |
+| `routes`   | TanStack Router 파일 라우트  | pages 이하                 |
+| `pages`    | widget 조합 + 레이아웃       | widgets 이하               |
+| `widgets`  | 독립 UI 블록                 | features, entities, shared |
+| `features` | 사용자 인터랙션 단위         | entities, shared           |
+| `entities` | 도메인 타입 + API 훅         | shared                     |
+| `shared`   | 공통 유틸, UI 프리미티브     | 없음                       |
 
 ## 핵심 규칙 (절대 위반 금지)
 
 **레이어 규칙**
+
 - 같은 레이어 간 import 금지 — `widgets/a`가 `widgets/b`를 import하면 위반
 - 하위 레이어에서 상위 레이어 import 금지 — `entities`가 `features`를 import하면 위반
 - `src/components/ui/` (shadcn 원본)는 직접 수정 금지 — `src/shared/ui/`에서 래핑해서 사용
 
 **Public API 원칙**
+
 - 슬라이스 외부에서는 반드시 `index.ts`를 통해서만 import
   - ✅ `import { RecipeCard } from '@/entities/recipe'`
   - ❌ `import { RecipeCard } from '@/entities/recipe/ui/recipe-card'`
 
 **레이어별 역할 제한**
+
 - `routes/`: pages를 import 후 `component`에 할당하는 역할만. `useState`, `useEffect`, fetch 등 로직 금지
 - `pages/`: widgets 조합과 레이아웃만. API 훅 직접 호출 금지, 비즈니스 로직 금지
 
 ## 코딩 컨벤션
 
 **파일 네이밍**
+
 - 모든 파일: **kebab-case** (`recipe-card.tsx`, `use-recipes.ts`, `auth-store.ts`)
 - 예외: `routeTree.gen.ts` (TanStack Router 자동 생성)
 
 **export 방식**
+
 - **named export only** — default export 절대 금지
   - ✅ `export function RecipeCard() {}`
   - ❌ `export default function RecipeCard() {}`
 
 **import alias**
+
 - `@/` → `src/` (절대 경로 사용)
 
 **슬라이스 내부 구조**
+
 ```
 slice-name/
 ├── ui/       # React 컴포넌트
@@ -76,6 +83,72 @@ slice-name/
 - **반응형**: mobile-first, `md:` (768px+) 브레이크포인트
 - **아이콘**: `lucide-react`만 사용 — 이모지 금지
 - **폰트**: Pretendard (`--font-sans`)
+
+### 불필요한 wrapper div 금지
+
+`<div>` 하나만 있고 자식이 레이아웃 없이 렌더될 때, `flex flex-col gap-*`가 필요한 경우라면 `<div className="flex flex-col gap-*">`으로 처리하세요. 레이아웃 목적 없는 빈 `<div>` wrapper에 `mt-*` 등 margin을 자식에 걸지 마세요.
+
+```tsx
+// ❌ 금지 — wrapper div + 자식 margin
+<div>
+  <Input aria-invalid={hasError} />
+  {hasError && <p className="mt-2 text-destructive">{msg}</p>}
+</div>
+
+// ✅ 대체 — flex gap으로 간격 표현
+<div className="flex flex-col gap-1.5">
+  <Input aria-invalid={hasError} />
+  {hasError && <p className="text-destructive">{msg}</p>}
+</div>
+```
+
+### 인라인 스타일 금지 (엄격 적용)
+
+`style={{}}` 인라인 스타일은 **원칙적으로 사용 금지**. TailwindCSS v4의 arbitrary value와 CSS 변수를 활용해 className으로 대체하세요.
+
+**허용되는 예외** (3가지만):
+
+1. JS 런타임 값 — 동적으로 계산된 숫자/문자열 (`style={{ width: `${progress}%` }}`)
+2. CSS 변수 직접 할당 — `style={{ '--card-rotation': `${deg}deg` }}`
+3. `position: absolute/fixed` + 동적 좌표 — JS로 계산된 `top`/`left` 위치값
+
+**TailwindCSS v4 arbitrary value로 대체하는 방법:**
+
+```tsx
+// ❌ 금지
+style={{ backgroundColor: 'var(--primary)', borderRadius: 8, padding: '6px 12px' }}
+
+// ✅ 대체
+className="bg-[var(--primary)] rounded-lg px-3 py-1.5"
+```
+
+**CSS 변수 색상 Tailwind 클래스 치트시트:**
+
+```
+배경:   bg-[var(--background)]  bg-[var(--card)]  bg-[var(--surface)]
+텍스트: text-[var(--foreground)]  text-[var(--muted-foreground)]  text-[var(--primary)]
+테두리: border-[var(--border)]
+주색상: bg-[var(--primary)] text-[var(--primary-foreground)]
+파괴:   bg-[var(--destructive)] text-[var(--destructive-foreground)]
+```
+
+**자주 쓰는 패턴:**
+
+```tsx
+// 카드
+className = 'rounded-xl border border-[var(--border)] bg-[var(--card)] p-4'
+
+// 주요 버튼 (shadcn Button 사용이 우선)
+className =
+  'rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] px-4 py-2 text-sm font-medium'
+
+// 뮤트 텍스트
+className = 'text-xs text-[var(--muted-foreground)]'
+
+// sticky 헤더
+className =
+  'sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)] backdrop-blur-md'
+```
 
 ## 데이터 패칭
 
