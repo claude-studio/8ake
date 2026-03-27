@@ -178,8 +178,6 @@
     transition:
       background-color var(--transition),
       color var(--transition);
-    margin: 0;
-    padding: 0;
   }
 
   /* Paper noise texture */
