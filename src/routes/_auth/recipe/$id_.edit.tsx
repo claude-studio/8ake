@@ -1,5 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 
+import { RecipeFormPage } from '@/pages/recipe-form'
+
 export const Route = createFileRoute('/_auth/recipe/$id_/edit')({
-  component: () => <div>레시피 수정 (구현 예정)</div>,
+  component: function EditRoute() {
+    const { id } = Route.useParams()
+    return <RecipeFormPage mode="edit" recipeId={id} />
+  },
 })

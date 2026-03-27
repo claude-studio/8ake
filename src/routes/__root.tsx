@@ -1,9 +1,11 @@
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
+import type { Session } from '@supabase/supabase-js'
+
 interface RouterContext {
   auth: {
-    session: unknown | null
+    session: Session | null
   }
 }
 
