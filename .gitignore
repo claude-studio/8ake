@@ -83,7 +83,9 @@ Desktop.ini
 # .bkit/workflows/
 
 # ── Claude Code ───────────────────────────────────────────
-.claude/
+.claude/settings.local.json
+.claude/memory/
+# skills, settings.json은 git 추적
 
 # ── Vercel ────────────────────────────────────────────────
 .vercel/
