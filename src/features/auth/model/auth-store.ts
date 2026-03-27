@@ -13,6 +13,9 @@ interface AuthStore {
   initialize: () => Promise<void>
 }
 
+// 구독은 앱 생명주기 동안 단 1회만 등록
+let authListenerRegistered = false
+
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   session: null,
@@ -26,8 +29,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
     const { data } = await supabase.auth.getSession()
     set({ session: data.session, user: data.session?.user ?? null, isLoading: false })
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({ session, user: session?.user ?? null })
-    })
+    if (!authListenerRegistered) {
+      authListenerRegistered = true
+      supabase.auth.onAuthStateChange((_event, session) => {
+        set({ session, user: session?.user ?? null })
+      })
+    }
   },
 }))
