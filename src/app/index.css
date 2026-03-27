@@ -1,3 +1,5 @@
+/* Pretendard 웹폰트 — @import는 모든 규칙 앞에 위치해야 함 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -13,6 +15,17 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  /* shadcn ring/input — Tailwind v4 색상 토큰 매핑 */
+  --color-ring: var(--ring);
+  --color-input: var(--input);
   --font-sans: 'Pretendard', -apple-system, sans-serif;
   --radius-xs: var(--radius-xs-val);
   --radius-sm: var(--radius-sm-val);
@@ -51,13 +64,49 @@
 
     /* 레이아웃 */
     --header-h: 56px;
+    --subheader-h: 49px;
+    --tabbar-h: 64px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
     --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* 에러 */
     --destructive: #c0392b;
 
+    /* 성공 */
+    --success-bg: rgba(80, 160, 100, 0.12);
+    --success-text: #3a8a52;
+    --success-border: rgba(80, 160, 100, 0.25);
+
+    /* 오버레이 */
+    --overlay-bg: rgba(0, 0, 0, 0.5);
+
+    /* 그림자 확장 */
+    --shadow-md: 0 4px 20px rgba(100, 50, 20, 0.08);
+    --shadow-lg: 0 4px 18px rgba(0, 0, 0, 0.22);
+    --shadow-xl: 0 -4px 24px rgba(0, 0, 0, 0.1);
+
+    /* 카드 플레이스홀더 */
+    --card-placeholder-bg: #f5e6d3;
+    --card-placeholder-text: #a08060;
+    --card-placeholder-icon: #c2a080;
+
+    /* muted (배경) */
+    --muted: rgba(194, 103, 58, 0.06);
+
+    /* 브랜드 컬러 */
+    --youtube: #ff0000;
+
     /* shadcn 호환 */
     --radius: 0.75rem;
+    --input: rgba(194, 103, 58, 0.2);
+    --ring: rgba(194, 103, 58, 0.5);
+    --accent: #ede3d6;
+    --accent-foreground: #1e1410;
+    --secondary: #ede3d6;
+    --secondary-foreground: #1e1410;
+    --popover: #fefaf4;
+    --popover-foreground: #1e1410;
+    --destructive-foreground: #ffffff;
   }
 
   [data-theme='dark'] {
@@ -74,5 +123,163 @@
     --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
     --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3);
     --destructive: #e05c4a;
+    --primary-foreground: #ffffff;
+
+    /* 성공 */
+    --success-bg: rgba(80, 160, 100, 0.15);
+    --success-text: #5faa77;
+    --success-border: rgba(80, 160, 100, 0.3);
+
+    /* 오버레이 */
+    --overlay-bg: rgba(0, 0, 0, 0.65);
+
+    /* 그림자 확장 */
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 4px 18px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 -4px 24px rgba(0, 0, 0, 0.25);
+
+    /* 카드 플레이스홀더 */
+    --card-placeholder-bg: #2a201a;
+    --card-placeholder-text: #7a6a5a;
+    --card-placeholder-icon: #5a4a3a;
+
+    /* muted (배경) */
+    --muted: rgba(224, 123, 74, 0.08);
+
+    /* shadcn 호환 */
+    --input: rgba(224, 123, 74, 0.25);
+    --ring: rgba(224, 123, 74, 0.5);
+    --accent: #1c1610;
+    --accent-foreground: #f0e6d8;
+    --secondary: #1c1610;
+    --secondary-foreground: #f0e6d8;
+    --popover: #221c15;
+    --popover-foreground: #f0e6d8;
+    --destructive-foreground: #ffffff;
   }
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family:
+      'Pretendard',
+      -apple-system,
+      sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    transition:
+      background-color var(--transition),
+      color var(--transition);
+  }
+
+  /* Paper noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  [data-theme='dark'] body::before {
+    opacity: 0.055;
+  }
+
+  /* Ruled notebook lines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      var(--rule) 27px,
+      var(--rule) 28px
+    );
+    background-attachment: fixed;
+  }
+
+  /* Content above textures */
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+/* Form input focus — replaces JS-based onFocus/onBlur DOM manipulation */
+.form-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-dim) !important;
+  outline: none;
+}
+
+/* Memo textarea: dashed border → solid on focus */
+.form-input-memo {
+  border-style: dashed !important;
+}
+.form-input-memo:focus {
+  border-style: solid !important;
+}
+
+/* Delete button hover — replaces JS onMouseEnter/onMouseLeave */
+.btn-delete:hover {
+  border-color: var(--destructive) !important;
+  color: var(--destructive) !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Card animation — replaces inline <style> in RecipeCard */
+@keyframes cardFall {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) rotate(var(--card-rotation, 0deg));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--card-rotation, 0deg));
+  }
+}
+
+/* Ingredient row animation — replaces inline <style> in IngredientsSection */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Note card top accent line */
+.note-card-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 3px;
+  background: var(--primary);
+  opacity: 0.4;
+  border-radius: 0 0 4px 4px;
 }
