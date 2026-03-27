@@ -33,7 +33,6 @@ src/routeTree.gen.ts
 *.key
 
 # ── Editor / IDE ──────────────────────────────────────────
-.vscode/
 .idea/
 *.suo
 *.ntvs*
