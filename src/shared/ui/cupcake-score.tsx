@@ -20,7 +20,7 @@ export function CupcakeScore({ value, max = 5, size = 'md' }: Props) {
         <Star
           key={i}
           size={px}
-          className={i < value ? 'text-[var(--primary)]' : 'text-[var(--border)]'}
+          className={i < value ? 'text-(--primary)' : 'text-(--border)'}
           fill={i < value ? 'var(--primary)' : 'transparent'}
         />
       ))}

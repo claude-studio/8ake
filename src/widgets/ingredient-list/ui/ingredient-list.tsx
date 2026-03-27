@@ -69,7 +69,7 @@ export function IngredientList() {
           <div className="relative flex-1">
             <Search
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted-foreground)"
             />
             <Input
               type="search"
@@ -86,8 +86,8 @@ export function IngredientList() {
 
         {/* 2행: 뷰 전환 */}
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-[var(--muted-foreground)]">보기</span>
-          <div className="flex rounded-lg border border-[var(--border)] bg-[var(--card)] p-0.5">
+          <span className="text-xs text-(--muted-foreground)">보기</span>
+          <div className="flex rounded-lg border border-(--border) bg-(--card) p-0.5">
             <ViewToggle
               active={viewMode === 'table'}
               onClick={() => setViewMode('table')}
@@ -106,7 +106,7 @@ export function IngredientList() {
 
       {/* 재료 추가 폼 */}
       {showAddForm && (
-        <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] p-3">
+        <div className="flex items-center gap-2 rounded-xl border border-(--border) bg-(--card) p-3">
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -131,7 +131,7 @@ export function IngredientList() {
               setShowAddForm(false)
               setNewName('')
             }}
-            className="text-[var(--muted-foreground)]"
+            className="text-(--muted-foreground)"
           >
             취소
           </Button>
@@ -140,19 +140,17 @@ export function IngredientList() {
 
       {/* 목록 */}
       {isLoading ? (
-        <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">불러오는 중...</p>
+        <p className="py-8 text-center text-sm text-(--muted-foreground)">불러오는 중...</p>
       ) : filteredIngredients.length === 0 && ingredients.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--border)] py-12">
-          <Package size={36} className="text-[var(--muted-foreground)] opacity-40" />
-          <p className="text-sm text-[var(--muted-foreground)]">아직 등록된 재료가 없습니다</p>
-          <p className="text-xs text-[var(--muted-foreground)] opacity-70">
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-(--border) py-12">
+          <Package size={36} className="text-(--muted-foreground) opacity-40" />
+          <p className="text-sm text-(--muted-foreground)">아직 등록된 재료가 없습니다</p>
+          <p className="text-xs text-(--muted-foreground) opacity-70">
             위의 재료 추가 버튼으로 시작해보세요
           </p>
         </div>
       ) : filteredIngredients.length === 0 ? (
-        <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
-          검색 결과가 없습니다
-        </p>
+        <p className="py-8 text-center text-sm text-(--muted-foreground)">검색 결과가 없습니다</p>
       ) : viewMode === 'card' ? (
         <IngredientCardView ingredients={filteredIngredients} onRefetch={refetch} />
       ) : (
@@ -176,12 +174,12 @@ function StatCard({
   small?: boolean
 }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-3">
-      <span className="text-[var(--primary)]">{icon}</span>
-      <span className="text-[10px] font-medium text-[var(--muted-foreground)]">{label}</span>
+    <div className="flex flex-col items-center gap-1 rounded-xl border border-(--border) bg-(--card) p-3">
+      <span className="text-(--primary)">{icon}</span>
+      <span className="text-[10px] font-medium text-(--muted-foreground)">{label}</span>
       <span
         className={cn(
-          'font-bold leading-none text-[var(--foreground)]',
+          'font-bold leading-none text-(--foreground)',
           accent ? 'text-xl text-[var(--primary)]' : small ? 'text-xs' : 'text-base'
         )}
       >

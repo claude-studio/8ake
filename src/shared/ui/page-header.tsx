@@ -12,7 +12,7 @@ export function PageHeader({ title, right }: Props) {
   const router = useRouter()
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-(--border) bg-(--background)/90 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-[1024px] items-center px-2">
         {/* 왼쪽: 뒤로가기 */}
         <Button
@@ -21,14 +21,14 @@ export function PageHeader({ title, right }: Props) {
           size="icon-sm"
           onClick={() => router.history.back()}
           title="뒤로가기"
-          className="shrink-0 text-[var(--muted-foreground)]"
+          className="shrink-0 text-(--muted-foreground)"
         >
           <ArrowLeft size={18} />
         </Button>
 
         {/* 가운데: 타이틀 */}
         <Link to="/" className="flex flex-1 items-center justify-center gap-1.5 no-underline">
-          <span className="text-[15px] font-bold text-[var(--foreground)]">{title}</span>
+          <span className="text-[15px] font-bold text-(--foreground)">{title}</span>
         </Link>
 
         {/* 오른쪽 액션 */}

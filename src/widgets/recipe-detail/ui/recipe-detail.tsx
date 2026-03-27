@@ -181,7 +181,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
       </PhotoGallery>
 
       {/* Tab bar */}
-      <div className="sticky top-[var(--subheader-h)] z-[150] border-b border-[var(--border)] bg-[var(--background)]">
+      <div className="sticky top-(--subheader-h) z-150 border-b border-(--border) bg-(--background)">
         <div className="mx-auto flex h-11 max-w-[1024px] px-4">
           {(['recipe', 'reviews'] as const).map((t) => (
             <button
@@ -197,7 +197,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
             >
               {t === 'recipe' ? '레시피' : '베이킹 기록'}
               {tab === t && (
-                <span className="absolute bottom-0 left-2 right-2 h-[2.5px] rounded-t-sm bg-[var(--primary)]" />
+                <span className="absolute bottom-0 inset-x-2  h-[2.5px] rounded-t-sm bg-(--primary)" />
               )}
             </button>
           ))}
@@ -270,7 +270,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                       <span className="flex-1">{ing.name}</span>
                       {ing.amount && (
                         <span
-                          className="flex-shrink-0"
+                          className="shrink-0"
                           style={{
                             color: 'var(--muted-foreground)',
                             fontWeight: 500,
@@ -381,7 +381,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                       <PenLine size={11} /> 메모
                     </div>
                     <p
-                      className="text-sm leading-relaxed"
+                      className="text-sm/relaxed "
                       style={{ color: 'var(--muted-foreground)', margin: 0 }}
                     >
                       {recipe.memo}

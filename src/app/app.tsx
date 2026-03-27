@@ -34,7 +34,7 @@ export function App() {
         style={{ backgroundColor: 'var(--background)' }}
       >
         <div
-          className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
+          className="size-8  rounded-full border-2 border-t-transparent animate-spin"
           style={{ borderColor: 'var(--primary)', borderTopColor: 'transparent' }}
         />
       </div>

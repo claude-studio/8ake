@@ -106,7 +106,7 @@ export function RecipeGrid() {
           {isFetchingMore && (
             <div className="flex justify-center">
               <div
-                className="w-6 h-6 rounded-full border-2 animate-spin"
+                className="size-6  rounded-full border-2 animate-spin"
                 style={{
                   borderColor: 'var(--border)',
                   borderTopColor: 'var(--primary)',

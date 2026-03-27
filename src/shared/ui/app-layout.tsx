@@ -59,7 +59,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
       </main>
 
       {!hideNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-[calc(var(--tabbar-h)+var(--safe-bottom))] items-center justify-center">
+        <nav className="fixed bottom-0 inset-x-0  z-50 flex h-[calc(var(--tabbar-h)+var(--safe-bottom))] items-center justify-center">
           {/* 단일 pill — 내비 아이템 + separator + FAB */}
           <div className="relative">
             {/* Tooltip */}
@@ -70,11 +70,11 @@ export function AppLayout({ children, hideNav = false }: Props) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 4 }}
                   transition={springConfig}
-                  className="pointer-events-none absolute left-0 right-0 -top-8"
+                  className="pointer-events-none absolute inset-x-0  -top-8"
                 >
                   <motion.div
                     ref={tooltipRef}
-                    className="inline-flex h-6 items-center whitespace-nowrap rounded-lg border border-[var(--border)] bg-[var(--card)]/95 px-2.5 text-[11px] font-medium text-[var(--foreground)] shadow-[0_0_0_1px_rgba(0,0,0,0.06)] backdrop-blur-sm"
+                    className="inline-flex h-6 items-center whitespace-nowrap rounded-lg border border-(--border) bg-(--card)/95 px-2.5 text-[11px] font-medium text-(--foreground) shadow-[0_0_0_1px_rgba(0,0,0,0.06)] backdrop-blur-sm"
                     initial={{ x: tooltipLeft }}
                     animate={{ x: tooltipLeft }}
                     transition={springConfig}
@@ -88,7 +88,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
             {/* Pill container */}
             <div
               ref={menuRef}
-              className="inline-flex h-12 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--card)]/95 px-2 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_8px_24px_-4px_rgba(0,0,0,0.12)] backdrop-blur-xl"
+              className="inline-flex h-12 items-center gap-1 rounded-full border border-(--border) bg-(--card)/95 px-2 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_8px_24px_-4px_rgba(0,0,0,0.12)] backdrop-blur-xl"
             >
               {/* 레시피 */}
               <PillItem
@@ -131,12 +131,12 @@ export function AppLayout({ children, hideNav = false }: Props) {
               </PillItem>
 
               {/* Separator */}
-              <div className="mx-1 h-5 w-px bg-[var(--border)]" />
+              <div className="mx-1 h-5 w-px bg-(--border)" />
 
               {/* FAB — pill 내부, primary 배경 */}
               <Link
                 to="/recipe/new"
-                className="flex size-9 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] transition-transform duration-150 hover:scale-110 active:scale-95"
+                className="flex size-9 items-center justify-center rounded-full bg-(--primary) text-(--primary-foreground) transition-transform duration-150 hover:scale-110 active:scale-95"
                 aria-label="새 레시피 추가"
                 onMouseEnter={() => handleHover(3)}
                 onMouseLeave={() => handleHover(null)}

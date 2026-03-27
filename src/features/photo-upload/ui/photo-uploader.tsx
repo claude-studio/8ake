@@ -168,7 +168,7 @@ export function PhotoUploader({ onChange }: Props) {
               <img
                 src={photo.preview}
                 alt={`사진 ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="size-full  object-cover"
               />
 
               {/* Overlay buttons */}
@@ -204,7 +204,7 @@ export function PhotoUploader({ onChange }: Props) {
               {/* Thumbnail badge */}
               {index === thumbnailIndex && (
                 <div
-                  className="absolute bottom-0 left-0 right-0 text-center text-[10px] py-0.5 font-medium"
+                  className="absolute bottom-0 inset-x-0  text-center text-[10px] py-0.5 font-medium"
                   style={{
                     backgroundColor: 'var(--primary)',
                     color: 'var(--primary-foreground)',

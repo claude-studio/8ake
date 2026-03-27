@@ -24,7 +24,7 @@ export function ScorePicker({ value, onChange, max = 5 }: Props) {
           >
             <Star
               size={22}
-              className={filled ? 'text-[var(--primary)]' : 'text-[var(--border)]'}
+              className={filled ? 'text-(--primary)' : 'text-(--border)'}
               fill={filled ? 'var(--primary)' : 'transparent'}
             />
           </button>

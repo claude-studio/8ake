@@ -155,7 +155,7 @@ export function RecipeCard({
             <img
               src={getPhotoUrl(thumbnail.storage_path)}
               alt={name}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 size-full  object-cover"
               loading="lazy"
             />
           ) : (

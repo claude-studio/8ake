@@ -41,7 +41,7 @@ export function ReviewCard({ review, onEdit, onDelete }: Props) {
       {/* Comment */}
       {review.comment && (
         <p
-          className="text-sm leading-relaxed"
+          className="text-sm/relaxed "
           style={{ color: 'var(--foreground)', whiteSpace: 'pre-wrap' }}
         >
           {review.comment}

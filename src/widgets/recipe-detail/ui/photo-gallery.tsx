@@ -21,21 +21,21 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
   const displayed = activePhoto ?? mainPhoto
 
   return (
-    <div className="bg-[var(--background)] px-4 pb-2 pt-4">
+    <div className="bg-(--background) px-4 pb-2 pt-4">
       {/* 이미지 컨테이너 — 카드처럼 rounded */}
-      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-card)]">
+      <div className="overflow-hidden rounded-2xl border border-(--border) bg-(--card) shadow-(--shadow-card)">
         {/* 메인 이미지 */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <div className="relative aspect-4/3 w-full overflow-hidden">
           {displayed ? (
             <img
               key={displayed.id}
               src={getPhotoUrl(displayed.storage_path)}
               alt="레시피 사진"
-              className="h-full w-full object-cover"
+              className="size-full  object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[var(--surface)]">
-              <ImageOff size={36} className="text-[var(--muted-foreground)] opacity-30" />
+            <div className="flex size-full  items-center justify-center bg-(--surface)">
+              <ImageOff size={36} className="text-(--muted-foreground) opacity-30" />
             </div>
           )}
 
@@ -49,12 +49,12 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
 
         {/* 서브 썸네일 */}
         {subPhotos.length > 0 && (
-          <div className="flex gap-1.5 bg-[var(--card)] px-3 py-2.5">
+          <div className="flex gap-1.5 bg-(--card) px-3 py-2.5">
             <button
               type="button"
               onClick={() => setActivePhoto(null)}
               className={cn(
-                'h-12 w-12 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
+                'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
                 !activePhoto
                   ? 'border-[var(--primary)]'
                   : 'border-transparent opacity-50 hover:opacity-75'
@@ -64,11 +64,11 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                 <img
                   src={getPhotoUrl(mainPhoto.storage_path)}
                   alt="메인"
-                  className="h-full w-full object-cover"
+                  className="size-full  object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[var(--surface)]">
-                  <ImageOff size={14} className="text-[var(--muted-foreground)]" />
+                <div className="flex size-full  items-center justify-center bg-(--surface)">
+                  <ImageOff size={14} className="text-(--muted-foreground)" />
                 </div>
               )}
             </button>
@@ -78,7 +78,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                 type="button"
                 onClick={() => setActivePhoto(photo)}
                 className={cn(
-                  'h-12 w-12 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
+                  'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
                   activePhoto?.id === photo.id
                     ? 'border-[var(--primary)]'
                     : 'border-transparent opacity-50 hover:opacity-75'
@@ -87,7 +87,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                 <img
                   src={getPhotoUrl(photo.storage_path)}
                   alt="서브"
-                  className="h-full w-full object-cover"
+                  className="size-full  object-cover"
                   loading="lazy"
                 />
               </button>

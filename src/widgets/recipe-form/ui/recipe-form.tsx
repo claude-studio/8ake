@@ -361,7 +361,7 @@ export function RecipeForm({ mode, recipeId }: Props) {
 
       {/* Fixed bottom action bar */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[60]"
+        className="fixed bottom-0 inset-x-0  z-60"
         style={{
           height: 64,
           backgroundColor: 'var(--card)',

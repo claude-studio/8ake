@@ -4,6 +4,7 @@ import { BookOpen, FileText, Globe, Lock, Pencil, Play, X } from 'lucide-react'
 import { Controller, useController } from 'react-hook-form'
 
 import { Input } from '@/components/ui/input'
+import { cn } from '@/shared/lib/utils'
 
 import { fieldLabelStyle } from './form-styles'
 
@@ -90,14 +91,16 @@ export function BasicInfoSection({ control, errors }: Props) {
                 key={st.value}
                 type="button"
                 onClick={() => sourceType.field.onChange(isActive ? undefined : st.value)}
-                className={[
+                className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150',
-                  isActive && isYoutube
-                    ? 'border-[var(--youtube)] bg-[var(--youtube)] text-white'
-                    : isActive
-                      ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
-                      : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted-foreground)]',
-                ].join(' ')}
+                  {
+                    'border-[var(--youtube)] bg-[var(--youtube)] text-white': isActive && isYoutube,
+                    'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]':
+                      isActive && !isYoutube,
+                    'border-[var(--border)] bg-[var(--surface)] text-[var(--muted-foreground)]':
+                      !isActive,
+                  }
+                )}
               >
                 {st.icon}
                 {st.label}
@@ -219,9 +222,9 @@ export function BasicInfoSection({ control, errors }: Props) {
           >
             <div className="flex items-center gap-2">
               {field.value ? (
-                <Globe size={18} className="text-[var(--primary)]" />
+                <Globe size={18} className="text-(--primary)" />
               ) : (
-                <Lock size={18} className="text-[var(--muted-foreground)]" />
+                <Lock size={18} className="text-(--muted-foreground)" />
               )}
               <div>
                 <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--foreground)' }}>

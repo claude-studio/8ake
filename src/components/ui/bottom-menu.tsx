@@ -49,7 +49,7 @@ export function MenuBar({ items, className, ...props }: MenuBarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
             transition={springConfig}
-            className="absolute left-0 right-0 -top-[31px] pointer-events-none z-50"
+            className="absolute inset-x-0  -top-[31px] pointer-events-none z-50"
           >
             <motion.div
               ref={tooltipRef}
@@ -86,13 +86,13 @@ export function MenuBar({ items, className, ...props }: MenuBarProps) {
         {items.map((item, index) => (
           <button
             key={index}
-            className="w-8 h-8 px-3 py-1 rounded-full flex justify-center items-center gap-2 hover:bg-muted/80 transition-colors"
+            className="size-8  px-3 py-1 rounded-full flex justify-center items-center gap-2 hover:bg-muted/80 transition-colors"
             onMouseEnter={() => setActiveIndex(index)}
             onMouseLeave={() => setActiveIndex(null)}
           >
             <div className="flex justify-center items-center">
-              <div className="w-[18px] h-[18px] flex justify-center items-center overflow-hidden">
-                <item.icon className="w-full h-full" />
+              <div className="size-[18px]  flex justify-center items-center overflow-hidden">
+                <item.icon className="size-full " />
               </div>
             </div>
             <span className="sr-only">{item.label}</span>
