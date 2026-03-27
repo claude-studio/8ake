@@ -1,8 +1,6 @@
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
-import { fieldLabelStyle } from './form-styles'
-
 import type { RecipeFormValues } from '../model/recipe-schema'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
@@ -15,11 +13,9 @@ export function StepsSection({ register, errors }: Props) {
   return (
     <div className="space-y-4">
       {/* 오븐온도 / 굽는시간 / 분량 - 3열 */}
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}
-      >
-        <div>
-          <label style={fieldLabelStyle}>
+      <div className="grid grid-cols-3 gap-[10px] mb-4">
+        <div className="flex flex-col gap-1.5">
+          <label className="field-label">
             오븐 온도 <span className="text-destructive">*</span>
           </label>
           <Input
@@ -33,8 +29,8 @@ export function StepsSection({ register, errors }: Props) {
             <p className="text-xs mt-2 text-destructive">{errors.oven_temp.message}</p>
           )}
         </div>
-        <div>
-          <label style={fieldLabelStyle}>
+        <div className="flex flex-col gap-1.5">
+          <label className="field-label">
             굽는 시간 <span className="text-destructive">*</span>
           </label>
           <Input
@@ -48,8 +44,8 @@ export function StepsSection({ register, errors }: Props) {
             <p className="text-xs mt-2 text-destructive">{errors.bake_time.message}</p>
           )}
         </div>
-        <div>
-          <label style={fieldLabelStyle}>
+        <div className="flex flex-col gap-1.5">
+          <label className="field-label">
             분량 <span className="text-destructive">*</span>
           </label>
           <Input
@@ -66,8 +62,8 @@ export function StepsSection({ register, errors }: Props) {
       </div>
 
       {/* 만드는 법 - ruled textarea */}
-      <div>
-        <label style={fieldLabelStyle}>
+      <div className="flex flex-col gap-1.5">
+        <label className="field-label">
           만드는 법 <span className="text-destructive">*</span>
         </label>
         <Textarea
@@ -75,26 +71,19 @@ export function StepsSection({ register, errors }: Props) {
           rows={8}
           placeholder={`1. 버터를 녹인다\n2. 밀가루를 섞는다\n...`}
           aria-invalid={!!errors.steps}
-          style={{
-            resize: 'vertical',
-            lineHeight: 1.8,
-            backgroundImage:
-              'repeating-linear-gradient(to bottom, transparent, transparent calc(1.8em - 1px), var(--border) calc(1.8em - 1px), var(--border) calc(1.8em))',
-            backgroundSize: '100% 1.8em',
-          }}
+          className="ruled-lines-textarea"
         />
         {errors.steps && <p className="text-xs mt-2 text-destructive">{errors.steps.message}</p>}
       </div>
 
       {/* 메모 - dashed textarea */}
-      <div>
-        <label style={fieldLabelStyle}>메모</label>
+      <div className="flex flex-col gap-1.5">
+        <label className="field-label">메모</label>
         <Textarea
           {...register('memo')}
           rows={3}
           placeholder="팁이나 변형 방법 등 자유롭게 메모하세요..."
-          className="form-input-memo"
-          style={{ resize: 'vertical' }}
+          className="form-input-memo resize-y"
         />
       </div>
     </div>

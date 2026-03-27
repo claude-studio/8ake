@@ -12,30 +12,6 @@ interface Props {
   onAppendRef?: (fn: () => void) => void
 }
 
-const rowStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 120px 36px',
-  gap: 8,
-  alignItems: 'start',
-  animation: 'slideDown 0.2s ease',
-}
-
-const deleteBtnStyle: React.CSSProperties = {
-  width: 32,
-  height: 32,
-  borderRadius: 6,
-  border: '1.5px solid var(--border)',
-  backgroundColor: 'var(--surface)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  color: 'var(--muted-foreground)',
-  fontSize: 16,
-  flexShrink: 0,
-  transition: 'all 0.15s',
-}
-
 export function IngredientsSection({ control, errors, onAppendRef }: Props) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -46,10 +22,13 @@ export function IngredientsSection({ control, errors, onAppendRef }: Props) {
   if (onAppendRef) onAppendRef(() => append({ name: '', amount: '' }))
 
   return (
-    <div>
+    <div className="flex flex-col gap-1.5">
       <div className="flex flex-col gap-3">
         {fields.map((field, index) => (
-          <div key={field.id} style={rowStyle}>
+          <div
+            key={field.id}
+            className="grid items-start gap-2 grid-cols-[1fr_120px_36px] animate-[slideDown_0.2s_ease]"
+          >
             {/* 재료명 */}
             <Controller
               control={control}
@@ -99,8 +78,7 @@ export function IngredientsSection({ control, errors, onAppendRef }: Props) {
             <button
               type="button"
               onClick={() => remove(index)}
-              className="btn-delete"
-              style={deleteBtnStyle}
+              className="btn-delete size-8 rounded-[6px] border-[1.5px] border-border bg-surface flex items-center justify-center cursor-pointer text-muted-foreground text-base shrink-0 transition-all duration-150"
               title="삭제"
             >
               ×

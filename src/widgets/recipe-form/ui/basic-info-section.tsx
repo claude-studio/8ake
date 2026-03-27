@@ -6,8 +6,6 @@ import { Controller, useController } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/shared/lib/utils'
 
-import { fieldLabelStyle } from './form-styles'
-
 import type { RecipeFormValues } from '../model/recipe-schema'
 import type { Control, FieldErrors } from 'react-hook-form'
 
@@ -59,8 +57,8 @@ export function BasicInfoSection({ control, errors }: Props) {
   return (
     <div className="space-y-4">
       {/* 메뉴명 */}
-      <div>
-        <label style={fieldLabelStyle}>
+      <div className="flex flex-col gap-1.5">
+        <label className="field-label">
           메뉴명 <span className="text-destructive">*</span>
         </label>
         <Controller
@@ -80,8 +78,8 @@ export function BasicInfoSection({ control, errors }: Props) {
       </div>
 
       {/* 출처 타입 */}
-      <div>
-        <label style={fieldLabelStyle}>출처</label>
+      <div className="flex flex-col gap-1.5">
+        <label className="field-label">출처</label>
         <div className="flex flex-wrap gap-2">
           {SOURCE_TYPES.map((st) => {
             const isActive = sourceType.field.value === st.value
@@ -96,7 +94,7 @@ export function BasicInfoSection({ control, errors }: Props) {
                   {
                     'border-(--youtube) bg-(--youtube) text-white': isActive && isYoutube,
                     'border-primary bg-primary text-primary-foreground': isActive && !isYoutube,
-                    'border-border bg-(--surface) text-muted-foreground': !isActive,
+                    'border-border bg-surface text-muted-foreground': !isActive,
                   }
                 )}
               >
@@ -110,8 +108,8 @@ export function BasicInfoSection({ control, errors }: Props) {
 
       {/* 출처 URL */}
       {showUrl && (
-        <div>
-          <label style={fieldLabelStyle}>출처 URL</label>
+        <div className="flex flex-col gap-1.5">
+          <label className="field-label">출처 URL</label>
           <Controller
             control={control}
             name="source_url"
@@ -123,8 +121,8 @@ export function BasicInfoSection({ control, errors }: Props) {
       )}
 
       {/* 태그 */}
-      <div>
-        <label style={fieldLabelStyle}>태그</label>
+      <div className="flex flex-col gap-1.5">
+        <label className="field-label">태그</label>
         <Controller
           control={control}
           name="tags"
@@ -132,31 +130,13 @@ export function BasicInfoSection({ control, errors }: Props) {
             const tags = field.value ?? []
             return (
               <div
-                className="flex flex-wrap items-center gap-1.5"
-                style={{
-                  backgroundColor: 'var(--surface)',
-                  border: '1.5px solid var(--border)',
-                  borderRadius: 6,
-                  padding: '8px 10px',
-                  minHeight: 44,
-                  cursor: 'text',
-                }}
+                className="flex flex-wrap items-center gap-1.5 bg-surface border-[1.5px] border-border rounded-[6px] px-[10px] py-2 min-h-11 cursor-text"
                 onClick={() => document.getElementById('tag-input-field')?.focus()}
               >
                 {tags.map((tag, i) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1"
-                    style={{
-                      backgroundColor: 'var(--primary-dim)',
-                      border: '1px solid var(--primary-border)',
-                      borderRadius: 20,
-                      padding: '3px 10px',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: 'var(--primary)',
-                      whiteSpace: 'nowrap',
-                    }}
+                    className="inline-flex items-center gap-1 bg-(--primary-dim) border border-(--primary-border) rounded-[20px] px-[10px] py-[3px] text-xs font-medium text-primary whitespace-nowrap"
                   >
                     {tag}
                     <button
@@ -165,16 +145,7 @@ export function BasicInfoSection({ control, errors }: Props) {
                         e.stopPropagation()
                         removeTag(i, tags, field.onChange)
                       }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--primary)',
-                        opacity: 0.6,
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: 0,
-                      }}
+                      className="bg-transparent border-0 cursor-pointer text-primary opacity-60 flex items-center p-0"
                     >
                       <X size={12} />
                     </button>
@@ -187,16 +158,7 @@ export function BasicInfoSection({ control, errors }: Props) {
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => handleTagKeyDown(e, tags, field.onChange)}
                   placeholder={tags.length === 0 ? '태그 입력 후 Enter' : ''}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    fontFamily: 'inherit',
-                    fontSize: 13,
-                    color: 'var(--foreground)',
-                    outline: 'none',
-                    minWidth: 80,
-                    flex: 1,
-                  }}
+                  className="border-0 bg-transparent font-[inherit] text-[13px] text-foreground outline-none min-w-[80px] flex-1"
                 />
               </div>
             )
@@ -209,22 +171,14 @@ export function BasicInfoSection({ control, errors }: Props) {
         control={control}
         name="is_public"
         render={({ field }) => (
-          <div
-            className="flex items-center justify-between"
-            style={{
-              backgroundColor: 'var(--surface)',
-              border: '1.5px solid var(--border)',
-              borderRadius: 6,
-              padding: '12px 16px',
-            }}
-          >
+          <div className="flex items-center justify-between bg-surface border-[1.5px] border-border rounded-[6px] px-4 py-3">
             <div className="flex items-center gap-2">
               {field.value ? (
                 <Globe size={18} className="text-primary" />
               ) : (
                 <Lock size={18} className="text-muted-foreground" />
               )}
-              <div>
+              <div className="flex flex-col gap-1.5">
                 <div className="text-sm font-medium text-foreground">
                   {field.value ? '공개' : '비공개'}
                 </div>
@@ -238,31 +192,19 @@ export function BasicInfoSection({ control, errors }: Props) {
               role="switch"
               aria-checked={field.value}
               onClick={() => field.onChange(!field.value)}
-              style={{
-                position: 'relative',
-                width: 44,
-                height: 24,
-                borderRadius: 12,
-                backgroundColor: field.value ? 'var(--primary)' : 'var(--surface)',
-                border: `1.5px solid ${field.value ? 'var(--primary)' : 'var(--border)'}`,
-                cursor: 'pointer',
-                flexShrink: 0,
-                transition: 'all 0.2s',
-              }}
+              className={cn(
+                'relative w-11 h-6 rounded-xl cursor-pointer shrink-0 transition-all duration-200',
+                field.value
+                  ? 'bg-primary border-[1.5px] border-primary'
+                  : 'bg-surface border-[1.5px] border-border'
+              )}
             >
               <span
-                style={{
-                  position: 'absolute',
-                  top: 3,
-                  left: field.value ? 23 : 3,
-                  width: 16,
-                  height: 16,
-                  borderRadius: '50%',
-                  backgroundColor: field.value
-                    ? 'var(--primary-foreground)'
-                    : 'var(--muted-foreground)',
-                  transition: 'all 0.2s',
-                }}
+                className={cn(
+                  'absolute top-[3px] size-4 rounded-full transition-all duration-200',
+                  field.value ? 'bg-primary-foreground' : 'bg-muted-foreground'
+                )}
+                style={{ left: field.value ? 23 : 3 }}
               />
             </button>
           </div>

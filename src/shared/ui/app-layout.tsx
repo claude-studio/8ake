@@ -131,7 +131,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
               </PillItem>
 
               {/* Separator */}
-              <div className="mx-1 h-5 w-px bg-(--border)" />
+              <div className="mx-1 h-5 w-px bg-border" />
 
               {/* FAB — pill 내부, primary 배경 */}
               <Link
@@ -174,7 +174,7 @@ function PillItem({ as, to, active, onHover, onClick, children }: PillItemProps)
     'flex size-9 items-center justify-center rounded-full transition-colors duration-150',
     active
       ? 'bg-primary text-primary-foreground'
-      : 'text-muted-foreground hover:bg-(--surface) hover:text-foreground'
+      : 'text-muted-foreground hover:bg-surface hover:text-foreground'
   )
 
   if (as === 'link') {

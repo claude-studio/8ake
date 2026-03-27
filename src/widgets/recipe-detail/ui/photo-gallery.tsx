@@ -34,7 +34,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
               className="size-full  object-cover"
             />
           ) : (
-            <div className="flex size-full  items-center justify-center bg-(--surface)">
+            <div className="flex size-full  items-center justify-center bg-surface">
               <ImageOff size={36} className="text-muted-foreground opacity-30" />
             </div>
           )}
@@ -65,7 +65,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                   className="size-full  object-cover"
                 />
               ) : (
-                <div className="flex size-full  items-center justify-center bg-(--surface)">
+                <div className="flex size-full  items-center justify-center bg-surface">
                   <ImageOff size={14} className="text-muted-foreground" />
                 </div>
               )}

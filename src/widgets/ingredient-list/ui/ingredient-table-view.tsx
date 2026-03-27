@@ -227,7 +227,7 @@ export function IngredientTableView({ ingredients, onRefetch }: Props) {
     <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full bg-card">
         <thead>
-          <tr className="bg-(--surface)">
+          <tr className="bg-surface">
             <th className="w-10 border-b border-border p-3  text-left text-xs font-semibold text-muted-foreground">
               #
             </th>

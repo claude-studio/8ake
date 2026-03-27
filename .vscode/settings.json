@@ -1,0 +1,4 @@
+{
+  "cSpell.words": ["supabase"],
+  "tailwindCSS.files.exclude": ["**/.git/**", "**/node_modules/**", "**/.hg/**", "**/*.md"]
+}

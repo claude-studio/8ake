@@ -232,6 +232,43 @@
   outline: none;
 }
 
+/* Form field label — replaces fieldLabelStyle CSSProperties object */
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Ruled paper line effect (32px row height) — ingredient list, steps list */
+.ruled-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 31px,
+    var(--border) 31px,
+    var(--border) 32px
+  );
+  background-position: 0 12px;
+}
+
+/* Ruled textarea (1.8em row height) — steps form textarea */
+.ruled-lines-textarea {
+  resize: vertical;
+  line-height: 1.8;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent calc(1.8em - 1px),
+    var(--border) calc(1.8em - 1px),
+    var(--border) calc(1.8em)
+  );
+  background-size: 100% 1.8em;
+}
+
 /* Memo textarea: dashed border → solid on focus */
 .form-input-memo {
   border-style: dashed !important;

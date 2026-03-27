@@ -54,6 +54,8 @@ playwright-report/
 .playwright/
 
 # ── Cache ─────────────────────────────────────────────────
+__pycache__/
+*.pyc
 .cache/
 .parcel-cache/
 .turbo/

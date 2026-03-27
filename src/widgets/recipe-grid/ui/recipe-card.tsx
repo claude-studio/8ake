@@ -24,78 +24,6 @@ const sourceLabel: Record<string, string> = {
 
 const rotations = [-1, 0.5, -0.8, 1, -0.3, 0.7, -0.6, 0.9, -1.1, 0.4]
 
-const noPhotoStyle: React.CSSProperties = {
-  backgroundColor: 'var(--card-placeholder-bg)',
-}
-
-const noPhotoNameStyle: React.CSSProperties = {
-  fontSize: '0.7rem',
-  color: 'var(--card-placeholder-text)',
-  fontWeight: 600,
-  maxWidth: '80%',
-  textAlign: 'center',
-  lineHeight: 1.2,
-  overflow: 'hidden',
-  display: '-webkit-box',
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-}
-
-const dateDayStyle: React.CSSProperties = {
-  fontSize: '1rem',
-  fontWeight: 800,
-  lineHeight: 1,
-}
-
-const dateMonthStyle: React.CSSProperties = {
-  fontSize: '0.55rem',
-  fontWeight: 700,
-  letterSpacing: '0.06em',
-}
-
-const dateWrapStyle: React.CSSProperties = {
-  transform: 'rotate(-3.5deg)',
-  textAlign: 'center',
-  flexShrink: 0,
-  lineHeight: 1,
-  color: 'var(--primary)',
-  opacity: 0.7,
-}
-
-const yearStyle: React.CSSProperties = {
-  fontSize: '0.6rem',
-  color: 'var(--muted-foreground)',
-  fontWeight: 500,
-  opacity: 0.6,
-}
-
-const sourceBadgeStyle: React.CSSProperties = {
-  fontSize: '0.6rem',
-  fontWeight: 600,
-  color: 'var(--muted-foreground)',
-  border: '1px solid var(--border)',
-  borderRadius: 3,
-  padding: '1px 5px',
-  textTransform: 'uppercase',
-  letterSpacing: '0.04em',
-}
-
-const dashedDividerStyle: React.CSSProperties = {
-  borderTop: '1px dashed var(--border)',
-  margin: '6px 0',
-}
-
-const tagStyle: React.CSSProperties = {
-  fontSize: '0.68rem',
-  color: 'var(--primary)',
-  fontWeight: 500,
-}
-
-const extraTagStyle: React.CSSProperties = {
-  fontSize: '0.68rem',
-  color: 'var(--muted-foreground)',
-}
-
 export function RecipeCard({
   id,
   name,
@@ -132,25 +60,9 @@ export function RecipeCard({
         } as React.CSSProperties
       }
     >
-      <div
-        className="overflow-hidden"
-        style={{
-          backgroundColor: 'var(--card)',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-card)',
-          borderRadius: '12px',
-          padding: '8px 8px 12px',
-        }}
-      >
+      <div className="overflow-hidden bg-card border border-border shadow-(--shadow-card) rounded-xl px-2 pb-3 pt-2">
         {/* Polaroid thumbnail area */}
-        <div
-          className="relative w-full overflow-hidden"
-          style={{
-            aspectRatio: '4 / 3',
-            borderRadius: '6px',
-            backgroundColor: 'var(--surface)',
-          }}
-        >
+        <div className="relative w-full overflow-hidden aspect-4/3 rounded-[6px] bg-surface">
           {thumbnail ? (
             <img
               src={getPhotoUrl(thumbnail.storage_path)}
@@ -159,12 +71,11 @@ export function RecipeCard({
               loading="lazy"
             />
           ) : (
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-              style={noPhotoStyle}
-            >
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-(--card-placeholder-bg)">
               <ImageOff size={32} color="var(--card-placeholder-icon)" />
-              <span style={noPhotoNameStyle}>{name}</span>
+              <span className="text-[0.7rem] text-(--card-placeholder-text) font-semibold max-w-[80%] text-center leading-[1.2] overflow-hidden line-clamp-2">
+                {name}
+              </span>
             </div>
           )}
         </div>
@@ -174,9 +85,9 @@ export function RecipeCard({
           {/* Title row + date stamp */}
           <div className="flex items-start justify-between gap-1">
             <h3 className="truncate text-foreground text-[0.88rem] font-extrabold">{name}</h3>
-            <div style={dateWrapStyle}>
-              <div style={dateMonthStyle}>{month}</div>
-              <div style={dateDayStyle}>{day}</div>
+            <div className="-rotate-[3.5deg] text-center shrink-0 leading-none text-primary opacity-70">
+              <div className="text-[0.55rem] font-bold tracking-[0.06em]">{month}</div>
+              <div className="text-base font-extrabold leading-none">{day}</div>
             </div>
           </div>
 
@@ -184,29 +95,35 @@ export function RecipeCard({
           {totalScore != null && (
             <div className="flex items-center justify-between mt-1">
               <CupcakeScore value={totalScore} size="sm" />
-              <span style={yearStyle}>{year}</span>
+              <span className="text-[0.6rem] text-muted-foreground font-medium opacity-60">
+                {year}
+              </span>
             </div>
           )}
 
           {/* Source badge */}
           {source && (
             <div className="mt-1.5">
-              <span style={sourceBadgeStyle}>{source}</span>
+              <span className="text-[0.6rem] font-semibold text-muted-foreground border border-border rounded-[3px] px-[5px] py-px uppercase tracking-[0.04em]">
+                {source}
+              </span>
             </div>
           )}
 
           {/* Dashed divider */}
-          {tags.length > 0 && <div style={dashedDividerStyle} />}
+          {tags.length > 0 && <div className="border-t border-dashed border-border my-[6px]" />}
 
           {/* Tags footer */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {displayTags.map((tag) => (
-                <span key={tag} style={tagStyle}>
+                <span key={tag} className="text-[0.68rem] text-primary font-medium">
                   #{tag}
                 </span>
               ))}
-              {extraCount > 0 && <span style={extraTagStyle}>+{extraCount}</span>}
+              {extraCount > 0 && (
+                <span className="text-[0.68rem] text-muted-foreground">+{extraCount}</span>
+              )}
             </div>
           )}
         </div>

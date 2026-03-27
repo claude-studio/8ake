@@ -79,20 +79,11 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
   const hasMeta = recipe.oven_temp || recipe.bake_time || recipe.quantity
 
   return (
-    <div>
+    <div className="flex flex-col">
       {/* Hero: Photo gallery + Info overlay */}
       <PhotoGallery photos={recipe.recipe_photos} thumbnailPhotoId={recipe.thumbnail_photo_id}>
         {/* Recipe name */}
-        <h1
-          style={{
-            fontSize: 24,
-            fontWeight: 800,
-            color: 'var(--foreground)',
-            margin: '0 0 10px 0',
-            lineHeight: 1.2,
-            letterSpacing: '-0.5px',
-          }}
-        >
+        <h1 className="text-2xl font-extrabold text-foreground mb-[10px] mt-0 leading-[1.2] tracking-[-0.5px]">
           {recipe.name}
         </h1>
 
@@ -122,17 +113,14 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
         )}
 
         {/* Badges row: visibility + tags */}
-        <div
-          className="flex items-center flex-wrap gap-1.5"
-          style={{ marginBottom: hasMeta ? 12 : 0 }}
-        >
+        <div className={cn('flex items-center flex-wrap gap-1.5', hasMeta ? 'mb-3' : 'mb-0')}>
           <span
-            className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full"
-            style={{
-              backgroundColor: recipe.is_public ? 'var(--success-bg)' : 'var(--surface)',
-              color: recipe.is_public ? 'var(--success-text)' : 'var(--muted-foreground)',
-              border: `1px solid ${recipe.is_public ? 'var(--success-border)' : 'var(--border)'}`,
-            }}
+            className={cn(
+              'inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full',
+              recipe.is_public
+                ? 'bg-(--success-bg) text-(--success-text) border border-(--success-border)'
+                : 'bg-surface text-muted-foreground border border-border'
+            )}
           >
             {recipe.is_public ? (
               '공개'
@@ -145,12 +133,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
           {recipe.tags.map((tag) => (
             <span
               key={tag}
-              className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
-              style={{
-                backgroundColor: 'var(--primary-dim)',
-                color: 'var(--primary)',
-                border: '1px solid var(--primary-border)',
-              }}
+              className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-(--primary-dim) text-primary border border-(--primary-border)"
             >
               #{tag}
             </span>
@@ -175,7 +158,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
       {/* Tab bar */}
       <div className="sticky top-(--subheader-h) z-150 border-b border-border bg-background">
-        <div className="mx-auto flex h-11 max-w-[1024px] px-4">
+        <div className="mx-auto flex h-11 w-full max-w-[1024px] px-4">
           {(['recipe', 'reviews'] as const).map((t) => (
             <button
               key={t}
@@ -196,21 +179,13 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
       </div>
 
       {/* Content below hero */}
-      <div style={{ maxWidth: 1024, margin: '0 auto', padding: '20px 16px 60px' }}>
+      <div className="w-full px-4 pt-5 pb-[60px]">
         {/* Tab content */}
         {tab === 'recipe' && (
           <div className="space-y-5">
             {/* Ingredients */}
             {recipe.recipe_ingredients.length > 0 && (
-              <div
-                style={{
-                  backgroundColor: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 12,
-                  boxShadow: 'var(--shadow-card)',
-                  overflow: 'hidden',
-                }}
-              >
+              <div className="bg-card border border-border rounded-xl shadow-(--shadow-card) overflow-hidden">
                 <div className="flex items-center justify-between px-4 pb-2.5 pt-3.5 border-b border-border">
                   <h2 className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase text-primary m-0">
                     <ClipboardList size={13} /> 재료
@@ -219,48 +194,19 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                     <span className="text-xs text-muted-foreground">{recipe.quantity} 기준</span>
                   )}
                 </div>
-                <ul
-                  style={{
-                    listStyle: 'none',
-                    margin: 0,
-                    padding: '8px 0',
-                    backgroundImage:
-                      'repeating-linear-gradient(to bottom, transparent, transparent 31px, var(--border) 31px, var(--border) 32px)',
-                    backgroundPosition: '0 12px',
-                  }}
-                >
+                <ul className="list-none m-0 py-2 ruled-lines">
                   {sortedIngredients.map((ing, idx, arr) => (
                     <li
                       key={ing.id}
-                      className="flex items-center text-sm"
-                      style={{
-                        color: 'var(--foreground)',
-                        padding: '7px 16px',
-                        minHeight: 32,
-                        borderBottom: idx < arr.length - 1 ? '1px dashed var(--border)' : 'none',
-                      }}
+                      className={cn(
+                        'flex items-center text-sm text-foreground px-4 min-h-8',
+                        idx < arr.length - 1 ? 'border-b border-dashed border-border' : ''
+                      )}
                     >
-                      <span
-                        style={{
-                          marginRight: 8,
-                          color: 'var(--muted-foreground)',
-                          fontSize: 13,
-                          flexShrink: 0,
-                        }}
-                      >
-                        ·
-                      </span>
+                      <span className="mr-2 text-muted-foreground text-[13px] shrink-0">·</span>
                       <span className="flex-1">{ing.name}</span>
                       {ing.amount && (
-                        <span
-                          className="shrink-0"
-                          style={{
-                            color: 'var(--muted-foreground)',
-                            fontWeight: 500,
-                            minWidth: 56,
-                            textAlign: 'right',
-                          }}
-                        >
+                        <span className="shrink-0 text-muted-foreground font-medium min-w-[56px] text-right">
                           {ing.amount}
                         </span>
                       )}
@@ -272,55 +218,19 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
             {/* Steps */}
             {recipe.steps && (
-              <div
-                style={{
-                  backgroundColor: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 12,
-                  boxShadow: 'var(--shadow-card)',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  className="flex items-center justify-between"
-                  style={{
-                    padding: '14px 16px 10px',
-                    borderBottom: '1px solid var(--border)',
-                  }}
-                >
+              <div className="bg-card border border-border rounded-xl shadow-(--shadow-card) overflow-hidden">
+                <div className="flex items-center justify-between px-4 pt-[14px] pb-[10px] border-b border-border">
                   <h2 className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase text-primary m-0">
                     <ScrollText size={13} /> 만드는 법
                   </h2>
                 </div>
-                <div
-                  style={{
-                    padding: '16px',
-                    backgroundImage:
-                      'repeating-linear-gradient(to bottom, transparent, transparent 31px, var(--border) 31px, var(--border) 32px)',
-                    backgroundPosition: '0 12px',
-                  }}
-                >
+                <div className="p-4 ruled-lines">
                   {parsedSteps.map((line, i) => {
                     const match = line.match(/^(\d+)\.\s*(.*)$/)
                     if (match) {
                       return (
-                        <div key={i} className="flex gap-3" style={{ marginBottom: 16 }}>
-                          <span
-                            style={{
-                              width: 24,
-                              height: 24,
-                              borderRadius: '50%',
-                              background: 'var(--primary)',
-                              color: 'var(--primary-foreground)',
-                              fontSize: 12,
-                              fontWeight: 800,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              flexShrink: 0,
-                              marginTop: 1,
-                            }}
-                          >
+                        <div key={i} className="flex gap-3 mb-4">
+                          <span className="size-6 rounded-full bg-primary text-primary-foreground text-xs font-extrabold flex items-center justify-center shrink-0 mt-px">
                             {match[1]}
                           </span>
                           <span className="text-sm text-foreground leading-[1.7] pt-0.5">
@@ -338,15 +248,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                 </div>
                 {/* memo-box: 만드는 법 카드 안에 위치 (시안과 동일) */}
                 {recipe.memo && (
-                  <div
-                    style={{
-                      margin: '0 16px 16px',
-                      border: '1.5px dashed var(--border)',
-                      borderRadius: 8,
-                      padding: '12px 14px',
-                      backgroundColor: 'var(--surface)',
-                    }}
-                  >
+                  <div className="mx-4 mb-4 border-[1.5px] border-dashed border-border rounded-lg px-[14px] py-3 bg-surface">
                     <div className="font-bold text-xs uppercase text-primary mb-1.5 tracking-[0.5px]">
                       <PenLine size={11} /> 메모
                     </div>
@@ -369,25 +271,8 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
 function MetaCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 12,
-        padding: 12,
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          marginBottom: 4,
-          color: 'var(--primary)',
-        }}
-      >
-        {icon}
-      </div>
+    <div className="bg-surface border border-border rounded-xl p-3 text-center">
+      <div className="flex justify-center mb-1 text-primary">{icon}</div>
       <div className="text-xs text-muted-foreground mb-1">{label}</div>
       <div className="text-sm font-bold text-foreground">{value}</div>
     </div>

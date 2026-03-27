@@ -25,60 +25,18 @@ interface Props {
 
 const STEP_LABELS = ['기본정보', '재료', '만드는 법', '사진', '회고'] as const
 
-const noteCardStyle = {
-  backgroundColor: 'var(--card)',
-  border: '1px solid var(--border)',
-  borderRadius: 12,
-  padding: 24,
-  boxShadow: 'var(--shadow-card)',
-  position: 'relative' as const,
-  overflow: 'hidden' as const,
-}
-
 function CardHeader({ index, extra }: { index: number; extra?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between" style={{ marginBottom: 20 }}>
+    <div className="flex items-center justify-between mb-5">
       <div className="flex items-center gap-2">
-        <span
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: '50%',
-            backgroundColor: 'var(--primary-dim)',
-            border: '1px solid var(--primary-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 11,
-            fontWeight: 700,
-            color: 'var(--primary)',
-          }}
-        >
+        <span className="size-6 rounded-full bg-(--primary-dim) border border-(--primary-border) flex items-center justify-center text-[11px] font-bold text-primary">
           {index + 1}
         </span>
-        <h2
-          style={{
-            fontSize: 15,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            color: 'var(--foreground)',
-            margin: 0,
-          }}
-        >
+        <h2 className="text-[15px] font-bold tracking-[-0.02em] text-foreground m-0">
           {STEP_LABELS[index]}
         </h2>
         {index === 4 && (
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              color: 'var(--muted-foreground)',
-              backgroundColor: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 20,
-              padding: '2px 7px',
-            }}
-          >
+          <span className="text-[10px] font-semibold text-muted-foreground bg-surface border border-border rounded-[20px] px-[7px] py-[2px]">
             선택사항
           </span>
         )}
@@ -298,37 +256,22 @@ export function RecipeForm({ mode, recipeId }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit as never)} className="pb-24">
       <PageHeader title={mode === 'create' ? '레시피 추가' : '레시피 수정'} />
-      <div
-        style={{
-          maxWidth: 720,
-          margin: '0 auto',
-          padding: '20px 16px 0',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 20,
-        }}
-      >
+      <div className="max-w-[720px] mx-auto px-4 pt-5 flex flex-col gap-5">
         {/* Section 1: Basic Info */}
-        <section className="note-card-accent" style={noteCardStyle}>
+        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader index={0} />
           <BasicInfoSection control={control} errors={errors} />
         </section>
 
         {/* Section 2: Ingredients */}
-        <section className="note-card-accent" style={noteCardStyle}>
+        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader
             index={1}
             extra={
               <button
                 type="button"
                 onClick={() => appendIngredientRef.current()}
-                className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg"
-                style={{
-                  color: 'var(--primary)',
-                  backgroundColor: 'var(--primary-dim)',
-                  border: '1px solid var(--primary-border)',
-                  cursor: 'pointer',
-                }}
+                className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg text-primary bg-(--primary-dim) border border-(--primary-border) cursor-pointer"
               >
                 <Plus size={12} />
                 재료 추가
@@ -339,19 +282,19 @@ export function RecipeForm({ mode, recipeId }: Props) {
         </section>
 
         {/* Section 3: Steps */}
-        <section className="note-card-accent" style={noteCardStyle}>
+        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader index={2} />
           <StepsSection register={register} errors={errors} />
         </section>
 
         {/* Section 4: Photos */}
-        <section className="note-card-accent" style={noteCardStyle}>
+        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader index={3} />
           <PhotoSection onChange={handlePhotoChange} />
         </section>
 
         {/* Section 5: Retrospective */}
-        <section className="note-card-accent" style={noteCardStyle}>
+        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader index={4} />
           <p className="text-sm text-muted-foreground">
             레시피 저장 후 상세 페이지에서 베이킹 기록을 추가할 수 있어요.
@@ -360,27 +303,8 @@ export function RecipeForm({ mode, recipeId }: Props) {
       </div>
 
       {/* Fixed bottom action bar */}
-      <div
-        className="fixed bottom-0 inset-x-0  z-60"
-        style={{
-          height: 64,
-          backgroundColor: 'var(--card)',
-          borderTop: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-md)',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 720,
-            margin: '0 auto',
-            padding: '0 16px',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 10,
-          }}
-        >
+      <div className="fixed bottom-0 inset-x-0 z-60 h-16 bg-card border-t border-border shadow-(--shadow-md)">
+        <div className="max-w-[720px] mx-auto px-4 h-full flex items-center justify-between gap-[10px]">
           {/* 취소 */}
           <Button type="button" variant="outline" onClick={() => router.history.back()}>
             취소

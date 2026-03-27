@@ -34,14 +34,7 @@ export function RecipeGrid() {
       {isLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
           {Array.from({ length: 6 }, (_, i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-xl"
-              style={{
-                backgroundColor: 'var(--surface)',
-                aspectRatio: '3 / 4',
-              }}
-            />
+            <div key={i} className="animate-pulse rounded-xl bg-surface aspect-3/4" />
           ))}
         </div>
       )}
@@ -94,13 +87,7 @@ export function RecipeGrid() {
         <div ref={sentinelRef} className="h-10 mt-4">
           {isFetchingMore && (
             <div className="flex justify-center">
-              <div
-                className="size-6  rounded-full border-2 animate-spin"
-                style={{
-                  borderColor: 'var(--border)',
-                  borderTopColor: 'var(--primary)',
-                }}
-              />
+              <div className="size-6 rounded-full border-2 animate-spin border-border border-t-primary" />
             </div>
           )}
         </div>

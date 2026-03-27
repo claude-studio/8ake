@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/fsd-guard.sh",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/fsd-guard.py",
             "timeout": 5
           }
         ]
@@ -18,13 +18,23 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/style-guard.sh",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/skills/fsd-check/scripts/fsd-guard.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/skills/token-check/scripts/token-validate.sh",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/skills/markup-conventions/scripts/markup-guard.py",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/skills/token-check/scripts/token-validate.py",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/skills/markup-conventions/scripts/eslint-guard.py",
+            "timeout": 15
           }
         ]
       }
