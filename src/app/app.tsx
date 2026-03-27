@@ -46,6 +46,9 @@ export function App() {
             color: 'var(--foreground)',
             border: '1px solid var(--border)',
           },
+          classNames: {
+            error: 'border-destructive! bg-destructive! text-destructive-foreground!',
+          },
         }}
       />
     </>

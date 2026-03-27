@@ -1,4 +1,4 @@
-import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
+import { createRootRouteWithContext, Outlet, ScrollRestoration } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
 import type { Session } from '@supabase/supabase-js'
@@ -12,6 +12,7 @@ interface RouterContext {
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <>
+      <ScrollRestoration getKey={(location) => location.pathname} />
       <Outlet />
       {import.meta.env.DEV && <TanStackRouterDevtools />}
     </>
