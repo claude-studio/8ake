@@ -1,7 +1,9 @@
 ---
 name: design-ref
-description: "8ake 설계 문서에서 특정 컴포넌트/페이지/기능의 명세를 추출. 사용법: /design-ref <keyword> — 예: /design-ref recipe-form, /design-ref auth, /design-ref recipe-card. 구현 전 FSD 구조, 컴포넌트 props, 데이터 스키마, 스타일 명세를 빠르게 확인할 때 사용."
-argument-hint: "<keyword>"
+description: '8ake 설계 문서에서 특정 컴포넌트/페이지/기능의 명세를 추출. 사용법: /design-ref <keyword> — 예: /design-ref recipe-form, /design-ref auth, /design-ref recipe-card. 구현 전 FSD 구조, 컴포넌트 props, 데이터 스키마, 스타일 명세를 빠르게 확인할 때 사용.'
+context: fork
+agent: Explore
+argument-hint: '<keyword>'
 user-invocable: true
 ---
 
@@ -40,21 +42,27 @@ user-invocable: true
 ## `/design-ref <keyword>` 결과
 
 ### FSD 구조
+
 어느 레이어/슬라이스에 위치하는지
 
 ### 컴포넌트 명세
+
 Props, 역할, 사용 위치
 
 ### 데이터 / 스키마
+
 관련 타입, Supabase 테이블, API 훅
 
 ### 스타일 명세
+
 레이아웃, 색상 토큰, 반응형
 
 ### 디자인 시안
+
 관련 HTML 파일명 및 확인 방법
 
 ### 구현 시 참고사항
+
 설계 문서에서 중요한 제약이나 주의사항
 ```
 

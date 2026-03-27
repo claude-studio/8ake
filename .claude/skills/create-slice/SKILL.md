@@ -1,7 +1,8 @@
 ---
 name: create-slice
-description: "FSD 슬라이스 보일러플레이트를 자동 생성. 사용법: /create-slice <layer> <name> — 예: /create-slice entities recipe, /create-slice features recipe-delete. 지정한 레이어에 ui/, model/, api/ 폴더와 index.ts를 생성하고 8ake 컨벤션에 맞는 초기 코드를 채운다."
-argument-hint: "<layer> <name>"
+description: 'FSD 슬라이스 보일러플레이트를 자동 생성. 사용법: /create-slice <layer> <name> — 예: /create-slice entities recipe, /create-slice features recipe-delete. 지정한 레이어에 ui/, model/, api/ 폴더와 index.ts를 생성하고 8ake 컨벤션에 맞는 초기 코드를 채운다.'
+context: fork
+argument-hint: '<layer> <name>'
 user-invocable: true
 ---
 
@@ -39,6 +40,7 @@ src/entities/<name>/
 ```
 
 **`<name>.types.ts` 템플릿:**
+
 ```ts
 import { z } from 'zod'
 
@@ -51,6 +53,7 @@ export type <Name> = z.infer<typeof <Name>Schema>
 ```
 
 **`use-<name>s.ts` 템플릿:**
+
 ```ts
 import { useState, useEffect } from 'react'
 import { supabase } from '@/shared/api/supabase-client'
@@ -78,6 +81,7 @@ export function use<Names>() {
 ```
 
 **`<name>-card.tsx` 템플릿:**
+
 ```tsx
 import type { <Name> } from '../model/<name>.types'
 
@@ -95,6 +99,7 @@ export function <Name>Card({ <name> }: <Name>CardProps) {
 ```
 
 **`index.ts` 템플릿:**
+
 ```ts
 export { <Name>Card } from './ui/<name>-card'
 export { use<Names> } from './api/use-<name>s'
@@ -118,6 +123,7 @@ src/features/<name>/
 ```
 
 **`<name>.tsx` 템플릿:**
+
 ```tsx
 // TODO: 구현
 export function <Name>() {
@@ -126,6 +132,7 @@ export function <Name>() {
 ```
 
 **`index.ts` 템플릿:**
+
 ```ts
 export { <Name> } from './ui/<name>'
 ```
@@ -142,6 +149,7 @@ src/widgets/<name>/
 ```
 
 **`<name>.tsx` 템플릿:**
+
 ```tsx
 export function <Name>() {
   return (
@@ -153,6 +161,7 @@ export function <Name>() {
 ```
 
 **`index.ts` 템플릿:**
+
 ```ts
 export { <Name> } from './ui/<name>'
 ```
@@ -169,6 +178,7 @@ src/pages/<name>/
 ```
 
 **`<name>-page.tsx` 템플릿:**
+
 ```tsx
 export function <Name>Page() {
   return (
@@ -184,6 +194,7 @@ export function <Name>Page() {
 ## 이름 변환 규칙
 
 `<name>`이 `recipe-delete`처럼 kebab-case인 경우:
+
 - 파일명 → `recipe-delete.tsx`
 - PascalCase 변환 → `RecipeDelete`
 - camelCase 변환 → `recipeDelete`
@@ -192,6 +203,7 @@ export function <Name>Page() {
 ## 생성 후 안내
 
 생성된 파일 목록을 출력하고 다음을 안내하세요:
+
 1. `index.ts`에서 export가 필요한 항목을 확인하세요
 2. 타입/스키마는 `docs/02-design/features/ui.design.md`의 스키마 섹션을 참조하세요
 3. Supabase 테이블명을 실제 스키마에 맞게 수정하세요
