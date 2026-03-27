@@ -53,7 +53,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
   const LABELS = ['레시피', '재료', theme === 'light' ? '다크' : '라이트', '새 레시피']
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       <main className={hideNav ? '' : 'pb-[calc(var(--tabbar-h)+var(--safe-bottom))]'}>
         {children}
       </main>

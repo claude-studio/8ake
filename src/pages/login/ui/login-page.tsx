@@ -39,7 +39,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-[360px] rounded-2xl border border-border bg-card p-8 shadow-(--shadow)">
         <div className="mb-8 text-center">
           <div className="text-[2rem] font-extrabold leading-none tracking-[-0.04em] text-primary">
