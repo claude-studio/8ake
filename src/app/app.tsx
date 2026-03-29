@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { Toaster } from 'sonner'
@@ -6,6 +6,18 @@ import { Toaster } from 'sonner'
 import { useAuthStore } from '@/features/auth'
 
 import { routeTree } from '../routeTree.gen'
+
+const TOAST_OPTIONS = {
+  duration: 3000,
+  style: {
+    background: 'var(--card)',
+    color: 'var(--foreground)',
+    border: '1px solid var(--border)',
+  },
+  classNames: {
+    error: 'border-destructive! bg-destructive! text-destructive-foreground!',
+  },
+}
 
 const router = createRouter({
   routeTree,
@@ -23,6 +35,8 @@ declare module '@tanstack/react-router' {
 export function App() {
   const { session, isLoading, initialize } = useAuthStore()
 
+  const routerContext = useMemo(() => ({ auth: { session } }), [session])
+
   useEffect(() => {
     initialize()
   }, [initialize])
@@ -37,20 +51,8 @@ export function App() {
 
   return (
     <>
-      <RouterProvider router={router} context={{ auth: { session } }} />
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            background: 'var(--card)',
-            color: 'var(--foreground)',
-            border: '1px solid var(--border)',
-          },
-          classNames: {
-            error: 'border-destructive! bg-destructive! text-destructive-foreground!',
-          },
-        }}
-      />
+      <RouterProvider router={router} context={routerContext} />
+      <Toaster position="top-center" closeButton toastOptions={TOAST_OPTIONS} />
     </>
   )
 }
