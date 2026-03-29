@@ -6,11 +6,12 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/features/auth'
-import { supabase } from '@/shared/api'
+import { createLoginClient, supabase } from '@/shared/api'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const { setSession } = useAuthStore()
@@ -25,10 +26,15 @@ export function LoginPage() {
     if (!isFormValid) return
     setIsLoading(true)
     setErrorMsg('')
-    const { data, error } = await supabase.auth.signInWithPassword({
+
+    // rememberMe=false → sessionStorage 클라이언트(탭 종료 시 세션 만료)
+    // rememberMe=true  → 기본 클라이언트(localStorage, 브라우저 재시작 후에도 유지)
+    const client = rememberMe ? supabase : createLoginClient()
+    const { data, error } = await client.auth.signInWithPassword({
       email: trimmedEmail,
       password: trimmedPassword,
     })
+
     if (error) {
       setIsLoading(false)
       setErrorMsg(error.message)
@@ -73,6 +79,16 @@ export function LoginPage() {
               required
             />
           </div>
+
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="size-4 rounded border-border accent-primary cursor-pointer"
+            />
+            <span className="text-sm text-muted-foreground">로그인 상태 유지</span>
+          </label>
 
           {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
 

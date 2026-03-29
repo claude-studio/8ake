@@ -9,15 +9,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-// Remember me OFF → sessionStorage (탭 종료 시 세션 만료)
-export function createSupabaseClient(rememberMe: boolean = true) {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    storage: localStorage,
+  },
+})
+
+/**
+ * rememberMe=false 시 localStorage 대신 sessionStorage를 사용하는 임시 클라이언트.
+ * 로그인 완료 후 버려지므로 앱 전체 인스턴스와 충돌하지 않는다.
+ */
+export function createLoginClient() {
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
-      storage: rememberMe ? localStorage : sessionStorage,
       persistSession: true,
+      storage: sessionStorage,
     },
   })
 }
-
-// 기본 클라이언트 (Remember me ON)
-export const supabase = createSupabaseClient(true)
