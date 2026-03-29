@@ -22,16 +22,16 @@
 
 ## 주요 기능
 
-| 기능                   | 설명                                                       |
-| ---------------------- | ---------------------------------------------------------- |
-| 📋 **레시피 아카이브** | 메뉴명, 출처(YouTube/블로그/책), 재료, 만드는 법을 한 곳에 |
-| 🔁 **회고 (1:N)**      | 같은 레시피를 여러 번 만들어도 회고는 각각 기록            |
-| 📊 **레이더 차트**     | 맛·보관·간편성·재료수급·당도 5축 시각화                    |
-| 🧁 **컵케이크 점수**   | 별점 대신 컵케이크로 평점 표시                             |
-| 📦 **재료 리뷰**       | 구매처, 품질 평가, 메모를 재료 단위로 관리                 |
-| 🖼️ **사진 아카이브**   | 레시피당 최대 2장, 썸네일 지정                             |
-| 🔒 **기본 비공개**     | 내 레시피는 내 것. 공유하고 싶을 때만 공개                 |
-| 🌙 **다크모드**        | 새벽 베이킹을 위한 눈 편한 모드                            |
+| 기능                   | 설명                                                          |
+| ---------------------- | ------------------------------------------------------------- |
+| 📋 **레시피 아카이브** | 메뉴명, 출처(YouTube/블로그/책), 재료, 만드는 법을 한 곳에    |
+| 🔁 **회고 (1:N)**      | 같은 레시피를 여러 번 만들어도 회고는 각각 기록               |
+| 📊 **레이더 차트**     | 맛·식감·보관성·간편성·재료수급 5축 시각화                     |
+| 🧁 **컵케이크 점수**   | 별점 대신 컵케이크로 평점 표시                                |
+| 📦 **재료 리뷰**       | 구매처, 품질 점수, 메모를 재료 단위로 관리 (카드/테이블 토글) |
+| 🖼️ **사진 아카이브**   | 레시피당 최대 2장, 썸네일 지정                                |
+| 🔒 **기본 비공개**     | 내 레시피는 내 것. 공유하고 싶을 때만 공개                    |
+| 🌙 **다크모드**        | 새벽 베이킹을 위한 눈 편한 모드                               |
 
 ---
 
@@ -49,30 +49,33 @@
 
 ### Frontend
 
-```
-Vite 8 + React 19 + TypeScript
-TailwindCSS v4 (CSS-first, @theme)
-shadcn/ui (new-york, Tailwind v4)
-lucide-react
-TanStack Router (파일 기반, 타입 안전)
-zustand 5 (auth, ui 상태)
-react-hook-form + zod (폼 검증)
-recharts (레이더 차트)
-sonner (toast)
-```
+| 라이브러리            | 버전      | 용도                             |
+| --------------------- | --------- | -------------------------------- |
+| Vite                  | 8.x       | 빌드 도구 (Rolldown 기반)        |
+| React + TypeScript    | 19.x      | 앱 기반                          |
+| TailwindCSS           | v4.x      | CSS-first 스타일링 (`@theme {}`) |
+| shadcn/ui (new-york)  | latest    | UI 컴포넌트 (Tailwind v4 지원)   |
+| lucide-react          | 1.6.x     | 아이콘 (이모지 대체)             |
+| TanStack Router       | 1.x       | 파일 기반 라우터 (타입 안전)     |
+| zustand               | 5.x       | 전역 상태 (auth, ui)             |
+| react-hook-form + zod | 7.x / 4.x | 폼 관리 및 스키마 검증           |
+| recharts              | 3.8.x     | 레이더 차트                      |
+| framer-motion         | 12.x      | 애니메이션                       |
+| sonner                | 2.x       | 토스트 알림                      |
+| date-fns              | 4.x       | 날짜 처리                        |
 
 ### Backend (Supabase)
 
-```
-Auth       — Email OTP + Remember me
-Database   — PostgreSQL + RLS
-Storage    — 레시피 사진 (recipe-photos 버킷)
-```
+| 서비스   | 용도                                             |
+| -------- | ------------------------------------------------ |
+| Auth     | Email OTP + Remember me (세션 60일)              |
+| Database | PostgreSQL + RLS (사용자별 데이터 격리)          |
+| Storage  | 레시피 사진 (`recipe-photos` 버킷, 레시피당 2장) |
 
 ### 배포
 
 ```
-Vercel (자동 배포, main 브랜치)
+Vercel (자동 배포, main 브랜치) + SPA 리라이트
 ```
 
 ---
@@ -83,16 +86,33 @@ FSD(Feature-Sliced Design) 기반 모듈 구조를 채택합니다.
 
 ```
 src/
-├── app/          # 앱 진입점, 프로바이더
-├── routes/       # TanStack Router 파일 라우트
-├── pages/        # 위젯 조합 페이지
-├── widgets/      # 독립 UI 블록 (recipe-grid, review-list 등)
-├── features/     # 사용자 인터랙션 단위 (auth, photo-upload 등)
-├── entities/     # 도메인 타입 + API 훅 (recipe, review, ingredient)
-└── shared/       # 공통 유틸, 디자인 토큰, UI 프리미티브
+├── app/           # 앱 진입점, 프로바이더, 글로벌 CSS
+├── routes/        # TanStack Router 파일 라우트 (_auth 레이아웃)
+├── pages/         # 위젯 조합 페이지
+├── widgets/       # 독립 UI 블록
+│   ├── recipe-grid/    # 레시피 목록 그리드
+│   ├── recipe-form/    # 레시피 생성/수정 폼
+│   ├── recipe-detail/  # 레시피 상세
+│   ├── review-list/    # 회고 목록
+│   └── ingredient-list/ # 재료 리뷰 목록
+├── features/      # 사용자 인터랙션 단위
+│   ├── auth/           # 인증 (OTP 로그인, 로그아웃)
+│   ├── photo-upload/   # 사진 업로드 (Storage)
+│   └── recipe-delete/  # 레시피 삭제
+├── entities/      # 도메인 타입 + API 훅
+│   ├── recipe/         # recipes, recipe_ingredients, recipe_photos
+│   ├── review/         # reviews (회고)
+│   └── ingredient/     # ingredients, ingredient_reviews
+└── shared/
+    ├── api/        # supabase-client.ts (싱글톤) + database.types.ts
+    ├── ui/         # 래핑/커스텀 컴포넌트
+    ├── styles/     # tokens.css, shadcn-theme.css, tailwind-theme.css
+    ├── hooks/      # use-intersection-observer 등
+    ├── lib/        # cn() 유틸
+    └── model/      # ui-store.ts (zustand)
 ```
 
-레이어 간 참조 규칙: `app → pages → widgets → features → entities → shared`
+레이어 간 참조 방향: `app → routes → pages → widgets → features → entities → shared`
 
 ---
 
@@ -100,26 +120,29 @@ src/
 
 ```
 recipes
-  ├── recipe_ingredients  (재료 리스트)
-  ├── recipe_photos       (사진, Storage 경로)
-  └── reviews             (회고 1:N, 레이더 차트 데이터)
+  ├── recipe_ingredients  (재료 리스트, 순서 포함)
+  ├── recipe_photos       (사진, Storage 경로, 최대 2장)
+  └── reviews             (회고 1:N)
+        └── taste / texture / storability / recipe_simplicity / ingredient_availability
+              → 레이더 차트 5개 축
+              → total_score (컵케이크 점수)
 
 ingredients
-  └── ingredient_reviews  (재료 리뷰)
+  └── ingredient_reviews  (구매처, 점수, 메모)
 ```
 
 ---
 
 ## 라우트
 
-| 경로               | 페이지                    | 인증 |
-| ------------------ | ------------------------- | :--: |
-| `/login`           | 이메일 OTP 로그인         |      |
-| `/`                | 레시피 목록 (무한 스크롤) |  ✅  |
-| `/recipe/new`      | 레시피 추가               |  ✅  |
-| `/recipe/:id`      | 레시피 상세 + 회고        |  ✅  |
-| `/recipe/:id/edit` | 레시피 수정               |  ✅  |
-| `/ingredients`     | 재료 리뷰                 |  ✅  |
+| 경로               | 페이지                           | 인증 |
+| ------------------ | -------------------------------- | :--: |
+| `/login`           | 이메일 OTP 로그인                |      |
+| `/`                | 레시피 목록 (검색 + 무한 스크롤) |  ✅  |
+| `/recipe/new`      | 레시피 추가 (멀티섹션 폼)        |  ✅  |
+| `/recipe/:id`      | 레시피 상세 + 회고 목록          |  ✅  |
+| `/recipe/:id/edit` | 레시피 수정                      |  ✅  |
+| `/ingredients`     | 재료 리뷰 (카드/테이블 토글)     |  ✅  |
 
 ---
 
@@ -136,26 +159,41 @@ cp .env.example .env.local
 
 # 개발 서버
 pnpm dev
+
+# 빌드
+pnpm build
+
+# 타입 검사
+pnpm typecheck
+
+# 린트
+pnpm lint
 ```
+
+> **Node.js >= 20**, **pnpm >= 10** 필요
 
 ---
 
 ## 개발 규칙
 
 - **파일명**: kebab-case (`recipe-card.tsx`, `use-recipes.ts`)
-- **커밋**: `feat`, `fix`, `design`, `refactor`, `chore`, `docs`, `test`, `revert`
+- **export**: named export only (default export 금지)
+- **import alias**: `@/` → `src/`
+- **스타일**: 디자인 토큰(`tokens.css`) 사용, 하드코딩 색상 금지
+- **커밋**: `feat` / `fix` / `design` / `refactor` / `chore` / `docs` / `test` / `revert`
 - **PR 전**: `pnpm lint` + `pnpm typecheck` 통과 필수
+- **Git hooks**: husky + lint-staged (커밋 시 자동 실행)
 
 ---
 
 ## 로드맵
 
-- [x] 디자인 시안 확정 (Step 1~4)
-- [x] 공통 디자인 토큰 정의
+- [x] 디자인 시안 확정 (Notebook & Kraft Paper 컨셉)
+- [x] 공통 디자인 토큰 정의 (CSS 변수)
 - [x] 프로젝트 셋업 (Vite + shadcn + TanStack Router)
-- [ ] Supabase DB / Auth / Storage 설정
-- [ ] 핵심 기능 구현
-- [ ] Vercel 배포
+- [x] entities / features / widgets / pages / routes 구현
+- [x] Vercel 배포 설정
+- [ ] Supabase DB / Auth / Storage 최종 연동
 - [ ] v2: 공개 레시피 피드, 태그 필터링, 소셜 기능
 
 ---
