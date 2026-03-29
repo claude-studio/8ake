@@ -374,18 +374,21 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
       {/* Fixed bottom action bar */}
       <div className="fixed bottom-0 inset-x-0 z-60 h-16 bg-card border-t border-border shadow-(--shadow-md)">
         <div className="max-w-[720px] mx-auto px-4 h-full flex items-center justify-between gap-[10px]">
-          {/* 취소 */}
-          <Button type="button" variant="outline" onClick={() => router.history.back()}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.history.back()}
+            className="min-[475px]:w-auto flex-1 min-[475px]:flex-none"
+          >
             취소
           </Button>
 
-          {/* 저장 */}
           <Button
             type="submit"
             disabled={
               isSubmitting || (mode === 'edit' && !isDirty && !photosChanged && !unitsChanged)
             }
-            className="min-w-[100px]"
+            className="min-[475px]:min-w-[100px] flex-1 min-[475px]:flex-none"
           >
             {isSubmitting && <Loader2 size={16} className="animate-spin" />}
             {isSubmitting ? '저장 중...' : '저장하기'}
