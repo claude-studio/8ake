@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { LogOut, Menu, Moon, Pencil, Sun, Trash2 } from 'lucide-react'
+import { Home, LogOut, Menu, Moon, Pencil, Sun, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -65,6 +65,16 @@ export function HeaderMenu({ onEdit, onDelete }: Props) {
             <DropdownMenuSeparator className="my-1 bg-border/50" />
           </>
         )}
+
+        {/* 홈 */}
+        <DropdownMenuItem
+          onClick={() => navigate({ to: '/home' })}
+          className="cursor-pointer gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-medium text-foreground focus:bg-surface focus:text-foreground"
+        >
+          <Home size={15} className="text-muted-foreground" />
+          <span>홈</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="my-1 bg-border/50" />
 
         {/* 다크모드 토글 */}
         <DropdownMenuItem
