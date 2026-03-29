@@ -106,7 +106,6 @@ src/
 └── shared/
     ├── api/        # supabase-client.ts (싱글톤) + database.types.ts
     ├── ui/         # 래핑/커스텀 컴포넌트
-    ├── styles/     # tokens.css, shadcn-theme.css, tailwind-theme.css
     ├── hooks/      # use-intersection-observer 등
     ├── lib/        # cn() 유틸
     └── model/      # ui-store.ts (zustand)
@@ -138,7 +137,8 @@ ingredients
 | 경로               | 페이지                           | 인증 |
 | ------------------ | -------------------------------- | :--: |
 | `/login`           | 이메일 OTP 로그인                |      |
-| `/`                | 레시피 목록 (검색 + 무한 스크롤) |  ✅  |
+| `/`                | 랜딩 페이지 (로그인 시 /home으로 리다이렉트) |      |
+| `/home`            | 레시피 목록 (검색 + 무한 스크롤) |  ✅  |
 | `/recipe/new`      | 레시피 추가 (멀티섹션 폼)        |  ✅  |
 | `/recipe/:id`      | 레시피 상세 + 회고 목록          |  ✅  |
 | `/recipe/:id/edit` | 레시피 수정                      |  ✅  |
