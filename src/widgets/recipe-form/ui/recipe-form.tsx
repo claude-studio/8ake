@@ -16,7 +16,7 @@ import { BasicInfoSection } from './basic-info-section'
 import { IngredientsSection } from './ingredients-section'
 import { PhotoSection } from './photo-section'
 import { StepsSection } from './steps-section'
-import { RecipeSchema, type RecipeFormValues } from '../model/recipe-schema'
+import { RecipeSchemaRefined, type RecipeFormValues } from '../model/recipe-schema'
 
 interface Props {
   mode: 'create' | 'edit'
@@ -26,7 +26,15 @@ interface Props {
 
 const STEP_LABELS = ['기본정보', '재료', '만드는 법', '사진'] as const
 
-function CardHeader({ index, extra }: { index: number; extra?: React.ReactNode }) {
+function CardHeader({
+  index,
+  extra,
+  required,
+}: {
+  index: number
+  extra?: React.ReactNode
+  required?: boolean
+}) {
   return (
     <div className="flex items-center justify-between mb-5">
       <div className="flex items-center gap-2">
@@ -35,6 +43,7 @@ function CardHeader({ index, extra }: { index: number; extra?: React.ReactNode }
         </span>
         <h2 className="text-[15px] font-bold tracking-[-0.02em] text-foreground m-0">
           {STEP_LABELS[index]}
+          {required && <span className="text-destructive ml-0.5">*</span>}
         </h2>
       </div>
       {extra}
@@ -53,14 +62,41 @@ function parseTimeUnit(s: string | null | undefined): '분' | '시간' {
   return s.includes('시간') ? '시간' : '분'
 }
 
+function parseIngredientAmount(s: string): {
+  amount: string
+  unit: '개' | 'g' | '직접입력'
+} {
+  if (!s) return { amount: '', unit: 'g' }
+  const m = s.match(/^(\d+(?:\.\d+)?)(개|g)$/)
+  if (m) return { amount: m[1], unit: m[2] as '개' | 'g' }
+  return { amount: s, unit: '직접입력' }
+}
+
+function buildIngredientRows(recipeId: string, ingredients: RecipeFormValues['ingredients']) {
+  return ingredients.map((ing, i) => ({
+    recipe_id: recipeId,
+    name: ing.name,
+    amount:
+      ing.unit === '직접입력' ? ing.amount || null : ing.amount ? `${ing.amount}${ing.unit}` : null,
+    order: i,
+  }))
+}
+
 export function RecipeForm({ mode, recipeId, headerRight }: Props) {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [photosChanged, setPhotosChanged] = useState(false)
+  const [unitsChanged, setUnitsChanged] = useState(false)
+  const [loadKey, setLoadKey] = useState(0)
+  const [bakeTimeUnit, setBakeTimeUnit] = useState<'분' | '시간'>('분')
+  const [preheatTimeUnit, setPreheatTimeUnit] = useState<'분' | '시간'>('분')
   const formLoaded = useRef(false)
 
-  const unitsRef = useRef({ bakeTimeUnit: '분', preheatTimeUnit: '분' })
+  const unitsRef = useRef<{ bakeTimeUnit: string; preheatTimeUnit: string }>({
+    bakeTimeUnit: '분',
+    preheatTimeUnit: '분',
+  })
 
   // Photos managed outside react-hook-form to avoid type conflicts
   const photosRef = useRef<{ files: File[]; thumbnailIndex: number }>({
@@ -75,7 +111,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     reset,
     formState: { errors, isDirty },
   } = useForm<RecipeFormValues>({
-    resolver: zodResolver(RecipeSchema),
+    resolver: zodResolver(RecipeSchemaRefined),
     defaultValues: {
       name: '',
       source_type: undefined,
@@ -89,7 +125,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
       memo: '',
       tags: [],
       is_public: false,
-      ingredients: [{ name: '', amount: '' }],
+      ingredients: [{ name: '', amount: '', unit: 'g' as const }],
     },
   })
 
@@ -99,7 +135,6 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     appendIngredientRef.current = fn
   }, [])
 
-  // Load existing recipe for edit mode
   useEffect(() => {
     if (mode !== 'edit' || !recipeId || formLoaded.current) return
 
@@ -108,10 +143,13 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
         const recipe = await fetchRecipe(recipeId!)
         formLoaded.current = true
         // 단위 복원
-        unitsRef.current = {
+        const units = {
           bakeTimeUnit: parseTimeUnit(recipe.bake_time),
           preheatTimeUnit: parseTimeUnit(recipe.preheat_time),
         }
+        unitsRef.current = units
+        setBakeTimeUnit(units.bakeTimeUnit)
+        setPreheatTimeUnit(units.preheatTimeUnit)
 
         reset({
           name: recipe.name,
@@ -128,11 +166,11 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           is_public: recipe.is_public,
           ingredients:
             recipe.recipe_ingredients.length > 0
-              ? recipe.recipe_ingredients.map((ri) => ({
-                  name: ri.name,
-                  amount: ri.amount ?? '',
-                }))
-              : [{ name: '', amount: '' }],
+              ? recipe.recipe_ingredients.map((ri) => {
+                  const parsed = parseIngredientAmount(ri.amount ?? '')
+                  return { name: ri.name, amount: parsed.amount, unit: parsed.unit }
+                })
+              : [{ name: '', amount: '', unit: 'g' as const }],
         })
       } catch {
         toast.error('레시피를 불러오는데 실패했습니다')
@@ -140,7 +178,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     }
 
     load()
-  }, [mode, recipeId, reset])
+  }, [mode, recipeId, reset, loadKey])
 
   const handlePhotoChange = useCallback(
     (files: File[], thumbnailIndex: number) => {
@@ -224,14 +262,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
             ingredients.length > 0
               ? supabase
                   .from('recipe_ingredients')
-                  .insert(
-                    ingredients.map((ing, i) => ({
-                      recipe_id: recipe.id,
-                      name: ing.name,
-                      amount: ing.amount || null,
-                      order: i,
-                    }))
-                  )
+                  .insert(buildIngredientRows(recipe.id, ingredients))
                   .then(({ error }) => {
                     if (error) console.error('Ingredient insert failed:', error)
                   })
@@ -243,34 +274,31 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           window.dispatchEvent(new Event('recipe-updated'))
           router.navigate({ to: '/recipe/$id', params: { id: recipe.id } })
         } else if (recipeId) {
-          await updateRecipe(recipeId, {
-            ...recipeData,
-            tags: recipeData.tags ?? [],
-          })
+          const replaceIngredients = supabase
+            .from('recipe_ingredients')
+            .delete()
+            .eq('recipe_id', recipeId)
+            .then(async () => {
+              if (ingredients.length > 0) {
+                const { error } = await supabase
+                  .from('recipe_ingredients')
+                  .insert(buildIngredientRows(recipeId, ingredients))
+                if (error) console.error('Ingredient insert failed:', error)
+              }
+            })
 
-          // Replace ingredients: delete existing, insert new
-          await supabase.from('recipe_ingredients').delete().eq('recipe_id', recipeId)
-
-          if (ingredients.length > 0) {
-            const { error: ingError } = await supabase.from('recipe_ingredients').insert(
-              ingredients.map((ing, i) => ({
-                recipe_id: recipeId,
-                name: ing.name,
-                amount: ing.amount || null,
-                order: i,
-              }))
-            )
-            if (ingError) console.error('Ingredient insert failed:', ingError)
-          }
-
-          // Upload new photos (if any)
-          if (files.length > 0) {
-            await uploadPhotos(recipeId, files, thumbnailIndex)
-          }
+          await Promise.all([
+            updateRecipe(recipeId, { ...recipeData, tags: recipeData.tags ?? [] }),
+            replaceIngredients,
+            files.length > 0 ? uploadPhotos(recipeId, files, thumbnailIndex) : Promise.resolve(),
+          ])
 
           toast.success('레시피가 수정되었습니다')
           window.dispatchEvent(new Event('recipe-updated'))
-          router.navigate({ to: '/recipe/$id', params: { id: recipeId } })
+          formLoaded.current = false
+          setPhotosChanged(false)
+          setUnitsChanged(false)
+          setLoadKey((k) => k + 1)
         }
       } catch (err) {
         console.error('Submit error:', err)
@@ -296,6 +324,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
         <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader
             index={1}
+            required
             extra={
               <button
                 type="button"
@@ -316,8 +345,17 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           <StepsSection
             register={register}
             errors={errors}
-            onUnitsChange={(units) => {
-              unitsRef.current = units
+            bakeTimeUnit={bakeTimeUnit}
+            preheatTimeUnit={preheatTimeUnit}
+            onBakeTimeUnitChange={(u) => {
+              setBakeTimeUnit(u)
+              unitsRef.current = { ...unitsRef.current, bakeTimeUnit: u }
+              if (mode === 'edit') setUnitsChanged(true)
+            }}
+            onPreheatTimeUnitChange={(u) => {
+              setPreheatTimeUnit(u)
+              unitsRef.current = { ...unitsRef.current, preheatTimeUnit: u }
+              if (mode === 'edit') setUnitsChanged(true)
             }}
           />
         </section>
@@ -340,7 +378,9 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           {/* 저장 */}
           <Button
             type="submit"
-            disabled={isSubmitting || (mode === 'edit' && !isDirty && !photosChanged)}
+            disabled={
+              isSubmitting || (mode === 'edit' && !isDirty && !photosChanged && !unitsChanged)
+            }
             className="min-w-[100px]"
           >
             {isSubmitting && <Loader2 size={16} className="animate-spin" />}

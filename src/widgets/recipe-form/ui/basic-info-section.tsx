@@ -6,7 +6,8 @@ import { Controller, useController } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/shared/lib/utils'
 
-import type { RecipeFormValues } from '../model/recipe-schema'
+import { SOURCE_TYPES_WITH_URL, type RecipeFormValues } from '../model/recipe-schema'
+
 import type { Control, FieldErrors } from 'react-hook-form'
 
 const SOURCE_TYPES = [
@@ -26,7 +27,9 @@ export function BasicInfoSection({ control, errors }: Props) {
   const [tagInput, setTagInput] = useState('')
 
   const sourceType = useController({ control, name: 'source_type' })
-  const showUrl = sourceType.field.value === 'youtube' || sourceType.field.value === 'blog'
+  const showUrl = SOURCE_TYPES_WITH_URL.includes(
+    sourceType.field.value as (typeof SOURCE_TYPES_WITH_URL)[number]
+  )
 
   const handleTagKeyDown = useCallback(
     (
@@ -55,8 +58,7 @@ export function BasicInfoSection({ control, errors }: Props) {
   )
 
   return (
-    <div className="space-y-4">
-      {/* 메뉴명 */}
+    <div className="flex flex-col">
       <div className="flex flex-col gap-1.5">
         <label className="field-label">
           메뉴명 <span className="text-destructive">*</span>
@@ -77,7 +79,8 @@ export function BasicInfoSection({ control, errors }: Props) {
         {errors.name && <p className="text-xs mt-2 text-destructive">{errors.name.message}</p>}
       </div>
 
-      {/* 출처 타입 */}
+      <div className="border-t border-dashed border-border my-4" />
+
       <div className="flex flex-col gap-1.5">
         <label className="field-label">
           출처 <span className="text-destructive">*</span>
@@ -86,6 +89,7 @@ export function BasicInfoSection({ control, errors }: Props) {
           {SOURCE_TYPES.map((st) => {
             const isActive = sourceType.field.value === st.value
             const isYoutube = st.value === 'youtube'
+            const hasError = !!errors.source_type
             return (
               <button
                 key={st.value}
@@ -96,7 +100,8 @@ export function BasicInfoSection({ control, errors }: Props) {
                   {
                     'border-(--youtube) bg-(--youtube) text-white': isActive && isYoutube,
                     'border-primary bg-primary text-primary-foreground': isActive && !isYoutube,
-                    'border-border bg-surface text-muted-foreground': !isActive,
+                    'border-destructive bg-destructive/5 text-destructive': !isActive && hasError,
+                    'border-border bg-surface text-muted-foreground': !isActive && !hasError,
                   }
                 )}
               >
@@ -111,21 +116,32 @@ export function BasicInfoSection({ control, errors }: Props) {
         )}
       </div>
 
-      {/* 출처 URL */}
-      {showUrl && (
+      {showUrl ? (
         <div className="flex flex-col gap-1.5">
-          <label className="field-label">출처 URL</label>
+          <label className="field-label">
+            출처 URL <span className="text-destructive">*</span>
+          </label>
           <Controller
             control={control}
             name="source_url"
             render={({ field }) => (
-              <Input {...field} value={field.value ?? ''} type="url" placeholder="https://..." />
+              <Input
+                {...field}
+                value={field.value ?? ''}
+                type="url"
+                placeholder="https://..."
+                aria-invalid={!!errors.source_url}
+              />
             )}
           />
+          {errors.source_url && (
+            <p className="text-xs text-destructive">{errors.source_url.message}</p>
+          )}
         </div>
-      )}
+      ) : null}
 
-      {/* 태그 */}
+      <div className="border-t border-dashed border-border my-4" />
+
       <div className="flex flex-col gap-1.5">
         <label className="field-label">태그</label>
         <Controller
@@ -171,7 +187,8 @@ export function BasicInfoSection({ control, errors }: Props) {
         />
       </div>
 
-      {/* 공개/비공개 */}
+      <div className="border-t border-dashed border-border my-4" />
+
       <Controller
         control={control}
         name="is_public"
