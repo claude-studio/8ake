@@ -1,11 +1,10 @@
 import { useState } from 'react'
 
-import { Link } from '@tanstack/react-router'
-import { Pencil, Trash2 } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
-import { Button } from '@/components/ui/button'
 import { DeleteDialog } from '@/features/recipe-delete'
 import { PageHeader } from '@/shared/ui'
+import { HeaderMenu } from '@/widgets/header-menu'
 import { RecipeDetail } from '@/widgets/recipe-detail'
 import { ReviewList } from '@/widgets/review-list'
 
@@ -15,30 +14,19 @@ interface Props {
 
 export function RecipeDetailPage({ recipeId }: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false)
-
-  const rightActions = (
-    <>
-      <Button variant="ghost" size="icon-sm" asChild title="수정">
-        <Link to="/recipe/$id/edit" params={{ id: recipeId }}>
-          <Pencil size={16} />
-        </Link>
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        onClick={() => setDeleteOpen(true)}
-        title="삭제"
-        className="text-destructive"
-      >
-        <Trash2 size={16} />
-      </Button>
-    </>
-  )
+  const navigate = useNavigate()
 
   return (
     <div className="pb-20">
-      <PageHeader title="레시피 상세" right={rightActions} />
+      <PageHeader
+        title="레시피 상세"
+        right={
+          <HeaderMenu
+            onEdit={() => navigate({ to: '/recipe/$id/edit', params: { id: recipeId } })}
+            onDelete={() => setDeleteOpen(true)}
+          />
+        }
+      />
       <RecipeDetail recipeId={recipeId} reviewListSlot={<ReviewList recipeId={recipeId} />} />
       <DeleteDialog recipeId={recipeId} open={deleteOpen} onOpenChange={setDeleteOpen} />
     </div>
