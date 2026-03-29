@@ -38,14 +38,14 @@ function UnitSelect({
       <NativeSelect
         value={value}
         onChange={(e) => onChange(e.target.value as TimeUnit)}
-        className="h-full w-[44px] flex-none rounded-none rounded-r-md border-0 pl-0 pr-3 py-0 text-[11px] font-semibold text-gray-800 dark:text-gray-200 bg-surface text-center focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
+        className="h-full w-[44px] flex-none rounded-none rounded-r-md border-0 pl-1 pr-4 py-0 text-[11px] font-semibold text-gray-800 dark:text-gray-200 bg-surface focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
       >
         <NativeSelectOption value="분">분</NativeSelectOption>
         <NativeSelectOption value="시간">시간</NativeSelectOption>
       </NativeSelect>
       <ChevronDown
         size={10}
-        className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
       />
     </div>
   )
