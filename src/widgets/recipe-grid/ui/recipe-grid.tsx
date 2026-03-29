@@ -33,7 +33,7 @@ export function RecipeGrid() {
 
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 min-[475px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
           {Array.from({ length: 6 }, (_, i) => (
             <div key={i} className="animate-pulse rounded-xl bg-surface aspect-3/4" />
           ))}
@@ -65,7 +65,7 @@ export function RecipeGrid() {
 
       {/* Card grid */}
       {!isLoading && items.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 min-[475px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {items.map((recipe, index) => (
             <RecipeCard
               key={recipe.id}
