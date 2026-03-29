@@ -16,7 +16,11 @@ import { BasicInfoSection } from './basic-info-section'
 import { IngredientsSection } from './ingredients-section'
 import { PhotoSection } from './photo-section'
 import { StepsSection } from './steps-section'
-import { RecipeSchemaRefined, type RecipeFormValues } from '../model/recipe-schema'
+import {
+  RecipeSchemaRefined,
+  type RecipeFormValues,
+  type RecipeFormOutput,
+} from '../model/recipe-schema'
 
 interface Props {
   mode: 'create' | 'edit'
@@ -111,7 +115,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     reset,
     formState: { errors, isDirty },
   } = useForm<RecipeFormValues>({
-    resolver: zodResolver(RecipeSchemaRefined),
+    resolver: zodResolver(RecipeSchemaRefined) as never,
     defaultValues: {
       name: '',
       source_type: undefined,
@@ -229,7 +233,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
   )
 
   const onSubmit = useCallback(
-    async (values: RecipeFormValues) => {
+    async (values: RecipeFormOutput) => {
       if (!user) {
         toast.error('로그인이 필요합니다')
         return
