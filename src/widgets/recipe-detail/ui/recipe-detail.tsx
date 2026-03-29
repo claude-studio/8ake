@@ -11,6 +11,8 @@ import {
   PenLine,
   Play,
   ScrollText,
+  Thermometer,
+  Timer,
   UtensilsCrossed,
 } from 'lucide-react'
 
@@ -52,13 +54,14 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
   const steps = recipe?.steps
   const parsedSteps = useMemo(() => (steps ? steps.split('\n').filter(Boolean) : []), [steps])
 
+  const preheatTemp = recipe?.preheat_temp
+  const preheatTime = recipe?.preheat_time
   const ovenTemp = recipe?.oven_temp
   const bakeTime = recipe?.bake_time
   const quantity = recipe?.quantity
-  const metaColumns = useMemo(
-    () => `repeat(${[ovenTemp, bakeTime, quantity].filter(Boolean).length}, 1fr)`,
-    [ovenTemp, bakeTime, quantity]
-  )
+  const hasPreheat = preheatTemp || preheatTime
+  const preheatCount = [preheatTemp, preheatTime].filter(Boolean).length
+  const mainCount = [ovenTemp, bakeTime, quantity].filter(Boolean).length
 
   if (isLoading) {
     return (
@@ -76,7 +79,12 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
     )
   }
 
-  const hasMeta = recipe.oven_temp || recipe.bake_time || recipe.quantity
+  const hasMeta =
+    recipe.preheat_temp ||
+    recipe.preheat_time ||
+    recipe.oven_temp ||
+    recipe.bake_time ||
+    recipe.quantity
 
   return (
     <div className="flex flex-col">
@@ -142,15 +150,49 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
         {/* Meta row inside hero info card */}
         {hasMeta && (
-          <div className="grid gap-2" style={{ gridTemplateColumns: metaColumns }}>
-            {recipe.oven_temp && (
-              <MetaCard icon={<Flame size={18} />} label="오븐 온도" value={recipe.oven_temp} />
+          <div className="flex flex-col gap-2">
+            {/* 예열 행 */}
+            {hasPreheat && (
+              <div
+                className="grid gap-2"
+                style={{ gridTemplateColumns: `repeat(${preheatCount}, 1fr)` }}
+              >
+                {recipe.preheat_temp && (
+                  <MetaCard
+                    icon={<Thermometer size={18} />}
+                    label="예열 온도"
+                    value={recipe.preheat_temp}
+                  />
+                )}
+                {recipe.preheat_time && (
+                  <MetaCard
+                    icon={<Timer size={18} />}
+                    label="예열 시간"
+                    value={recipe.preheat_time}
+                  />
+                )}
+              </div>
             )}
-            {recipe.bake_time && (
-              <MetaCard icon={<Clock size={18} />} label="굽는 시간" value={recipe.bake_time} />
-            )}
-            {recipe.quantity && (
-              <MetaCard icon={<UtensilsCrossed size={18} />} label="분량" value={recipe.quantity} />
+            {/* 오븐/시간/분량 행 */}
+            {mainCount > 0 && (
+              <div
+                className="grid gap-2"
+                style={{ gridTemplateColumns: `repeat(${mainCount}, 1fr)` }}
+              >
+                {recipe.oven_temp && (
+                  <MetaCard icon={<Flame size={18} />} label="오븐 온도" value={recipe.oven_temp} />
+                )}
+                {recipe.bake_time && (
+                  <MetaCard icon={<Clock size={18} />} label="굽는 시간" value={recipe.bake_time} />
+                )}
+                {recipe.quantity && (
+                  <MetaCard
+                    icon={<UtensilsCrossed size={18} />}
+                    label="분량"
+                    value={recipe.quantity}
+                  />
+                )}
+              </div>
             )}
           </div>
         )}
@@ -249,7 +291,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                 {/* memo-box: 만드는 법 카드 안에 위치 (시안과 동일) */}
                 {recipe.memo && (
                   <div className="mx-4 mb-4 border-[1.5px] border-dashed border-border rounded-lg px-[14px] py-3 bg-surface">
-                    <div className="font-bold text-xs uppercase text-primary mb-1.5 tracking-[0.5px]">
+                    <div className="flex items-center gap-1 font-bold text-xs uppercase text-primary mb-1.5 tracking-[0.5px]">
                       <PenLine size={11} /> 메모
                     </div>
                     <p className="text-sm/relaxed text-muted-foreground m-0">{recipe.memo}</p>

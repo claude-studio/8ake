@@ -79,7 +79,9 @@ export function BasicInfoSection({ control, errors }: Props) {
 
       {/* 출처 타입 */}
       <div className="flex flex-col gap-1.5">
-        <label className="field-label">출처</label>
+        <label className="field-label">
+          출처 <span className="text-destructive">*</span>
+        </label>
         <div className="flex flex-wrap gap-2">
           {SOURCE_TYPES.map((st) => {
             const isActive = sourceType.field.value === st.value
@@ -88,7 +90,7 @@ export function BasicInfoSection({ control, errors }: Props) {
               <button
                 key={st.value}
                 type="button"
-                onClick={() => sourceType.field.onChange(isActive ? undefined : st.value)}
+                onClick={() => sourceType.field.onChange(st.value)}
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150',
                   {
@@ -104,6 +106,9 @@ export function BasicInfoSection({ control, errors }: Props) {
             )
           })}
         </div>
+        {errors.source_type && (
+          <p className="text-xs text-destructive">{errors.source_type.message}</p>
+        )}
       </div>
 
       {/* 출처 URL */}

@@ -137,6 +137,8 @@ export type Database = {
           memo: string | null
           name: string
           oven_temp: string | null
+          preheat_temp: string | null
+          preheat_time: string | null
           quantity: string | null
           source_type: string | null
           source_url: string | null
@@ -153,6 +155,8 @@ export type Database = {
           memo?: string | null
           name: string
           oven_temp?: string | null
+          preheat_temp?: string | null
+          preheat_time?: string | null
           quantity?: string | null
           source_type?: string | null
           source_url?: string | null
@@ -169,6 +173,8 @@ export type Database = {
           memo?: string | null
           name?: string
           oven_temp?: string | null
+          preheat_temp?: string | null
+          preheat_time?: string | null
           quantity?: string | null
           source_type?: string | null
           source_url?: string | null
