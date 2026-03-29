@@ -1,10 +1,15 @@
 import { useState } from 'react'
 
-import { ImageOff } from 'lucide-react'
+import { ChefHat } from 'lucide-react'
 
 import { getPhotoUrl } from '@/entities/recipe'
 import type { RecipePhoto } from '@/entities/recipe'
 import { cn } from '@/shared/lib/utils'
+
+const DOT_PATTERN_STYLE = {
+  backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+  backgroundSize: '20px 20px',
+}
 
 interface Props {
   photos: RecipePhoto[]
@@ -34,8 +39,13 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
               className="size-full  object-cover"
             />
           ) : (
-            <div className="flex size-full  items-center justify-center bg-surface">
-              <ImageOff size={36} className="text-muted-foreground opacity-30" />
+            <div className="relative flex size-full flex-col items-center justify-center gap-3 overflow-hidden bg-surface">
+              {/* 배경 도트 패턴 */}
+              <div className="absolute inset-0 opacity-[0.04]" style={DOT_PATTERN_STYLE} />
+              <div className="flex size-18 items-center justify-center rounded-2xl border border-border bg-background shadow-sm">
+                <ChefHat size={30} className="text-primary opacity-50" />
+              </div>
+              <p className="text-xs font-medium text-muted-foreground/50">등록된 사진이 없습니다</p>
             </div>
           )}
 
@@ -65,8 +75,8 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                   className="size-full  object-cover"
                 />
               ) : (
-                <div className="flex size-full  items-center justify-center bg-surface">
-                  <ImageOff size={14} className="text-muted-foreground" />
+                <div className="flex size-full items-center justify-center bg-surface">
+                  <ChefHat size={14} className="text-primary opacity-40" />
                 </div>
               )}
             </button>
