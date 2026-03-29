@@ -22,6 +22,7 @@ vite.config.*.timestamp-*
 
 # ── TanStack Router (자동생성) ────────────────────────────
 src/routeTree.gen.ts
+.tanstack/
 
 # ── Env / Secrets ─────────────────────────────────────────
 .env
