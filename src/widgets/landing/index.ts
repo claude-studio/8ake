@@ -1,0 +1,7 @@
+export { LandingNav } from './ui/landing-nav'
+export { HeroSection } from './ui/hero-section'
+export { FeaturesSection } from './ui/features-section'
+export { StepsSection } from './ui/steps-section'
+export { WhySection } from './ui/why-section'
+export { BottomCtaSection } from './ui/bottom-cta-section'
+export { LandingFooter } from './ui/landing-footer'

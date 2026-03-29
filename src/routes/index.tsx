@@ -1,12 +1,12 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
-import { LoginPage } from '@/pages/login'
+import { LandingPage } from '@/pages/landing'
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute('/')({
   beforeLoad: ({ context }) => {
     if (context.auth?.session) {
       throw redirect({ to: '/home' })
     }
   },
-  component: LoginPage,
+  component: LandingPage,
 })

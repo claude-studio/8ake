@@ -79,7 +79,7 @@ export function IngredientList() {
               className="pl-8 text-sm"
             />
           </div>
-          <Button onClick={() => setShowAddForm(true)} className="shrink-0">
+          <Button onClick={() => setShowAddForm(true)} size="lg" className="shrink-0 px-4">
             + 재료 추가
           </Button>
         </div>
@@ -142,7 +142,7 @@ export function IngredientList() {
       {isLoading ? (
         <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
       ) : filteredIngredients.length === 0 && ingredients.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border py-12">
+        <div className="flex min-h-[calc(100dvh-var(--header-h)-var(--tabbar-h)-var(--safe-bottom)-12rem)] flex-col items-center justify-center gap-2 text-center">
           <Package size={36} className="text-muted-foreground opacity-40" />
           <p className="text-sm text-muted-foreground">아직 등록된 재료가 없습니다</p>
           <p className="text-xs text-muted-foreground opacity-70">

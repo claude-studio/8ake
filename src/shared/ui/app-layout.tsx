@@ -1,8 +1,8 @@
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { Link, useRouterState } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Home, Moon, Package, Plus, Sun } from 'lucide-react'
+import { Home, Package, Plus } from 'lucide-react'
 
 import { cn } from '@/shared/lib/utils'
 
@@ -14,26 +14,11 @@ interface Props {
 const springConfig = { duration: 0.25, ease: 'easeInOut' } as const
 
 export function AppLayout({ children, hideNav = false }: Props) {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null
-    const t = saved ?? 'light'
-    document.documentElement.setAttribute('data-theme', t)
-    return t
-  })
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [tooltipLeft, setTooltipLeft] = useState(0)
   const menuRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
-
-  const toggleTheme = useCallback(() => {
-    setTheme((t) => {
-      const next = t === 'light' ? 'dark' : 'light'
-      document.documentElement.setAttribute('data-theme', next)
-      localStorage.setItem('theme', next)
-      return next
-    })
-  }, [])
 
   const isActive = (path: string, exact = false) =>
     exact ? pathname === path : pathname.startsWith(path)
@@ -50,7 +35,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
     }
   }
 
-  const LABELS = ['레시피', '재료', theme === 'light' ? '다크' : '라이트', '새 레시피']
+  const LABELS = ['레시피', '재료', '새 레시피']
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -93,8 +78,8 @@ export function AppLayout({ children, hideNav = false }: Props) {
               {/* 레시피 */}
               <PillItem
                 as="link"
-                to="/"
-                active={isActive('/', true)}
+                to="/home"
+                active={isActive('/home', true)}
                 onHover={(v) => handleHover(v ? 0 : null)}
               >
                 <Home size={18} />
@@ -110,26 +95,6 @@ export function AppLayout({ children, hideNav = false }: Props) {
                 <Package size={18} />
               </PillItem>
 
-              {/* 다크모드 */}
-              <PillItem
-                as="button"
-                active={false}
-                onHover={(v) => handleHover(v ? 2 : null)}
-                onClick={toggleTheme}
-              >
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={theme}
-                    initial={{ rotate: -20, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 20, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-                  </motion.div>
-                </AnimatePresence>
-              </PillItem>
-
               {/* Separator */}
               <div className="mx-1 h-5 w-px bg-border" />
 
@@ -138,7 +103,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
                 to="/recipe/new"
                 className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform duration-150 hover:scale-110 active:scale-95"
                 aria-label="새 레시피 추가"
-                onMouseEnter={() => handleHover(3)}
+                onMouseEnter={() => handleHover(2)}
                 onMouseLeave={() => handleHover(null)}
               >
                 <Plus size={18} strokeWidth={2.5} />

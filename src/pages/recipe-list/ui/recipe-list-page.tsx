@@ -1,12 +1,7 @@
+import { HeaderMenu } from '@/widgets/header-menu'
 import { RecipeGrid } from '@/widgets/recipe-grid'
 
 export function RecipeListPage() {
-  const dateStr = new Date().toLocaleDateString('ko-KR', {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'short',
-  })
-
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
@@ -17,9 +12,7 @@ export function RecipeListPage() {
               nb
             </span>
           </div>
-          <span className="text-[11px] font-medium tabular-nums text-muted-foreground">
-            {dateStr}
-          </span>
+          <HeaderMenu />
         </div>
       </header>
 

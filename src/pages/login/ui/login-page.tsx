@@ -34,7 +34,7 @@ export function LoginPage() {
       setErrorMsg(error.message)
     } else if (data.session) {
       setSession(data.session)
-      router.navigate({ to: '/' })
+      router.navigate({ to: '/home' })
     }
   }
 

@@ -121,7 +121,7 @@ export function ReviewList({ recipeId }: Props) {
 
       {/* Review cards */}
       {reviews.length === 0 && !showForm ? (
-        <div className="py-8 text-center text-sm text-muted-foreground">
+        <div className="flex min-h-40 items-center justify-center text-center text-sm text-muted-foreground">
           아직 회고가 없습니다. 첫 회고를 작성해보세요!
         </div>
       ) : (

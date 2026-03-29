@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import { useRecipes } from '@/entities/recipe'
 import { useIntersectionObserver } from '@/shared/hooks/use-intersection-observer'
 
@@ -41,17 +42,16 @@ export function RecipeGrid() {
 
       {/* Empty state */}
       {!isLoading && items.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-sm mb-4 text-muted-foreground">
+        <div className="flex min-h-[calc(100dvh-var(--header-h)-var(--tabbar-h)-var(--safe-bottom)-5rem)] flex-col items-center justify-center text-center">
+          <p className="mb-4 text-sm text-muted-foreground">
             아직 레시피가 없어요. 첫 레시피를 추가해보세요!
           </p>
-          <Link
-            to="/recipe/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors bg-primary"
-          >
-            <Plus size={16} />
-            레시피 추가
-          </Link>
+          <Button asChild>
+            <Link to="/recipe/new">
+              <Plus size={16} />
+              레시피 추가
+            </Link>
+          </Button>
         </div>
       )}
 
