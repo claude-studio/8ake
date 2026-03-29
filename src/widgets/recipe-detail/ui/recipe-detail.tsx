@@ -21,6 +21,8 @@ import { cn } from '@/shared/lib/utils'
 
 import { PhotoGallery } from './photo-gallery'
 
+const STEP_NUMBER_RE = /^(\d+)\.\s*(.*)$/
+
 const SOURCE_ICONS: Record<string, React.ReactNode> = {
   youtube: <Play size={13} />,
   blog: <Link2 size={13} />,
@@ -96,7 +98,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
         </h1>
 
         {/* Source row */}
-        {recipe.source_type && (
+        {recipe.source_type ? (
           <div className="flex items-center gap-1.5 text-sm mb-2.5">
             <span className="text-muted-foreground">
               {SOURCE_ICONS[recipe.source_type] ?? <ExternalLink size={14} />}
@@ -104,7 +106,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
             <span className="font-semibold text-muted-foreground">
               {SOURCE_LABELS[recipe.source_type] ?? recipe.source_type}
             </span>
-            {recipe.source_url && (
+            {recipe.source_url ? (
               <>
                 <span className="text-muted-foreground">·</span>
                 <a
@@ -116,9 +118,9 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                   링크 ↗
                 </a>
               </>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
 
         {/* Badges row: visibility + tags */}
         <div className={cn('flex items-center flex-wrap gap-1.5', hasMeta ? 'mb-3' : 'mb-0')}>
@@ -149,53 +151,53 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
         </div>
 
         {/* Meta row inside hero info card */}
-        {hasMeta && (
+        {hasMeta ? (
           <div className="flex flex-col gap-2">
             {/* 예열 행 */}
-            {hasPreheat && (
+            {hasPreheat ? (
               <div
                 className="grid gap-2"
                 style={{ gridTemplateColumns: `repeat(${preheatCount}, 1fr)` }}
               >
-                {recipe.preheat_temp && (
+                {recipe.preheat_temp ? (
                   <MetaCard
                     icon={<Thermometer size={18} />}
                     label="예열 온도"
                     value={recipe.preheat_temp}
                   />
-                )}
-                {recipe.preheat_time && (
+                ) : null}
+                {recipe.preheat_time ? (
                   <MetaCard
                     icon={<Timer size={18} />}
                     label="예열 시간"
                     value={recipe.preheat_time}
                   />
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
             {/* 오븐/시간/분량 행 */}
-            {mainCount > 0 && (
+            {mainCount > 0 ? (
               <div
                 className="grid gap-2"
                 style={{ gridTemplateColumns: `repeat(${mainCount}, 1fr)` }}
               >
-                {recipe.oven_temp && (
+                {recipe.oven_temp ? (
                   <MetaCard icon={<Flame size={18} />} label="오븐 온도" value={recipe.oven_temp} />
-                )}
-                {recipe.bake_time && (
+                ) : null}
+                {recipe.bake_time ? (
                   <MetaCard icon={<Clock size={18} />} label="굽는 시간" value={recipe.bake_time} />
-                )}
-                {recipe.quantity && (
+                ) : null}
+                {recipe.quantity ? (
                   <MetaCard
                     icon={<UtensilsCrossed size={18} />}
                     label="분량"
                     value={recipe.quantity}
                   />
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </PhotoGallery>
 
       {/* Tab bar */}
@@ -226,17 +228,17 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
         {tab === 'recipe' && (
           <div className="space-y-5">
             {/* Ingredients */}
-            {recipe.recipe_ingredients.length > 0 && (
+            {recipe.recipe_ingredients.length > 0 ? (
               <div className="bg-card border border-border rounded-xl shadow-(--shadow-card) overflow-hidden">
                 <div className="flex items-center justify-between px-4 pb-2.5 pt-3.5 border-b border-border">
                   <h2 className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase text-primary m-0">
                     <ClipboardList size={13} /> 재료
                   </h2>
-                  {recipe.quantity && (
+                  {recipe.quantity ? (
                     <span className="text-xs text-muted-foreground">{recipe.quantity} 기준</span>
-                  )}
+                  ) : null}
                 </div>
-                <ul className="list-none m-0 py-2 ruled-lines">
+                <ul className="list-none m-0 py-2">
                   {sortedIngredients.map((ing, idx, arr) => (
                     <li
                       key={ing.id}
@@ -247,31 +249,37 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                     >
                       <span className="mr-2 text-muted-foreground text-[13px] shrink-0">·</span>
                       <span className="flex-1">{ing.name}</span>
-                      {ing.amount && (
+                      {ing.amount ? (
                         <span className="shrink-0 text-muted-foreground font-medium min-w-[56px] text-right">
                           {ing.amount}
                         </span>
-                      )}
+                      ) : null}
                     </li>
                   ))}
                 </ul>
               </div>
-            )}
+            ) : null}
 
             {/* Steps */}
-            {recipe.steps && (
+            {recipe.steps ? (
               <div className="bg-card border border-border rounded-xl shadow-(--shadow-card) overflow-hidden">
                 <div className="flex items-center justify-between px-4 pt-[14px] pb-[10px] border-b border-border">
                   <h2 className="flex items-center gap-1.5 font-bold text-xs tracking-wide uppercase text-primary m-0">
                     <ScrollText size={13} /> 만드는 법
                   </h2>
                 </div>
-                <div className="p-4 ruled-lines">
+                <div className="px-4 py-2">
                   {parsedSteps.map((line, i) => {
-                    const match = line.match(/^(\d+)\.\s*(.*)$/)
+                    const match = line.match(STEP_NUMBER_RE)
                     if (match) {
                       return (
-                        <div key={i} className="flex gap-3 mb-4">
+                        <div
+                          key={i}
+                          className={cn(
+                            'flex gap-3 py-3',
+                            i < parsedSteps.length - 1 ? 'border-b border-dashed border-border' : ''
+                          )}
+                        >
                           <span className="size-6 rounded-full bg-primary text-primary-foreground text-xs font-extrabold flex items-center justify-center shrink-0 mt-px">
                             {match[1]}
                           </span>
@@ -282,30 +290,36 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                       )
                     }
                     return (
-                      <p key={i} className="text-sm text-foreground leading-[1.7] mb-2">
+                      <p
+                        key={i}
+                        className={cn(
+                          'text-sm text-foreground leading-[1.7] py-3 m-0',
+                          i < parsedSteps.length - 1 ? 'border-b border-dashed border-border' : ''
+                        )}
+                      >
                         {line}
                       </p>
                     )
                   })}
                 </div>
                 {/* memo-box: 만드는 법 카드 안에 위치 (시안과 동일) */}
-                {recipe.memo && (
+                {recipe.memo ? (
                   <div className="mx-4 mb-4 border-[1.5px] border-dashed border-border rounded-lg px-[14px] py-3 bg-surface">
                     <div className="flex items-center gap-1 font-bold text-xs uppercase text-primary mb-1.5 tracking-[0.5px]">
                       <PenLine size={11} /> 메모
                     </div>
                     <p className="text-sm/relaxed text-muted-foreground m-0">{recipe.memo}</p>
                   </div>
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
 
             {/* Delete */}
             {deleteSlot}
           </div>
         )}
 
-        {tab === 'reviews' && <div>{reviewListSlot}</div>}
+        {tab === 'reviews' ? <div>{reviewListSlot}</div> : null}
       </div>
     </div>
   )
