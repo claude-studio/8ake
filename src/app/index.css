@@ -30,6 +30,7 @@
   --radius-xs: var(--radius-xs-val);
   --radius-sm: var(--radius-sm-val);
   --radius-md: var(--radius-md-val);
+  --shadow-floating: var(--shadow-floating);
 }
 
 @layer base {
@@ -84,6 +85,7 @@
     --shadow-md: 0 4px 20px rgba(100, 50, 20, 0.08);
     --shadow-lg: 0 4px 18px rgba(0, 0, 0, 0.22);
     --shadow-xl: 0 -4px 24px rgba(0, 0, 0, 0.1);
+    --shadow-floating: 0 4px 24px -4px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
 
     /* 카드 플레이스홀더 */
     --card-placeholder-bg: #f5e6d3;
@@ -110,20 +112,32 @@
   }
 
   [data-theme='dark'] {
-    --background: #17120d;
-    --card: #221c15;
-    --surface: #1c1610;
-    --foreground: #f0e6d8;
-    --muted-foreground: #9e8e7e;
-    --primary: #e07b4a;
-    --primary-dim: rgba(224, 123, 74, 0.15);
-    --primary-border: rgba(224, 123, 74, 0.45);
-    --border: rgba(224, 123, 74, 0.16);
-    --rule: rgba(224, 123, 74, 0.06);
-    --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
-    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3);
-    --destructive: #e05c4a;
+    /* 배경: 짙은 네이비-차콜 계열 — 갈색 탈피, 깔끔한 다크 */
+    --background: #141414;
+    --card: #1e1e1e;
+    --surface: #252525;
+
+    /* 텍스트 */
+    --foreground: #f2ede8;
+    --muted-foreground: #8a8078;
+
+    /* 액센트: 라이트보다 약간 밝고 따뜻하게 */
+    --primary: #e8845a;
     --primary-foreground: #ffffff;
+    --primary-dim: rgba(232, 132, 90, 0.15);
+    --primary-border: rgba(232, 132, 90, 0.4);
+
+    /* 테두리: 흰색 기반으로 전환 — 갈색 틴트 제거 */
+    --border: rgba(255, 255, 255, 0.1);
+    --rule: rgba(255, 255, 255, 0.04);
+
+    /* 그림자 */
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.35);
+
+    /* 에러 */
+    --destructive: #e05c4a;
+    --destructive-foreground: #ffffff;
 
     /* 성공 */
     --success-bg: rgba(80, 160, 100, 0.15);
@@ -131,31 +145,31 @@
     --success-border: rgba(80, 160, 100, 0.3);
 
     /* 오버레이 */
-    --overlay-bg: rgba(0, 0, 0, 0.65);
+    --overlay-bg: rgba(0, 0, 0, 0.7);
 
     /* 그림자 확장 */
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 4px 18px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 -4px 24px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 4px 18px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 -4px 24px rgba(0, 0, 0, 0.3);
+    --shadow-floating: 0 4px 24px -4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06);
 
     /* 카드 플레이스홀더 */
-    --card-placeholder-bg: #2a201a;
-    --card-placeholder-text: #7a6a5a;
-    --card-placeholder-icon: #5a4a3a;
+    --card-placeholder-bg: #2a2520;
+    --card-placeholder-text: #6a6058;
+    --card-placeholder-icon: #4a4038;
 
     /* muted (배경) */
-    --muted: rgba(224, 123, 74, 0.08);
+    --muted: rgba(255, 255, 255, 0.06);
 
     /* shadcn 호환 */
-    --input: rgba(224, 123, 74, 0.25);
-    --ring: rgba(224, 123, 74, 0.5);
-    --accent: #1c1610;
-    --accent-foreground: #f0e6d8;
-    --secondary: #1c1610;
-    --secondary-foreground: #f0e6d8;
-    --popover: #221c15;
-    --popover-foreground: #f0e6d8;
-    --destructive-foreground: #ffffff;
+    --input: rgba(255, 255, 255, 0.12);
+    --ring: rgba(232, 132, 90, 0.5);
+    --accent: #252525;
+    --accent-foreground: #f2ede8;
+    --secondary: #252525;
+    --secondary-foreground: #f2ede8;
+    --popover: #1e1e1e;
+    --popover-foreground: #f2ede8;
   }
 }
 
