@@ -21,9 +21,10 @@ import { RecipeSchema, type RecipeFormValues } from '../model/recipe-schema'
 interface Props {
   mode: 'create' | 'edit'
   recipeId?: string
+  headerRight?: React.ReactNode
 }
 
-const STEP_LABELS = ['기본정보', '재료', '만드는 법', '사진', '회고'] as const
+const STEP_LABELS = ['기본정보', '재료', '만드는 법', '사진'] as const
 
 function CardHeader({ index, extra }: { index: number; extra?: React.ReactNode }) {
   return (
@@ -35,23 +36,31 @@ function CardHeader({ index, extra }: { index: number; extra?: React.ReactNode }
         <h2 className="text-[15px] font-bold tracking-[-0.02em] text-foreground m-0">
           {STEP_LABELS[index]}
         </h2>
-        {index === 4 && (
-          <span className="text-[10px] font-semibold text-muted-foreground bg-surface border border-border rounded-[20px] px-[7px] py-[2px]">
-            선택사항
-          </span>
-        )}
       </div>
       {extra}
     </div>
   )
 }
 
-export function RecipeForm({ mode, recipeId }: Props) {
+function parseFieldValue(s: string | null | undefined): number | undefined {
+  if (!s) return undefined
+  const m = s.match(/^(\d+(?:\.\d+)?)/)
+  return m ? Number(m[1]) : undefined
+}
+
+function parseTimeUnit(s: string | null | undefined): '분' | '시간' {
+  if (!s) return '분'
+  return s.includes('시간') ? '시간' : '분'
+}
+
+export function RecipeForm({ mode, recipeId, headerRight }: Props) {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [photosChanged, setPhotosChanged] = useState(false)
   const formLoaded = useRef(false)
+
+  const unitsRef = useRef({ bakeTimeUnit: '분', preheatTimeUnit: '분' })
 
   // Photos managed outside react-hook-form to avoid type conflicts
   const photosRef = useRef<{ files: File[]; thumbnailIndex: number }>({
@@ -71,9 +80,11 @@ export function RecipeForm({ mode, recipeId }: Props) {
       name: '',
       source_type: undefined,
       source_url: '',
-      oven_temp: '',
-      bake_time: '',
-      quantity: '',
+      oven_temp: undefined,
+      bake_time: undefined,
+      quantity: undefined,
+      preheat_temp: undefined,
+      preheat_time: undefined,
       steps: '',
       memo: '',
       tags: [],
@@ -96,13 +107,21 @@ export function RecipeForm({ mode, recipeId }: Props) {
       try {
         const recipe = await fetchRecipe(recipeId!)
         formLoaded.current = true
+        // 단위 복원
+        unitsRef.current = {
+          bakeTimeUnit: parseTimeUnit(recipe.bake_time),
+          preheatTimeUnit: parseTimeUnit(recipe.preheat_time),
+        }
+
         reset({
           name: recipe.name,
           source_type: (recipe.source_type as RecipeFormValues['source_type']) ?? undefined,
           source_url: recipe.source_url ?? '',
-          oven_temp: recipe.oven_temp ?? '',
-          bake_time: recipe.bake_time ?? '',
-          quantity: recipe.quantity ?? '',
+          oven_temp: parseFieldValue(recipe.oven_temp),
+          bake_time: parseFieldValue(recipe.bake_time),
+          quantity: parseFieldValue(recipe.quantity),
+          preheat_temp: parseFieldValue(recipe.preheat_temp),
+          preheat_time: parseFieldValue(recipe.preheat_time),
           steps: recipe.steps ?? '',
           memo: recipe.memo ?? '',
           tags: recipe.tags ?? [],
@@ -181,7 +200,17 @@ export function RecipeForm({ mode, recipeId }: Props) {
       setIsSubmitting(true)
 
       try {
-        const { ingredients, ...recipeData } = values
+        const { ingredients, oven_temp, bake_time, quantity, preheat_temp, preheat_time, ...rest } =
+          values
+        const { bakeTimeUnit, preheatTimeUnit } = unitsRef.current
+        const recipeData = {
+          ...rest,
+          oven_temp: oven_temp ? `${oven_temp}°C` : null,
+          bake_time: bake_time ? `${bake_time}${bakeTimeUnit}` : null,
+          quantity: quantity ? `${quantity}개` : null,
+          preheat_temp: preheat_temp ? `${preheat_temp}°C` : null,
+          preheat_time: preheat_time ? `${preheat_time}${preheatTimeUnit}` : null,
+        }
         const { files, thumbnailIndex } = photosRef.current
 
         if (mode === 'create') {
@@ -255,7 +284,7 @@ export function RecipeForm({ mode, recipeId }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit as never)} className="pb-24">
-      <PageHeader title={mode === 'create' ? '레시피 추가' : '레시피 수정'} />
+      <PageHeader title={mode === 'create' ? '레시피 추가' : '레시피 수정'} right={headerRight} />
       <div className="max-w-[720px] mx-auto px-4 pt-5 flex flex-col gap-5">
         {/* Section 1: Basic Info */}
         <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
@@ -284,21 +313,19 @@ export function RecipeForm({ mode, recipeId }: Props) {
         {/* Section 3: Steps */}
         <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader index={2} />
-          <StepsSection register={register} errors={errors} />
+          <StepsSection
+            register={register}
+            errors={errors}
+            onUnitsChange={(units) => {
+              unitsRef.current = units
+            }}
+          />
         </section>
 
         {/* Section 4: Photos */}
         <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader index={3} />
           <PhotoSection onChange={handlePhotoChange} />
-        </section>
-
-        {/* Section 5: Retrospective */}
-        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
-          <CardHeader index={4} />
-          <p className="text-sm text-muted-foreground">
-            레시피 저장 후 상세 페이지에서 베이킹 기록을 추가할 수 있어요.
-          </p>
         </section>
       </div>
 
