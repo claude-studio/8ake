@@ -132,7 +132,7 @@ export function PhotoUploader({ onChange }: Props) {
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-(--primary-border) bg-surface text-muted-foreground"
+        className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-border bg-surface text-muted-foreground"
       >
         <ImagePlus size={28} className="text-primary" />
         <span className="text-sm">클릭 또는 드래그하여 사진 추가</span>
