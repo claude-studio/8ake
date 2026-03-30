@@ -81,7 +81,9 @@ const IngredientRow = memo(function IngredientRow({
                       <Input
                         {...amountField}
                         value={amountField.value ?? ''}
-                        type={unitField.value === '직접입력' ? 'text' : 'number'}
+                        type="text"
+                        inputMode={unitField.value === '직접입력' ? 'text' : 'numeric'}
+                        pattern={unitField.value === '직접입력' ? undefined : '[0-9]*'}
                         placeholder={unitField.value === '직접입력' ? '직접입력' : '0'}
                         className="h-full flex-1 min-w-0 border-0 rounded-l-md rounded-r-none text-center shadow-none focus-visible:ring-0 focus-visible:border-0 text-sm"
                         aria-invalid={hasAmountError}

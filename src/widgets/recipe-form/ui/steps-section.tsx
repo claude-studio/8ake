@@ -74,7 +74,9 @@ export function StepsSection({
           <div className="flex h-9 rounded-md border border-input focus-within:border-primary focus-within:ring-[3px] focus-within:ring-primary/15">
             <Input
               {...register('preheat_temp')}
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="0"
               className="h-full flex-1 min-w-0 border-0 rounded-l-md rounded-r-none text-center shadow-none focus-visible:ring-0 focus-visible:border-0"
             />
@@ -87,7 +89,9 @@ export function StepsSection({
           <div className="flex h-9 rounded-md border border-input focus-within:border-primary focus-within:ring-[3px] focus-within:ring-primary/15">
             <Input
               {...register('preheat_time')}
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="0"
               className="h-full flex-1 min-w-0 border-0 rounded-l-md rounded-r-none text-center shadow-none focus-visible:ring-0 focus-visible:border-0"
             />
@@ -112,7 +116,9 @@ export function StepsSection({
           >
             <Input
               {...register('oven_temp')}
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="0"
               className="h-full flex-1 min-w-0 border-0 rounded-l-md rounded-r-none text-center shadow-none focus-visible:ring-0 focus-visible:border-0"
               aria-invalid={!!errors.oven_temp}
@@ -137,7 +143,9 @@ export function StepsSection({
           >
             <Input
               {...register('bake_time')}
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="0"
               className="h-full flex-1 min-w-0 border-0 rounded-l-md rounded-r-none text-center shadow-none focus-visible:ring-0 focus-visible:border-0"
               aria-invalid={!!errors.bake_time}
@@ -166,7 +174,9 @@ export function StepsSection({
           >
             <Input
               {...register('quantity')}
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="0"
               className="h-full flex-1 min-w-0 border-0 rounded-l-md rounded-r-none text-center shadow-none focus-visible:ring-0 focus-visible:border-0"
               aria-invalid={!!errors.quantity}

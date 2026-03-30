@@ -85,6 +85,7 @@ export function BasicInfoSection({ control, errors }: Props) {
         <label className="field-label">
           출처 <span className="text-destructive">*</span>
         </label>
+
         <div className="flex flex-wrap gap-2">
           {SOURCE_TYPES.map((st) => {
             const isActive = sourceType.field.value === st.value
@@ -117,7 +118,7 @@ export function BasicInfoSection({ control, errors }: Props) {
       </div>
 
       {showUrl ? (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 mt-4">
           <label className="field-label">
             출처 URL <span className="text-destructive">*</span>
           </label>
