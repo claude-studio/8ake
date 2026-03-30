@@ -1,34 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
-import { fetchRecipe } from './recipe-api'
-
-import type { RecipeWithDetails } from '../model/types'
+import { fetchRecipe, recipeKeys } from './recipe-api'
 
 export function useRecipe(id: string) {
-  const [data, setData] = useState<RecipeWithDetails | null>(null)
-  const [isLoading, setIsLoading] = useState(() => !!id)
-  const [error, setError] = useState<Error | null>(null)
+  const query = useQuery({
+    queryKey: recipeKeys.detail(id),
+    queryFn: () => fetchRecipe(id),
+    enabled: !!id,
+  })
 
-  useEffect(() => {
-    if (!id) return
-    let cancelled = false
-    fetchRecipe(id)
-      .then((result) => {
-        if (!cancelled) {
-          setData(result)
-          setIsLoading(false)
-        }
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setError(e instanceof Error ? e : new Error(String(e)))
-          setIsLoading(false)
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [id])
-
-  return { data, isLoading, error }
+  return {
+    data: query.data ?? null,
+    isLoading: query.isLoading,
+    error: query.error,
+  }
 }

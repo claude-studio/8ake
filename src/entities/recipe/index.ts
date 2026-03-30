@@ -6,6 +6,7 @@ export {
   updateRecipe,
   deleteRecipe,
   getPhotoUrl,
+  recipeKeys,
 } from './api/recipe-api'
 export { useRecipes } from './api/use-recipes'
 export { useRecipe } from './api/use-recipe'

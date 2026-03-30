@@ -1,25 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
-import { fetchReviews } from './review-api'
-
-import type { Review } from '../model/types'
+import { fetchReviews, reviewKeys } from './review-api'
 
 export function useReviews(recipeId: string) {
-  const [data, setData] = useState<Review[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const query = useQuery({
+    queryKey: reviewKeys.list(recipeId),
+    queryFn: () => fetchReviews(recipeId),
+    enabled: !!recipeId,
+  })
 
-  const load = useCallback(() => {
-    fetchReviews(recipeId)
-      .then((result) => {
-        setData(result)
-        setIsLoading(false)
-      })
-      .catch(() => setIsLoading(false))
-  }, [recipeId])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  return { data, isLoading, refetch: load }
+  return {
+    data: query.data ?? [],
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+  }
 }

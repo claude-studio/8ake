@@ -1,6 +1,12 @@
 import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
 
+export const ingredientKeys = {
+  all: ['ingredients'] as const,
+  list: () => [...ingredientKeys.all, 'list'] as const,
+  reviews: (ingredientId: string) => [...ingredientKeys.all, 'reviews', ingredientId] as const,
+}
+
 export async function fetchIngredients() {
   const { data, error } = await supabase
     .from('ingredients')

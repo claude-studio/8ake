@@ -3,6 +3,14 @@ import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
 
 import type { RecipeWithDetails } from '../model/types'
 
+export const recipeKeys = {
+  all: ['recipes'] as const,
+  lists: () => [...recipeKeys.all, 'list'] as const,
+  list: (search: string, sortBy: string) => [...recipeKeys.lists(), { search, sortBy }] as const,
+  details: () => [...recipeKeys.all, 'detail'] as const,
+  detail: (id: string) => [...recipeKeys.details(), id] as const,
+}
+
 export const PAGE_SIZE = 12
 
 export async function fetchRecipes({

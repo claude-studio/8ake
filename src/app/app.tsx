@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react'
 
+import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { Toaster } from 'sonner'
 
 import { useAuthStore } from '@/features/auth'
+import { queryClient } from '@/shared/api'
 
 import { routeTree } from '../routeTree.gen'
 
@@ -50,9 +52,9 @@ export function App() {
   }
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} context={routerContext} />
       <Toaster position="top-center" closeButton toastOptions={TOAST_OPTIONS} />
-    </>
+    </QueryClientProvider>
   )
 }

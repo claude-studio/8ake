@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { Loader2, Plus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { createRecipe, updateRecipe, fetchRecipe } from '@/entities/recipe'
+import { createRecipe, updateRecipe, fetchRecipe, recipeKeys } from '@/entities/recipe'
 import { useAuthStore } from '@/features/auth'
 import { supabase } from '@/shared/api'
 import { PageHeader } from '@/shared/ui'
@@ -89,6 +90,7 @@ function buildIngredientRows(recipeId: string, ingredients: RecipeFormValues['in
 export function RecipeForm({ mode, recipeId, headerRight }: Props) {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
+  const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [photosChanged, setPhotosChanged] = useState(false)
   const [unitsChanged, setUnitsChanged] = useState(false)
@@ -275,7 +277,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           ])
 
           toast.success('레시피가 등록되었습니다')
-          window.dispatchEvent(new Event('recipe-updated'))
+          queryClient.invalidateQueries({ queryKey: recipeKeys.all })
           router.navigate({ to: '/recipe/$id', params: { id: recipe.id } })
         } else if (recipeId) {
           const replaceIngredients = supabase
@@ -298,7 +300,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           ])
 
           toast.success('레시피가 수정되었습니다')
-          window.dispatchEvent(new Event('recipe-updated'))
+          queryClient.invalidateQueries({ queryKey: recipeKeys.all })
           formLoaded.current = false
           setPhotosChanged(false)
           setUnitsChanged(false)
@@ -311,7 +313,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
         setIsSubmitting(false)
       }
     },
-    [mode, recipeId, user, router, uploadPhotos]
+    [mode, recipeId, user, router, uploadPhotos, queryClient]
   )
 
   return (
