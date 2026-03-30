@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import {
@@ -7,6 +8,7 @@ import {
   updateIngredientReview,
   deleteIngredientReview,
   deleteIngredient,
+  ingredientKeys,
   useIngredientReviews,
 } from '@/entities/ingredient'
 import { useAuthStore } from '@/features/auth'
@@ -18,8 +20,9 @@ export function useIngredientCrud(ingredientId: string, onIngredientDeleted: () 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteIngredientOpen, setDeleteIngredientOpen] = useState(false)
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null)
-  const { data: reviews, isLoading, refetch: refetchReviews } = useIngredientReviews(ingredientId)
+  const { data: reviews, isLoading } = useIngredientReviews(ingredientId)
   const user = useAuthStore((s) => s.user)
+  const queryClient = useQueryClient()
 
   async function handleCreateReview(values: IngredientReviewFormValues) {
     if (!user) return
@@ -32,7 +35,7 @@ export function useIngredientCrud(ingredientId: string, onIngredientDeleted: () 
     })
     toast.success('리뷰가 추가되었습니다')
     setShowForm(false)
-    refetchReviews()
+    queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
   }
 
   async function handleUpdateReview(id: string, values: IngredientReviewFormValues) {
@@ -43,7 +46,7 @@ export function useIngredientCrud(ingredientId: string, onIngredientDeleted: () 
     })
     toast.success('리뷰가 수정되었습니다')
     setEditingId(null)
-    refetchReviews()
+    queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
   }
 
   async function handleDeleteReview() {
@@ -51,13 +54,14 @@ export function useIngredientCrud(ingredientId: string, onIngredientDeleted: () 
     await deleteIngredientReview(deletingReviewId)
     toast.success('리뷰가 삭제되었습니다')
     setDeletingReviewId(null)
-    refetchReviews()
+    queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
   }
 
   async function handleDeleteIngredient() {
     await deleteIngredient(ingredientId)
     toast.success('재료가 삭제되었습니다')
     setDeleteIngredientOpen(false)
+    queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
     onIngredientDeleted()
   }
 

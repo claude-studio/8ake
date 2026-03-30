@@ -7,6 +7,7 @@ export {
   createIngredientReview,
   updateIngredientReview,
   deleteIngredientReview,
+  ingredientKeys,
 } from './api/ingredient-api'
 export { useIngredients } from './api/use-ingredients'
 export { useIngredientReviews } from './api/use-ingredient-reviews'

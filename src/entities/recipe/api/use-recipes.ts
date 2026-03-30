@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMemo } from 'react'
 
-import { fetchRecipes, PAGE_SIZE } from './recipe-api'
+import { useInfiniteQuery } from '@tanstack/react-query'
+
+import { fetchRecipes, PAGE_SIZE, recipeKeys } from './recipe-api'
 
 import type { Recipe, RecipePhoto } from '../model/types'
 
@@ -9,70 +11,37 @@ interface RecipeRow extends Recipe {
 }
 
 export function useRecipes(search: string, sortBy: 'created_at' | 'total_score') {
-  const [items, setItems] = useState<RecipeRow[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isFetchingMore, setIsFetchingMore] = useState(false)
-  const [hasNextPage, setHasNextPage] = useState(false)
-  const cursorRef = useRef<{ created_at: string; id: string } | undefined>(undefined)
-  const abortRef = useRef<AbortController | null>(null)
-
-  const load = useCallback(
-    async (reset: boolean) => {
-      abortRef.current?.abort()
-      abortRef.current = new AbortController()
-
-      if (reset) {
-        setIsLoading(true)
-        cursorRef.current = undefined
-      } else {
-        setIsFetchingMore(true)
-      }
-
-      try {
-        const data = await fetchRecipes({
-          search,
-          sortBy,
-          cursor: reset ? undefined : cursorRef.current,
-        })
-        const rows = data as unknown as RecipeRow[]
-        setHasNextPage(rows.length === PAGE_SIZE)
-        if (rows.length > 0) {
-          const last = rows[rows.length - 1]
-          cursorRef.current = { created_at: last.created_at, id: last.id }
-        }
-        setItems((prev) => (reset ? rows : [...prev, ...rows]))
-      } catch {
-        // aborted
-      } finally {
-        setIsLoading(false)
-        setIsFetchingMore(false)
-      }
+  const query = useInfiniteQuery({
+    queryKey: recipeKeys.list(search, sortBy),
+    queryFn: ({ pageParam }) =>
+      fetchRecipes({
+        search,
+        sortBy,
+        cursor: pageParam,
+      }),
+    initialPageParam: undefined as { created_at: string; id: string } | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < PAGE_SIZE) return undefined
+      const last = lastPage[lastPage.length - 1]
+      return { created_at: last.created_at, id: last.id }
     },
-    [search, sortBy]
+  })
+
+  const items = useMemo(
+    () => (query.data?.pages.flat() ?? []) as unknown as RecipeRow[],
+    [query.data]
   )
 
-  useEffect(() => {
-    load(true)
-  }, [load])
-
-  // Refetch on window focus or explicit recipe-updated event
-  useEffect(() => {
-    function handleRefetch() {
-      load(true)
-    }
-    window.addEventListener('focus', handleRefetch)
-    window.addEventListener('recipe-updated', handleRefetch)
-    return () => {
-      window.removeEventListener('focus', handleRefetch)
-      window.removeEventListener('recipe-updated', handleRefetch)
-    }
-  }, [load])
-
-  const fetchMore = useCallback(() => {
-    if (!isFetchingMore && hasNextPage) load(false)
-  }, [isFetchingMore, hasNextPage, load])
-
-  const refetch = useCallback(() => load(true), [load])
-
-  return { items, isLoading, isFetchingMore, hasNextPage, fetchMore, refetch }
+  return {
+    items,
+    isLoading: query.isLoading,
+    isFetchingMore: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage ?? false,
+    fetchMore: () => {
+      if (!query.isFetchingNextPage && query.hasNextPage) {
+        query.fetchNextPage()
+      }
+    },
+    refetch: query.refetch,
+  }
 }

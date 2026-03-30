@@ -1,25 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
-import { fetchIngredients } from './ingredient-api'
-
-import type { Ingredient } from '../model/types'
+import { fetchIngredients, ingredientKeys } from './ingredient-api'
 
 export function useIngredients() {
-  const [data, setData] = useState<Ingredient[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const query = useQuery({
+    queryKey: ingredientKeys.list(),
+    queryFn: fetchIngredients,
+  })
 
-  const load = useCallback(() => {
-    fetchIngredients()
-      .then((result) => {
-        setData(result)
-        setIsLoading(false)
-      })
-      .catch(() => setIsLoading(false))
-  }, [])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  return { data, isLoading, refetch: load }
+  return {
+    data: query.data ?? [],
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+  }
 }
