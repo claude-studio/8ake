@@ -243,7 +243,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                       <NativeSelect
                         value={multiplier}
                         onChange={(e) => setMultiplier(Number(e.target.value))}
-                        className="h-7 py-0 pl-2 pr-6 text-xs font-semibold min-w-0 w-auto"
+                        className="h-7 py-0 pl-2 pr-4.5 text-xs font-semibold min-w-0 w-auto"
                       >
                         {[1, 2, 3, 4, 5].map((n) => (
                           <NativeSelectOption key={n} value={n}>

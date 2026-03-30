@@ -1,6 +1,6 @@
 import { memo, useEffect } from 'react'
 
-import { ChevronDown, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { Controller, useFieldArray } from 'react-hook-form'
 
 import { Input } from '@/components/ui/input'
@@ -108,10 +108,6 @@ const IngredientRow = memo(function IngredientRow({
                           <NativeSelectOption value="개">개</NativeSelectOption>
                           <NativeSelectOption value="직접입력">직접</NativeSelectOption>
                         </NativeSelect>
-                        <ChevronDown
-                          size={10}
-                          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                        />
                       </div>
                     </div>
                     {hasAmountError && (

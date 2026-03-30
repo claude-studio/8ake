@@ -1,5 +1,3 @@
-import { ChevronDown } from 'lucide-react'
-
 import { Input } from '@/components/ui/input'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
@@ -43,10 +41,6 @@ function UnitSelect({
         <NativeSelectOption value="분">분</NativeSelectOption>
         <NativeSelectOption value="시간">시간</NativeSelectOption>
       </NativeSelect>
-      <ChevronDown
-        size={10}
-        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-      />
     </div>
   )
 }
