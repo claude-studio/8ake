@@ -16,12 +16,14 @@ import {
   UtensilsCrossed,
 } from 'lucide-react'
 
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { useRecipe } from '@/entities/recipe'
 import { cn } from '@/shared/lib/utils'
 
 import { PhotoGallery } from './photo-gallery'
 
 const STEP_NUMBER_RE = /^(\d+)\.\s*(.*)$/
+const AMOUNT_NUMBER_RE = /^(\d+(?:\.\d+)?)\s*(.*)$/
 
 const SOURCE_ICONS: Record<string, React.ReactNode> = {
   youtube: <Play size={13} />,
@@ -46,6 +48,7 @@ interface Props {
 export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
   const { data: recipe, isLoading, error } = useRecipe(recipeId)
   const [tab, setTab] = useState<'recipe' | 'reviews'>('recipe')
+  const [multiplier, setMultiplier] = useState(1)
 
   const recipeIngredients = recipe?.recipe_ingredients
   const sortedIngredients = useMemo(
@@ -235,7 +238,20 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                     <ClipboardList size={13} /> 재료
                   </h2>
                   {recipe.quantity ? (
-                    <span className="text-xs text-muted-foreground">{recipe.quantity} 기준</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">{recipe.quantity} 기준</span>
+                      <NativeSelect
+                        value={multiplier}
+                        onChange={(e) => setMultiplier(Number(e.target.value))}
+                        className="h-7 py-0 pl-2 pr-6 text-xs font-semibold min-w-0 w-auto"
+                      >
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <NativeSelectOption key={n} value={n}>
+                            {n}배
+                          </NativeSelectOption>
+                        ))}
+                      </NativeSelect>
+                    </div>
                   ) : null}
                 </div>
                 <ul className="list-none m-0 py-2">
@@ -251,7 +267,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                       <span className="flex-1">{ing.name}</span>
                       {ing.amount ? (
                         <span className="shrink-0 text-muted-foreground font-medium min-w-[56px] text-right">
-                          {ing.amount}
+                          {multiplyAmount(ing.amount, multiplier)}
                         </span>
                       ) : null}
                     </li>
@@ -323,6 +339,16 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
       </div>
     </div>
   )
+}
+
+function multiplyAmount(amount: string, multiplier: number): string {
+  if (multiplier === 1) return amount
+  const match = amount.match(AMOUNT_NUMBER_RE)
+  if (!match) return amount
+  const num = parseFloat(match[1]) * multiplier
+  const unit = match[2]
+  const formatted = Number.isInteger(num) ? String(num) : num.toFixed(1).replace(/\.0$/, '')
+  return unit ? `${formatted}${unit}` : formatted
 }
 
 function MetaCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
