@@ -6,10 +6,11 @@ import type { RecipeWithDetails } from '../model/types'
 
 export function useRecipe(id: string) {
   const [data, setData] = useState<RecipeWithDetails | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(() => !!id)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
+    if (!id) return
     let cancelled = false
     fetchRecipe(id)
       .then((result) => {
