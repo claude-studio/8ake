@@ -27,7 +27,7 @@ export function PageHeader({ title, right }: Props) {
         </Button>
 
         {/* 가운데: 타이틀 */}
-        <Link to="/home" className="flex flex-1 items-center justify-center gap-1.5 no-underline">
+        <Link to="/" className="flex flex-1 items-center justify-center gap-1.5 no-underline">
           <span className="text-[15px] font-bold text-foreground">{title}</span>
         </Link>
 

@@ -78,8 +78,8 @@ export function AppLayout({ children, hideNav = false }: Props) {
               {/* 레시피 */}
               <PillItem
                 as="link"
-                to="/home"
-                active={isActive('/home', true)}
+                to="/"
+                active={isActive('/', true)}
                 onHover={(v) => handleHover(v ? 0 : null)}
               >
                 <Home size={18} />
