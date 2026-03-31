@@ -38,7 +38,7 @@ export function DeleteDialog({ recipeId, open: controlledOpen, onOpenChange, tri
     try {
       await deleteRecipe(recipeId)
       toast.success('레시피가 삭제되었습니다.')
-      router.navigate({ to: '/' })
+      router.navigate({ to: '/home' })
     } catch {
       toast.error('레시피 삭제에 실패했습니다.')
       setIsDeleting(false)
