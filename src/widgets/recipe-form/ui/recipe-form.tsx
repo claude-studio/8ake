@@ -277,7 +277,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           ])
 
           toast.success('레시피가 등록되었습니다')
-          queryClient.invalidateQueries({ queryKey: recipeKeys.all })
+          queryClient.invalidateQueries({ queryKey: recipeKeys.lists() })
           router.navigate({ to: '/recipe/$id', params: { id: recipe.id } })
         } else if (recipeId) {
           const replaceIngredients = supabase
@@ -300,7 +300,8 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           ])
 
           toast.success('레시피가 수정되었습니다')
-          queryClient.invalidateQueries({ queryKey: recipeKeys.all })
+          queryClient.invalidateQueries({ queryKey: recipeKeys.detail(recipeId) })
+          queryClient.invalidateQueries({ queryKey: recipeKeys.lists() })
           formLoaded.current = false
           setPhotosChanged(false)
           setUnitsChanged(false)

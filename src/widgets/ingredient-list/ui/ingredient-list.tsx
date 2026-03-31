@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { LayoutGrid, List, Package, Search, Star, Trophy } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { createIngredient, useIngredients } from '@/entities/ingredient'
+import { createIngredient, useIngredients, ingredientKeys } from '@/entities/ingredient'
 import { useAuthStore } from '@/features/auth'
 import { cn } from '@/shared/lib/utils'
 import { useUIStore } from '@/shared/model/ui-store'
@@ -14,7 +15,8 @@ import { IngredientCardView } from './ingredient-card-view'
 import { IngredientTableView } from './ingredient-table-view'
 
 export function IngredientList() {
-  const { data: ingredients, isLoading, refetch } = useIngredients()
+  const { data: ingredients, isLoading } = useIngredients()
+  const queryClient = useQueryClient()
   const user = useAuthStore((s) => s.user)
   const viewMode = useUIStore((s) => s.ingredientViewMode)
   const setViewMode = useUIStore((s) => s.setIngredientViewMode)
@@ -38,7 +40,7 @@ export function IngredientList() {
       toast.success('재료가 추가되었습니다')
       setNewName('')
       setShowAddForm(false)
-      refetch()
+      queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
     } catch {
       toast.error('재료 추가에 실패했습니다')
     } finally {
