@@ -10,14 +10,15 @@ interface RecipeRow extends Recipe {
   recipe_photos: RecipePhoto[]
 }
 
-export function useRecipes(search: string, sortBy: 'created_at' | 'total_score') {
+export function useRecipes(search: string, sortBy: 'created_at' | 'total_score', tags?: string[]) {
   const query = useInfiniteQuery({
-    queryKey: recipeKeys.list(search, sortBy),
+    queryKey: recipeKeys.list(search, sortBy, tags),
     queryFn: ({ pageParam }) =>
       fetchRecipes({
         search,
         sortBy,
         cursor: pageParam,
+        tags,
       }),
     initialPageParam: undefined as { created_at: string; id: string } | undefined,
     getNextPageParam: (lastPage) => {

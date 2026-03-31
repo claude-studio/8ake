@@ -44,9 +44,9 @@ export function WhySection() {
               <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-(--primary-dim)">
                 <div className="size-1.5 rounded-full bg-primary" />
               </div>
-              <div>
+              <div className="flex flex-col gap-1">
                 <p className="text-sm font-semibold text-foreground">{point.title}</p>
-                <p className="mt-1 text-xs/relaxed text-muted-foreground">{point.desc}</p>
+                <p className="text-xs/relaxed text-muted-foreground">{point.desc}</p>
               </div>
             </motion.div>
           ))}

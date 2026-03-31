@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { Link } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
@@ -9,12 +9,28 @@ import { useIntersectionObserver } from '@/shared/hooks/use-intersection-observe
 
 import { RecipeCard } from './recipe-card'
 import { RecipeSearchBar } from './recipe-search-bar'
+import { TagFilterBar } from './tag-filter-bar'
 
-export function RecipeGrid() {
+interface RecipeGridProps {
+  initialTag?: string
+}
+
+export function RecipeGrid({ initialTag }: RecipeGridProps) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<'created_at' | 'total_score'>('created_at')
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTag ? [initialTag] : [])
 
-  const { items, isLoading, isFetchingMore, hasNextPage, fetchMore } = useRecipes(search, sortBy)
+  const toggleTag = useCallback((tag: string) => {
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }, [])
+
+  const clearTags = useCallback(() => setSelectedTags([]), [])
+
+  const { items, isLoading, isFetchingMore, hasNextPage, fetchMore } = useRecipes(
+    search,
+    sortBy,
+    selectedTags.length > 0 ? selectedTags : undefined
+  )
 
   const sentinelRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetchingMore) {
@@ -31,7 +47,8 @@ export function RecipeGrid() {
         onSortByChange={setSortBy}
       />
 
-      {/* Loading skeleton */}
+      <TagFilterBar selectedTags={selectedTags} onToggleTag={toggleTag} onClearTags={clearTags} />
+
       {isLoading && (
         <div className="grid grid-cols-1 min-[475px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
           {Array.from({ length: 6 }, (_, i) => (
@@ -40,7 +57,6 @@ export function RecipeGrid() {
         </div>
       )}
 
-      {/* Empty state */}
       {!isLoading && items.length === 0 && (
         <div className="flex min-h-[calc(100dvh-var(--header-h)-var(--tabbar-h)-var(--safe-bottom)-5rem)] flex-col items-center justify-center text-center">
           <p className="mb-4 text-sm text-muted-foreground">
@@ -55,7 +71,6 @@ export function RecipeGrid() {
         </div>
       )}
 
-      {/* Recipe count */}
       {!isLoading && items.length > 0 && (
         <p className="text-xs tracking-wide font-medium text-muted-foreground mb-3.5 mt-4 pl-0.5">
           <span className="font-bold text-primary">{items.length}</span>
@@ -63,7 +78,6 @@ export function RecipeGrid() {
         </p>
       )}
 
-      {/* Card grid */}
       {!isLoading && items.length > 0 && (
         <div className="grid grid-cols-1 min-[475px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {items.map((recipe, index) => (
@@ -82,7 +96,6 @@ export function RecipeGrid() {
         </div>
       )}
 
-      {/* Infinite scroll sentinel */}
       {hasNextPage && (
         <div ref={sentinelRef} className="h-10 mt-4">
           {isFetchingMore && (

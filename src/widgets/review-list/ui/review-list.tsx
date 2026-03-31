@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -11,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useReviews, createReview, updateReview, deleteReview } from '@/entities/review'
+import { useReviews, createReview, updateReview, deleteReview, reviewKeys } from '@/entities/review'
 import type { Review } from '@/entities/review'
 import { useAuthStore } from '@/features/auth'
 
@@ -26,7 +27,8 @@ interface Props {
 
 export function ReviewList({ recipeId }: Props) {
   const user = useAuthStore((s) => s.user)
-  const { data: reviews, isLoading, refetch } = useReviews(recipeId)
+  const { data: reviews, isLoading } = useReviews(recipeId)
+  const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [editingReview, setEditingReview] = useState<Review | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -42,7 +44,7 @@ export function ReviewList({ recipeId }: Props) {
       })
       toast.success('회고가 추가되었습니다.')
       setShowForm(false)
-      refetch()
+      queryClient.invalidateQueries({ queryKey: reviewKeys.list(recipeId) })
     } catch {
       toast.error('회고 추가에 실패했습니다.')
     }
@@ -54,7 +56,7 @@ export function ReviewList({ recipeId }: Props) {
       await updateReview(editingReview.id, values)
       toast.success('회고가 수정되었습니다.')
       setEditingReview(null)
-      refetch()
+      queryClient.invalidateQueries({ queryKey: reviewKeys.list(recipeId) })
     } catch {
       toast.error('회고 수정에 실패했습니다.')
     }
@@ -67,7 +69,7 @@ export function ReviewList({ recipeId }: Props) {
       await deleteReview(deletingId)
       toast.success('회고가 삭제되었습니다.')
       setDeletingId(null)
-      refetch()
+      queryClient.invalidateQueries({ queryKey: reviewKeys.list(recipeId) })
     } catch {
       toast.error('회고 삭제에 실패했습니다.')
     } finally {

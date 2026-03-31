@@ -1,7 +1,11 @@
+import { useSearch } from '@tanstack/react-router'
+
 import { HeaderMenu } from '@/widgets/header-menu'
 import { RecipeGrid } from '@/widgets/recipe-grid'
 
 export function RecipeListPage() {
+  const { tag } = useSearch({ from: '/_auth/home' })
+
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
@@ -17,7 +21,7 @@ export function RecipeListPage() {
       </header>
 
       <div className="mx-auto max-w-[1024px] px-4">
-        <RecipeGrid />
+        <RecipeGrid initialTag={tag} />
       </div>
     </>
   )
