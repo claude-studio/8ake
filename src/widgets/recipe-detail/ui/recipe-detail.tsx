@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 
+import { Link } from '@tanstack/react-router'
 import {
   BookOpen,
   ClipboardList,
@@ -144,12 +145,14 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
             )}
           </span>
           {recipe.tags.map((tag) => (
-            <span
+            <Link
               key={tag}
-              className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-(--primary-dim) text-primary border border-(--primary-border)"
+              to="/home"
+              search={{ tag }}
+              className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-(--primary-dim) text-primary border border-(--primary-border) no-underline"
             >
               #{tag}
-            </span>
+            </Link>
           ))}
         </div>
 

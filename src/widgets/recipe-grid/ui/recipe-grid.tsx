@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { Link } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
@@ -9,12 +9,28 @@ import { useIntersectionObserver } from '@/shared/hooks/use-intersection-observe
 
 import { RecipeCard } from './recipe-card'
 import { RecipeSearchBar } from './recipe-search-bar'
+import { TagFilterBar } from './tag-filter-bar'
 
-export function RecipeGrid() {
+interface RecipeGridProps {
+  initialTag?: string
+}
+
+export function RecipeGrid({ initialTag }: RecipeGridProps) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<'created_at' | 'total_score'>('created_at')
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTag ? [initialTag] : [])
 
-  const { items, isLoading, isFetchingMore, hasNextPage, fetchMore } = useRecipes(search, sortBy)
+  const toggleTag = useCallback((tag: string) => {
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }, [])
+
+  const clearTags = useCallback(() => setSelectedTags([]), [])
+
+  const { items, isLoading, isFetchingMore, hasNextPage, fetchMore } = useRecipes(
+    search,
+    sortBy,
+    selectedTags.length > 0 ? selectedTags : undefined
+  )
 
   const sentinelRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetchingMore) {
@@ -30,6 +46,8 @@ export function RecipeGrid() {
         sortBy={sortBy}
         onSortByChange={setSortBy}
       />
+
+      <TagFilterBar selectedTags={selectedTags} onToggleTag={toggleTag} onClearTags={clearTags} />
 
       {/* Loading skeleton */}
       {isLoading && (

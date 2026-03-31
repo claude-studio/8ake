@@ -6,7 +6,8 @@ import type { RecipeWithDetails } from '../model/types'
 export const recipeKeys = {
   all: ['recipes'] as const,
   lists: () => [...recipeKeys.all, 'list'] as const,
-  list: (search: string, sortBy: string) => [...recipeKeys.lists(), { search, sortBy }] as const,
+  list: (search: string, sortBy: string, tags?: string[]) =>
+    [...recipeKeys.lists(), { search, sortBy, tags }] as const,
   details: () => [...recipeKeys.all, 'detail'] as const,
   detail: (id: string) => [...recipeKeys.details(), id] as const,
 }
@@ -17,10 +18,12 @@ export async function fetchRecipes({
   search,
   sortBy,
   cursor,
+  tags,
 }: {
   search: string
   sortBy: 'created_at' | 'total_score'
   cursor?: { created_at: string; id: string }
+  tags?: string[]
 }) {
   let query = supabase
     .from('recipes')
@@ -31,6 +34,10 @@ export async function fetchRecipes({
 
   if (search) {
     query = query.ilike('name', `%${search}%`)
+  }
+
+  if (tags && tags.length > 0) {
+    query = query.contains('tags', tags)
   }
 
   // cursor pagination은 created_at 정렬 시에만 유효
