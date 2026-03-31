@@ -132,7 +132,7 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
             className={cn(
               'inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full',
               recipe.is_public
-                ? 'bg-[var(--success-bg)] text-[var(--success-text)] border border-[var(--success-border)]'
+                ? 'bg-(--success-bg) text-(--success-text) border border-(--success-border)'
                 : 'bg-surface text-muted-foreground border border-border'
             )}
           >

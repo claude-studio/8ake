@@ -49,6 +49,12 @@ user-invocable: true
 - `@apply` 지시문 사용 → 권장하지 않음 (경고로 표시)
 - `dark:` 접두사 사용 → 위반 (`[data-theme="dark"]` 기반이어야 함)
 
+**정상 패턴 (위반 아님):**
+
+- `shadow-(--xxx)`, `bg-(--xxx)`, `text-(--xxx)`, `border-(--xxx)` — Tailwind v4 CSS variable shorthand 공식 문법
+- `bg-[var(--xxx)]`, `text-[var(--xxx)]` — Tailwind arbitrary value 문법 (shorthand와 등가)
+- 이 프로젝트는 `eslint-plugin-better-tailwindcss`가 shorthand `(--xxx)` 형식을 강제하므로 `[var(--xxx)]` 형식으로 변환하면 eslint --fix가 되돌림
+
 ### 4. 다크모드 컬러 누락
 
 `src/shared/styles/tokens.css`에서 `:root` 에 정의된 색상 변수가 `[data-theme="dark"]` 블록에도 정의되어 있는지 확인. 누락된 변수가 있으면 경고.
