@@ -68,7 +68,7 @@ export function HeaderMenu({ onEdit, onDelete }: Props) {
 
         {/* 홈 */}
         <DropdownMenuItem
-          onClick={() => navigate({ to: '/' })}
+          onClick={() => navigate({ to: '/home' })}
           className="cursor-pointer gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-medium text-foreground focus:bg-surface focus:text-foreground"
         >
           <Home size={15} className="text-muted-foreground" />
