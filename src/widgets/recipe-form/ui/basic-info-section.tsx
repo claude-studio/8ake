@@ -26,7 +26,7 @@ interface Props {
 
 export function BasicInfoSection({ control, errors }: Props) {
   const [tagInput, setTagInput] = useState('')
-  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
   const { data: popularTags } = usePopularTags()
@@ -46,6 +46,16 @@ export function BasicInfoSection({ control, errors }: Props) {
     sourceType.field.value as (typeof SOURCE_TYPES_WITH_URL)[number]
   )
 
+  const addTag = useCallback(
+    (tag: string, currentTags: string[], onChange: (tags: string[]) => void) => {
+      if (tag && !currentTags.includes(tag)) {
+        onChange([...currentTags, tag])
+      }
+      setTagInput('')
+    },
+    []
+  )
+
   const handleTagKeyDown = useCallback(
     (
       e: React.KeyboardEvent<HTMLInputElement>,
@@ -55,14 +65,10 @@ export function BasicInfoSection({ control, errors }: Props) {
       if (e.nativeEvent.isComposing) return
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault()
-        const value = tagInput.trim().replace(/,/g, '')
-        if (value && !currentTags.includes(value)) {
-          onChange([...currentTags, value])
-        }
-        setTagInput('')
+        addTag(tagInput.trim().replace(/,/g, ''), currentTags, onChange)
       }
     },
-    [tagInput]
+    [tagInput, addTag]
   )
 
   const removeTag = useCallback(
@@ -70,6 +76,14 @@ export function BasicInfoSection({ control, errors }: Props) {
       onChange(currentTags.filter((_, i) => i !== index))
     },
     []
+  )
+
+  const selectSuggestion = useCallback(
+    (tag: string, currentTags: string[], onChange: (tags: string[]) => void) => {
+      addTag(tag, currentTags, onChange)
+      setIsFocused(false)
+    },
+    [addTag]
   )
 
   return (
@@ -166,14 +180,6 @@ export function BasicInfoSection({ control, errors }: Props) {
           render={({ field }) => {
             const tags = field.value ?? []
 
-            const selectSuggestion = (tag: string) => {
-              if (!tags.includes(tag)) {
-                field.onChange([...tags, tag])
-              }
-              setTagInput('')
-              setShowSuggestions(false)
-            }
-
             return (
               <div className="relative">
                 <div
@@ -202,23 +208,19 @@ export function BasicInfoSection({ control, errors }: Props) {
                     id="tag-input-field"
                     type="text"
                     value={tagInput}
-                    onChange={(e) => {
-                      setTagInput(e.target.value)
-                      setShowSuggestions(true)
-                    }}
+                    onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={(e) => handleTagKeyDown(e, tags, field.onChange)}
-                    onFocus={() => setShowSuggestions(true)}
+                    onFocus={() => setIsFocused(true)}
                     onBlur={() => {
                       // 클릭 이벤트가 먼저 처리되도록 지연
-                      setTimeout(() => setShowSuggestions(false), 150)
+                      setTimeout(() => setIsFocused(false), 150)
                     }}
                     placeholder={tags.length === 0 ? '태그 입력 후 Enter' : ''}
                     className="border-0 bg-transparent font-[inherit] text-[13px] text-foreground outline-none min-w-[80px] flex-1"
                   />
                 </div>
 
-                {/* 자동완성 드롭다운 */}
-                {showSuggestions && suggestions.length > 0 && (
+                {isFocused && suggestions.length > 0 && (
                   <div
                     ref={suggestionsRef}
                     className="absolute z-50 inset-x-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden"
@@ -228,7 +230,7 @@ export function BasicInfoSection({ control, errors }: Props) {
                         key={tag}
                         type="button"
                         onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => selectSuggestion(tag)}
+                        onClick={() => selectSuggestion(tag, tags, field.onChange)}
                         className="flex w-full items-center justify-between px-3 py-2 text-sm hover:bg-surface transition-colors text-left"
                       >
                         <span className="text-foreground font-medium">#{tag}</span>

@@ -49,7 +49,6 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
 
       <TagFilterBar selectedTags={selectedTags} onToggleTag={toggleTag} onClearTags={clearTags} />
 
-      {/* Loading skeleton */}
       {isLoading && (
         <div className="grid grid-cols-1 min-[475px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
           {Array.from({ length: 6 }, (_, i) => (
@@ -58,7 +57,6 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
         </div>
       )}
 
-      {/* Empty state */}
       {!isLoading && items.length === 0 && (
         <div className="flex min-h-[calc(100dvh-var(--header-h)-var(--tabbar-h)-var(--safe-bottom)-5rem)] flex-col items-center justify-center text-center">
           <p className="mb-4 text-sm text-muted-foreground">
@@ -73,7 +71,6 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
         </div>
       )}
 
-      {/* Recipe count */}
       {!isLoading && items.length > 0 && (
         <p className="text-xs tracking-wide font-medium text-muted-foreground mb-3.5 mt-4 pl-0.5">
           <span className="font-bold text-primary">{items.length}</span>
@@ -81,7 +78,6 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
         </p>
       )}
 
-      {/* Card grid */}
       {!isLoading && items.length > 0 && (
         <div className="grid grid-cols-1 min-[475px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {items.map((recipe, index) => (
@@ -100,7 +96,6 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
         </div>
       )}
 
-      {/* Infinite scroll sentinel */}
       {hasNextPage && (
         <div ref={sentinelRef} className="h-10 mt-4">
           {isFetchingMore && (

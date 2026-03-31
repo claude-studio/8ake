@@ -5,7 +5,6 @@ export const tagKeys = {
   popular: () => [...tagKeys.all, 'popular'] as const,
 }
 
-/** 모든 레시피에서 사용된 태그를 빈도순으로 가져온다 */
 export async function fetchPopularTags(limit = 20): Promise<{ tag: string; count: number }[]> {
   const { data, error } = await supabase.from('recipes').select('tags')
   if (error) throw error
@@ -17,8 +16,7 @@ export async function fetchPopularTags(limit = 20): Promise<{ tag: string; count
     }
   }
 
-  return [...countMap.entries()]
-    .map(([tag, count]) => ({ tag, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit)
+  const results = Array.from(countMap, ([tag, count]) => ({ tag, count }))
+  results.sort((a, b) => b.count - a.count)
+  return results.slice(0, limit)
 }
