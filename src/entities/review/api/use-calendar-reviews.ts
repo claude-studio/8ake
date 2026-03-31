@@ -12,11 +12,18 @@ export interface CalendarEntry {
   created_at: string
 }
 
+/** UTC 타임스탬프를 로컬 YYYY-MM-DD로 변환 */
+function toLocalDate(isoStr: string): string {
+  const d = new Date(isoStr)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 async function fetchCalendarEntries(year: number, month: number) {
-  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-  const endMonth = month === 12 ? 1 : month + 1
-  const endYear = month === 12 ? year + 1 : year
-  const endDate = `${endYear}-${String(endMonth).padStart(2, '0')}-01`
+  // 로컬 타임존 기준 월 시작/끝을 UTC로 변환하여 필터링
+  const localStart = new Date(year, month - 1, 1)
+  const localEnd = new Date(year, month, 1)
+  const startDate = localStart.toISOString()
+  const endDate = localEnd.toISOString()
 
   // 레시피와 리뷰를 병렬로 가져오기
   const [recipesResult, reviewsResult] = await Promise.all([
@@ -43,7 +50,7 @@ async function fetchCalendarEntries(year: number, month: number) {
   for (const r of recipesResult.data ?? []) {
     entries.push({
       id: r.id,
-      date: r.created_at.slice(0, 10),
+      date: toLocalDate(r.created_at),
       type: 'recipe',
       recipe_id: r.id,
       recipe_name: r.name,
@@ -56,7 +63,7 @@ async function fetchCalendarEntries(year: number, month: number) {
   for (const r of reviewsResult.data ?? []) {
     entries.push({
       id: r.id,
-      date: r.date ?? r.created_at.slice(0, 10),
+      date: r.date ?? toLocalDate(r.created_at),
       type: 'review',
       recipe_id: r.recipe_id,
       recipe_name: (r.recipes as unknown as { name: string })?.name ?? '',
