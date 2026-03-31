@@ -104,7 +104,7 @@ const IngredientRow = memo(function IngredientRow({
                               if (val && isNaN(Number(val))) amountField.onChange('')
                             }
                           }}
-                          className="h-full w-[48px] flex-none rounded-none rounded-r-md border-0 pl-2 pr-4 py-0 text-[11px] font-semibold text-gray-800 dark:text-gray-200 bg-surface focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
+                          className="h-full w-[48px] flex-none rounded-none rounded-r-md border-0 pl-2 pr-4 py-0 text-[11px] font-semibold text-foreground bg-surface focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
                         >
                           <NativeSelectOption value="g">g</NativeSelectOption>
                           <NativeSelectOption value="개">개</NativeSelectOption>

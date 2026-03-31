@@ -47,9 +47,9 @@ export function StepsSection() {
               <div className="flex size-9 items-center justify-center rounded-full bg-primary">
                 <span className="text-xs font-bold text-primary-foreground">{step.num}</span>
               </div>
-              <div>
+              <div className="flex flex-col gap-1.5">
                 <p className="text-sm font-bold text-foreground">{step.title}</p>
-                <p className="mt-1.5 text-xs/relaxed text-muted-foreground">{step.desc}</p>
+                <p className="text-xs/relaxed text-muted-foreground">{step.desc}</p>
               </div>
             </motion.div>
           ))}

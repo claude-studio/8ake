@@ -55,9 +55,9 @@ export function FeaturesSection() {
                 <div className="flex size-10 items-center justify-center rounded-xl bg-(--primary-dim)">
                   <Icon size={18} className="text-primary" strokeWidth={1.8} />
                 </div>
-                <div>
+                <div className="flex flex-col gap-1">
                   <p className="text-sm/snug font-semibold text-foreground">{f.title}</p>
-                  <p className="mt-1 text-xs/relaxed text-muted-foreground">{f.desc}</p>
+                  <p className="text-xs/relaxed text-muted-foreground">{f.desc}</p>
                 </div>
               </motion.div>
             )

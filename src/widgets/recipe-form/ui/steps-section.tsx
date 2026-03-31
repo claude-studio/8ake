@@ -36,7 +36,7 @@ function UnitSelect({
       <NativeSelect
         value={value}
         onChange={(e) => onChange(e.target.value as TimeUnit)}
-        className="h-full w-[44px] flex-none rounded-none rounded-r-md border-0 pl-1 pr-4 py-0 text-[11px] font-semibold text-gray-800 dark:text-gray-200 bg-surface focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
+        className="h-full w-[44px] flex-none rounded-none rounded-r-md border-0 pl-1 pr-4 py-0 text-[11px] font-semibold text-foreground bg-surface focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
       >
         <NativeSelectOption value="분">분</NativeSelectOption>
         <NativeSelectOption value="시간">시간</NativeSelectOption>

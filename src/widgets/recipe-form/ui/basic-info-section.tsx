@@ -128,7 +128,7 @@ export function BasicInfoSection({ control, errors }: Props) {
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150',
                   {
-                    'border-(--youtube) bg-(--youtube) text-white': isActive && isYoutube,
+                    'border-[var(--youtube)] bg-[var(--youtube)] text-white': isActive && isYoutube,
                     'border-primary bg-primary text-primary-foreground': isActive && !isYoutube,
                     'border-destructive bg-destructive/5 text-destructive': !isActive && hasError,
                     'border-border bg-surface text-muted-foreground': !isActive && !hasError,
