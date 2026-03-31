@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 
 import { Link, useRouterState } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Home, Package, Plus } from 'lucide-react'
+import { CalendarDays, Home, Package, Plus } from 'lucide-react'
 
 import { cn } from '@/shared/lib/utils'
 
@@ -35,7 +35,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
     }
   }
 
-  const LABELS = ['레시피', '재료', '새 레시피']
+  const LABELS = ['레시피', '재료', '캘린더', '새 레시피']
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -95,6 +95,16 @@ export function AppLayout({ children, hideNav = false }: Props) {
                 <Package size={18} />
               </PillItem>
 
+              {/* 캘린더 */}
+              <PillItem
+                as="link"
+                to="/dashboard"
+                active={isActive('/dashboard')}
+                onHover={(v) => handleHover(v ? 2 : null)}
+              >
+                <CalendarDays size={18} />
+              </PillItem>
+
               {/* Separator */}
               <div className="mx-1 h-5 w-px bg-border" />
 
@@ -103,7 +113,7 @@ export function AppLayout({ children, hideNav = false }: Props) {
                 to="/recipe/new"
                 className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform duration-150 hover:scale-110 active:scale-95"
                 aria-label="새 레시피 추가"
-                onMouseEnter={() => handleHover(2)}
+                onMouseEnter={() => handleHover(3)}
                 onMouseLeave={() => handleHover(null)}
               >
                 <Plus size={18} strokeWidth={2.5} />

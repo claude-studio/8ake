@@ -24,7 +24,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     <>
       <ScrollToTop />
       <Outlet />
-      {import.meta.env.DEV && <TanStackRouterDevtools />}
+      {import.meta.env.DEV && <TanStackRouterDevtools position="top-left" />}
     </>
   ),
 })
