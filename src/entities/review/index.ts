@@ -7,5 +7,5 @@ export {
   reviewKeys,
 } from './api/review-api'
 export { useReviews } from './api/use-reviews'
-export type { CalendarReview } from './api/use-calendar-reviews'
-export { useCalendarReviews } from './api/use-calendar-reviews'
+export type { CalendarEntry } from './api/use-calendar-reviews'
+export { useCalendarEntries } from './api/use-calendar-reviews'

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 import { useNavigate } from '@tanstack/react-router'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CookingPot, MessageSquare } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import type { CalendarReview } from '@/entities/review'
-import { useCalendarReviews } from '@/entities/review'
+import type { CalendarEntry } from '@/entities/review'
+import { useCalendarEntries } from '@/entities/review'
 import { cn } from '@/shared/lib/utils'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const
@@ -16,12 +16,12 @@ function getMonthDays(year: number, month: number) {
   return { firstDay, daysInMonth }
 }
 
-function groupByDate(reviews: CalendarReview[]) {
-  const map = new Map<string, CalendarReview[]>()
-  for (const r of reviews) {
-    const key = r.date
+function groupByDate(entries: CalendarEntry[]) {
+  const map = new Map<string, CalendarEntry[]>()
+  for (const e of entries) {
+    const key = e.date
     if (!map.has(key)) map.set(key, [])
-    map.get(key)!.push(r)
+    map.get(key)!.push(e)
   }
   return map
 }
@@ -33,8 +33,8 @@ export function BakingCalendar() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const { data: reviews, isLoading } = useCalendarReviews(year, month)
-  const reviewsByDate = groupByDate(reviews)
+  const { data: entries, isLoading } = useCalendarEntries(year, month)
+  const entriesByDate = groupByDate(entries)
   const { firstDay, daysInMonth } = getMonthDays(year, month)
 
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -60,7 +60,7 @@ export function BakingCalendar() {
   }
 
   // 연속 베이킹 스트릭 계산
-  const sortedDates = [...reviewsByDate.keys()].sort()
+  const sortedDates = [...entriesByDate.keys()].sort()
   let streak = 0
   if (sortedDates.length > 0) {
     streak = 1
@@ -73,19 +73,19 @@ export function BakingCalendar() {
     }
   }
 
-  const selectedReviews = selectedDate ? (reviewsByDate.get(selectedDate) ?? []) : []
+  const selectedEntries = selectedDate ? (entriesByDate.get(selectedDate) ?? []) : []
 
   return (
     <div className="space-y-4">
       {/* 월 통계 */}
       <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
         <div className="flex-1 text-center">
-          <div className="text-2xl font-bold text-foreground">{reviewsByDate.size}</div>
+          <div className="text-2xl font-bold text-foreground">{entriesByDate.size}</div>
           <div className="text-xs text-muted-foreground">베이킹 일수</div>
         </div>
         <div className="h-8 w-px bg-border" />
         <div className="flex-1 text-center">
-          <div className="text-2xl font-bold text-foreground">{reviews.length}</div>
+          <div className="text-2xl font-bold text-foreground">{entries.length}</div>
           <div className="text-xs text-muted-foreground">총 기록</div>
         </div>
         <div className="h-8 w-px bg-border" />
@@ -127,8 +127,8 @@ export function BakingCalendar() {
           {Array.from({ length: daysInMonth }, (_, i) => {
             const day = i + 1
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-            const dayReviews = reviewsByDate.get(dateStr)
-            const hasBaking = !!dayReviews
+            const dayEntries = entriesByDate.get(dateStr)
+            const hasBaking = !!dayEntries
             const isToday = dateStr === today
             const isSelected = dateStr === selectedDate
 
@@ -174,25 +174,40 @@ export function BakingCalendar() {
           <h3 className="text-sm font-medium text-muted-foreground">
             {selectedDate.replace(/-/g, '.')} 기록
           </h3>
-          {selectedReviews.length === 0 ? (
+          {selectedEntries.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-4 text-center text-sm text-muted-foreground">
               이 날은 기록이 없어요
             </div>
           ) : (
-            selectedReviews.map((review) => (
+            selectedEntries.map((entry) => (
               <button
-                key={review.id}
+                key={entry.id}
                 type="button"
-                onClick={() => navigate({ to: '/recipe/$id', params: { id: review.recipe_id } })}
+                onClick={() => navigate({ to: '/recipe/$id', params: { id: entry.recipe_id } })}
                 className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-surface"
               >
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-foreground">{review.recipe_name}</div>
+                <div
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-lg',
+                    entry.type === 'recipe' ? 'bg-primary/10' : 'bg-surface'
+                  )}
+                >
+                  {entry.type === 'recipe' ? (
+                    <CookingPot size={16} className="text-primary" />
+                  ) : (
+                    <MessageSquare size={16} className="text-muted-foreground" />
+                  )}
                 </div>
-                {review.total_score !== null && (
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-foreground">{entry.recipe_name}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {entry.type === 'recipe' ? '베이킹' : '회고'}
+                  </div>
+                </div>
+                {entry.total_score !== null && (
                   <div className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
                     <span className="text-xs font-semibold text-primary">
-                      {review.total_score}점
+                      {entry.total_score}점
                     </span>
                   </div>
                 )}
