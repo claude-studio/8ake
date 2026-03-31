@@ -8,6 +8,7 @@ import {
   updateIngredientReview,
   deleteIngredientReview,
   deleteIngredient,
+  updateIngredientPrice,
   ingredientKeys,
   useIngredientReviews,
 } from '@/entities/ingredient'
@@ -57,6 +58,12 @@ export function useIngredientCrud(ingredientId: string, onIngredientDeleted: () 
     queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
   }
 
+  async function handleUpdatePrice(unitPrice: number | null, priceUnit: string | null) {
+    await updateIngredientPrice(ingredientId, unitPrice, priceUnit)
+    toast.success('가격이 수정되었습니다')
+    queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
+  }
+
   async function handleDeleteIngredient() {
     await deleteIngredient(ingredientId)
     toast.success('재료가 삭제되었습니다')
@@ -79,6 +86,7 @@ export function useIngredientCrud(ingredientId: string, onIngredientDeleted: () 
     handleCreateReview,
     handleUpdateReview,
     handleDeleteReview,
+    handleUpdatePrice,
     handleDeleteIngredient,
   }
 }

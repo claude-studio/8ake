@@ -2,6 +2,7 @@ export type { Ingredient, IngredientReview } from './model/types'
 export {
   fetchIngredients,
   createIngredient,
+  updateIngredientPrice,
   deleteIngredient,
   fetchIngredientReviews,
   createIngredientReview,

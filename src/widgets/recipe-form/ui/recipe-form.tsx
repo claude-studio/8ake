@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import { fetchIngredients } from '@/entities/ingredient'
 import { createRecipe, updateRecipe, fetchRecipe, recipeKeys } from '@/entities/recipe'
 import { useAuthStore } from '@/features/auth'
 import { supabase } from '@/shared/api'
@@ -77,13 +78,18 @@ function parseIngredientAmount(s: string): {
   return { amount: s, unit: '직접입력' }
 }
 
-function buildIngredientRows(recipeId: string, ingredients: RecipeFormValues['ingredients']) {
+function buildIngredientRows(
+  recipeId: string,
+  ingredients: RecipeFormValues['ingredients'],
+  priceMap?: Map<string, number>
+) {
   return ingredients.map((ing, i) => ({
     recipe_id: recipeId,
     name: ing.name,
     amount:
       ing.unit === '직접입력' ? ing.amount || null : ing.amount ? `${ing.amount}${ing.unit}` : null,
     order: i,
+    unit_price_snapshot: priceMap?.get(ing.name.trim().toLowerCase()) ?? null,
   }))
 }
 
@@ -257,6 +263,22 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
         }
         const { files, thumbnailIndex } = photosRef.current
 
+        // Build price snapshot map from ingredient master
+        let priceMap: Map<string, number> | undefined
+        if (ingredients.length > 0) {
+          try {
+            const masterIngredients = await fetchIngredients()
+            priceMap = new Map()
+            for (const mi of masterIngredients) {
+              if (mi.unit_price != null) {
+                priceMap.set(mi.name.trim().toLowerCase(), Number(mi.unit_price))
+              }
+            }
+          } catch {
+            // Non-critical: proceed without price snapshots
+          }
+        }
+
         if (mode === 'create') {
           const recipe = await createRecipe({
             ...recipeData,
@@ -268,7 +290,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
             ingredients.length > 0
               ? supabase
                   .from('recipe_ingredients')
-                  .insert(buildIngredientRows(recipe.id, ingredients))
+                  .insert(buildIngredientRows(recipe.id, ingredients, priceMap))
                   .then(({ error }) => {
                     if (error) console.error('Ingredient insert failed:', error)
                   })
@@ -288,7 +310,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
               if (ingredients.length > 0) {
                 const { error } = await supabase
                   .from('recipe_ingredients')
-                  .insert(buildIngredientRows(recipeId, ingredients))
+                  .insert(buildIngredientRows(recipeId, ingredients, priceMap))
                 if (error) console.error('Ingredient insert failed:', error)
               }
             })

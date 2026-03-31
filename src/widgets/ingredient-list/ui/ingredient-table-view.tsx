@@ -14,6 +14,7 @@ import {
 import type { Ingredient } from '@/entities/ingredient'
 import { CupcakeScore } from '@/shared/ui'
 
+import { IngredientPriceForm } from './ingredient-price-form'
 import { IngredientReviewForm } from './ingredient-review-form'
 import { useIngredientCrud } from '../model/use-ingredient-crud'
 
@@ -32,6 +33,7 @@ function IngredientRow({
   onRefetch: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [editingPrice, setEditingPrice] = useState(false)
   const {
     reviews,
     isLoading,
@@ -46,10 +48,12 @@ function IngredientRow({
     handleCreateReview,
     handleUpdateReview,
     handleDeleteReview,
+    handleUpdatePrice,
     handleDeleteIngredient,
   } = useIngredientCrud(ingredient.id, onRefetch)
 
   const latestReview = reviews[0]
+  const hasPrice = ingredient.unit_price != null && ingredient.price_unit != null
 
   return (
     <>
@@ -60,6 +64,16 @@ function IngredientRow({
         <td className="w-10 border-b border-border p-3  text-sm text-muted-foreground">{index}</td>
         <td className="border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
           {ingredient.name}
+        </td>
+        <td className="border-b border-border px-4 py-3 text-sm text-muted-foreground">
+          {hasPrice ? (
+            <span className="font-medium text-primary">
+              {Number(ingredient.unit_price).toLocaleString()}
+              {ingredient.price_unit}
+            </span>
+          ) : (
+            '-'
+          )}
         </td>
         <td className="border-b border-border px-4 py-3 text-sm text-muted-foreground">
           {latestReview?.purchase_place ?? '-'}
@@ -100,7 +114,39 @@ function IngredientRow({
 
       {expanded && (
         <tr>
-          <td colSpan={5} className="border-b border-border px-4 pb-4 pt-2">
+          <td colSpan={6} className="border-b border-border px-4 pb-4 pt-2">
+            {/* 가격 편집 */}
+            <div className="mb-3">
+              {editingPrice ? (
+                <IngredientPriceForm
+                  defaultUnitPrice={ingredient.unit_price}
+                  defaultPriceUnit={ingredient.price_unit}
+                  onSubmit={(price, unit) => {
+                    handleUpdatePrice(price, unit)
+                    setEditingPrice(false)
+                  }}
+                  onCancel={() => setEditingPrice(false)}
+                />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground">단가</span>
+                  <span className="text-sm text-foreground">
+                    {hasPrice
+                      ? `${Number(ingredient.unit_price).toLocaleString()}${ingredient.price_unit}`
+                      : '미등록'}
+                  </span>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    onClick={() => setEditingPrice(true)}
+                    aria-label="가격 수정"
+                  >
+                    <Pencil size={12} />
+                  </Button>
+                </div>
+              )}
+            </div>
+
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-medium text-foreground">리뷰 ({reviews.length})</span>
               <Button
@@ -233,6 +279,9 @@ export function IngredientTableView({ ingredients, onRefetch }: Props) {
             </th>
             <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
               재료명
+            </th>
+            <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
+              단가
             </th>
             <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
               구매처

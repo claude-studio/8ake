@@ -5,6 +5,7 @@ import {
   BookOpen,
   ClipboardList,
   Clock,
+  Coins,
   ExternalLink,
   Flame,
   Link2,
@@ -56,6 +57,20 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
     () => [...(recipeIngredients ?? [])].sort((a, b) => a.order - b.order),
     [recipeIngredients]
   )
+
+  const estimatedCost = useMemo(() => {
+    if (!sortedIngredients.length) return null
+    let total = 0
+    let hasAnyPrice = false
+    for (const ing of sortedIngredients) {
+      const snapshot = ing.unit_price_snapshot
+      if (snapshot == null || !ing.amount) continue
+      hasAnyPrice = true
+      const match = ing.amount.match(/^(\d+(?:\.\d+)?)/)
+      if (match) total += parseFloat(match[1]) * Number(snapshot)
+    }
+    return hasAnyPrice ? total : null
+  }, [sortedIngredients])
 
   const steps = recipe?.steps
   const parsedSteps = useMemo(() => (steps ? steps.split('\n').filter(Boolean) : []), [steps])
@@ -276,6 +291,16 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
                     </li>
                   ))}
                 </ul>
+                {estimatedCost !== null ? (
+                  <div className="flex items-center justify-between border-t border-border px-4 py-3">
+                    <span className="flex items-center gap-1.5 text-xs font-bold uppercase text-primary">
+                      <Coins size={13} /> 예상 원가
+                    </span>
+                    <span className="text-sm font-bold text-foreground">
+                      {Math.round(estimatedCost * multiplier).toLocaleString()}원
+                    </span>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 

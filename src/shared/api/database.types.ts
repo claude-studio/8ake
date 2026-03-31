@@ -51,18 +51,27 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          price_unit: string | null
+          price_updated_at: string | null
+          unit_price: number | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          price_unit?: string | null
+          price_updated_at?: string | null
+          unit_price?: number | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          price_unit?: string | null
+          price_updated_at?: string | null
+          unit_price?: number | null
           user_id?: string
         }
         Relationships: []
@@ -74,6 +83,7 @@ export type Database = {
           name: string
           order: number
           recipe_id: string
+          unit_price_snapshot: number | null
         }
         Insert: {
           amount?: string | null
@@ -81,6 +91,7 @@ export type Database = {
           name: string
           order?: number
           recipe_id: string
+          unit_price_snapshot?: number | null
         }
         Update: {
           amount?: string | null
@@ -88,6 +99,7 @@ export type Database = {
           name?: string
           order?: number
           recipe_id?: string
+          unit_price_snapshot?: number | null
         }
         Relationships: [
           {

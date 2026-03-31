@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { ChevronDown, Trash2 } from 'lucide-react'
+import { ChevronDown, Pencil, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -15,6 +15,7 @@ import type { Ingredient } from '@/entities/ingredient'
 import { cn } from '@/shared/lib/utils'
 import { CupcakeScore } from '@/shared/ui'
 
+import { IngredientPriceForm } from './ingredient-price-form'
 import { IngredientReviewForm } from './ingredient-review-form'
 import { useIngredientCrud } from '../model/use-ingredient-crud'
 
@@ -31,6 +32,7 @@ function IngredientCard({
   onRefetch: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [editingPrice, setEditingPrice] = useState(false)
   const {
     reviews,
     isLoading,
@@ -45,10 +47,12 @@ function IngredientCard({
     handleCreateReview,
     handleUpdateReview,
     handleDeleteReview,
+    handleUpdatePrice,
     handleDeleteIngredient,
   } = useIngredientCrud(ingredient.id, onRefetch)
 
   const latestReview = reviews[0]
+  const hasPrice = ingredient.unit_price != null && ingredient.price_unit != null
 
   return (
     <div className="rounded-xl border border-border bg-card transition-shadow hover:shadow-md">
@@ -59,6 +63,12 @@ function IngredientCard({
       >
         <div className="flex flex-col gap-1">
           <span className="font-semibold text-foreground">{ingredient.name}</span>
+          {hasPrice && (
+            <span className="text-xs font-medium text-primary">
+              {Number(ingredient.unit_price).toLocaleString()}
+              {ingredient.price_unit}
+            </span>
+          )}
           {latestReview && (
             <div className="flex items-center gap-2">
               <CupcakeScore value={latestReview.score ?? 0} size="sm" />
@@ -78,6 +88,40 @@ function IngredientCard({
 
       {expanded && (
         <div className="border-t border-border px-4 pb-4 pt-3">
+          {/* 가격 섹션 */}
+          <div className="mb-3">
+            {editingPrice ? (
+              <IngredientPriceForm
+                defaultUnitPrice={ingredient.unit_price}
+                defaultPriceUnit={ingredient.price_unit}
+                onSubmit={(price, unit) => {
+                  handleUpdatePrice(price, unit)
+                  setEditingPrice(false)
+                }}
+                onCancel={() => setEditingPrice(false)}
+              />
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground">단가</span>
+                  <span className="text-sm text-foreground">
+                    {hasPrice
+                      ? `${Number(ingredient.unit_price).toLocaleString()}${ingredient.price_unit}`
+                      : '미등록'}
+                  </span>
+                </div>
+                <Button
+                  size="icon-xs"
+                  variant="ghost"
+                  onClick={() => setEditingPrice(true)}
+                  aria-label="가격 수정"
+                >
+                  <Pencil size={12} />
+                </Button>
+              </div>
+            )}
+          </div>
+
           <div className="mb-3 flex items-center justify-between">
             <span className="text-sm font-medium text-foreground">리뷰 ({reviews.length})</span>
             <div className="flex gap-2">

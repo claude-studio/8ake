@@ -16,10 +16,41 @@ export async function fetchIngredients() {
   return data ?? []
 }
 
-export async function createIngredient(name: string, userId: string) {
+export async function createIngredient(
+  name: string,
+  userId: string,
+  pricing?: { unitPrice: number; priceUnit: string }
+) {
   const { data, error } = await supabase
     .from('ingredients')
-    .insert({ name, user_id: userId })
+    .insert({
+      name,
+      user_id: userId,
+      ...(pricing && {
+        unit_price: pricing.unitPrice,
+        price_unit: pricing.priceUnit,
+        price_updated_at: new Date().toISOString(),
+      }),
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function updateIngredientPrice(
+  id: string,
+  unitPrice: number | null,
+  priceUnit: string | null
+) {
+  const { data, error } = await supabase
+    .from('ingredients')
+    .update({
+      unit_price: unitPrice,
+      price_unit: priceUnit,
+      price_updated_at: unitPrice !== null ? new Date().toISOString() : null,
+    })
+    .eq('id', id)
     .select()
     .single()
   if (error) throw error

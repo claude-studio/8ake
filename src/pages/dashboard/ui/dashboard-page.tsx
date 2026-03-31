@@ -1,5 +1,6 @@
 import { BakingCalendar } from '@/widgets/baking-calendar'
 import { HeaderMenu } from '@/widgets/header-menu'
+import { MonthlyCostChart } from '@/widgets/monthly-cost-chart'
 
 export function DashboardPage() {
   return (
@@ -16,8 +17,9 @@ export function DashboardPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-[1024px] p-4">
+      <div className="mx-auto max-w-[1024px] p-4 flex flex-col gap-4">
         <BakingCalendar />
+        <MonthlyCostChart />
       </div>
     </>
   )

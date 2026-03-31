@@ -23,6 +23,8 @@ export function IngredientList() {
 
   const [showAddForm, setShowAddForm] = useState(false)
   const [newName, setNewName] = useState('')
+  const [newUnitPrice, setNewUnitPrice] = useState('')
+  const [newPriceUnit, setNewPriceUnit] = useState('원/g')
   const [isAdding, setIsAdding] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -36,9 +38,14 @@ export function IngredientList() {
     if (!newName.trim() || !user) return
     setIsAdding(true)
     try {
-      await createIngredient(newName.trim(), user.id)
+      const pricing = newUnitPrice.trim()
+        ? { unitPrice: Number(newUnitPrice), priceUnit: newPriceUnit }
+        : undefined
+      await createIngredient(newName.trim(), user.id, pricing)
       toast.success('재료가 추가되었습니다')
       setNewName('')
+      setNewUnitPrice('')
+      setNewPriceUnit('원/g')
       setShowAddForm(false)
       queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
     } catch {
@@ -108,35 +115,70 @@ export function IngredientList() {
 
       {/* 재료 추가 폼 */}
       {showAddForm && (
-        <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-3">
-          <Input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleAddIngredient()
-              if (e.key === 'Escape') {
+        <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3">
+          <div className="flex items-center gap-2">
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddIngredient()
+                if (e.key === 'Escape') {
+                  setShowAddForm(false)
+                  setNewName('')
+                  setNewUnitPrice('')
+                }
+              }}
+              placeholder="재료명 입력"
+              autoFocus
+              className="flex-1 text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.1"
+              value={newUnitPrice}
+              onChange={(e) => setNewUnitPrice(e.target.value)}
+              placeholder="단가 (선택)"
+              className="flex-1 text-sm"
+            />
+            <div className="flex rounded-lg border border-border bg-card p-0.5">
+              {(['원/g', '원/ml', '원/개'] as const).map((unit) => (
+                <button
+                  key={unit}
+                  type="button"
+                  onClick={() => setNewPriceUnit(unit)}
+                  className={cn(
+                    'rounded-md px-2 py-1 text-xs font-medium transition-colors',
+                    newPriceUnit === unit
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {unit}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
                 setShowAddForm(false)
                 setNewName('')
-              }
-            }}
-            placeholder="재료명 입력"
-            autoFocus
-            className="flex-1 text-sm"
-          />
-          <Button size="sm" onClick={handleAddIngredient} disabled={isAdding || !newName.trim()}>
-            추가
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              setShowAddForm(false)
-              setNewName('')
-            }}
-            className="text-muted-foreground"
-          >
-            취소
-          </Button>
+                setNewUnitPrice('')
+              }}
+              className="text-muted-foreground"
+            >
+              취소
+            </Button>
+            <Button size="sm" onClick={handleAddIngredient} disabled={isAdding || !newName.trim()}>
+              추가
+            </Button>
+          </div>
         </div>
       )}
 
