@@ -137,7 +137,7 @@ export function MonthlyCostChart() {
             tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
           />
           <Tooltip
-            formatter={(value: number) => [`${value.toLocaleString()}원`, '비용']}
+            formatter={(value) => [`${Number(value).toLocaleString()}원`, '비용']}
             contentStyle={{
               fontSize: 12,
               borderRadius: 8,
