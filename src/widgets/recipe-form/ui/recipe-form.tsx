@@ -104,6 +104,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
   const [bakeTimeUnit, setBakeTimeUnit] = useState<'분' | '시간'>('분')
   const [preheatTimeUnit, setPreheatTimeUnit] = useState<'분' | '시간'>('분')
   const formLoaded = useRef(false)
+  const submittingRef = useRef(false)
 
   const unitsRef = useRef<{ bakeTimeUnit: string; preheatTimeUnit: string }>({
     bakeTimeUnit: '분',
@@ -242,8 +243,12 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
 
   const onSubmit = useCallback(
     async (values: RecipeFormOutput) => {
+      if (submittingRef.current) return
+      submittingRef.current = true
+
       if (!user) {
         toast.error('로그인이 필요합니다')
+        submittingRef.current = false
         return
       }
 
@@ -334,6 +339,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
         toast.error(mode === 'create' ? '레시피 등록에 실패했습니다' : '레시피 수정에 실패했습니다')
       } finally {
         setIsSubmitting(false)
+        submittingRef.current = false
       }
     },
     [mode, recipeId, user, router, uploadPhotos, queryClient]

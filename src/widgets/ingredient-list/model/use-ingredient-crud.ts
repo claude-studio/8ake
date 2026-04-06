@@ -27,49 +27,71 @@ export function useIngredientCrud(ingredientId: string, onIngredientDeleted: () 
 
   async function handleCreateReview(values: IngredientReviewFormValues) {
     if (!user) return
-    await createIngredientReview({
-      ingredient_id: ingredientId,
-      user_id: user.id,
-      score: values.score,
-      purchase_place: values.purchase_place || null,
-      memo: values.memo || null,
-    })
-    toast.success('리뷰가 추가되었습니다')
-    setShowForm(false)
-    queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
+    try {
+      await createIngredientReview({
+        ingredient_id: ingredientId,
+        user_id: user.id,
+        score: values.score,
+        purchase_place: values.purchase_place || null,
+        memo: values.memo || null,
+      })
+      toast.success('리뷰가 추가되었습니다')
+      setShowForm(false)
+      queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
+    } catch (err) {
+      toast.error('리뷰 추가에 실패했습니다')
+      throw err
+    }
   }
 
   async function handleUpdateReview(id: string, values: IngredientReviewFormValues) {
-    await updateIngredientReview(id, {
-      score: values.score,
-      purchase_place: values.purchase_place || null,
-      memo: values.memo || null,
-    })
-    toast.success('리뷰가 수정되었습니다')
-    setEditingId(null)
-    queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
+    try {
+      await updateIngredientReview(id, {
+        score: values.score,
+        purchase_place: values.purchase_place || null,
+        memo: values.memo || null,
+      })
+      toast.success('리뷰가 수정되었습니다')
+      setEditingId(null)
+      queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
+    } catch (err) {
+      toast.error('리뷰 수정에 실패했습니다')
+      throw err
+    }
   }
 
   async function handleDeleteReview() {
     if (!deletingReviewId) return
-    await deleteIngredientReview(deletingReviewId)
-    toast.success('리뷰가 삭제되었습니다')
-    setDeletingReviewId(null)
-    queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
+    try {
+      await deleteIngredientReview(deletingReviewId)
+      toast.success('리뷰가 삭제되었습니다')
+      setDeletingReviewId(null)
+      queryClient.invalidateQueries({ queryKey: ingredientKeys.reviews(ingredientId) })
+    } catch {
+      toast.error('리뷰 삭제에 실패했습니다')
+    }
   }
 
   async function handleUpdatePrice(unitPrice: number | null, priceUnit: string | null) {
-    await updateIngredientPrice(ingredientId, unitPrice, priceUnit)
-    toast.success('가격이 수정되었습니다')
-    queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
+    try {
+      await updateIngredientPrice(ingredientId, unitPrice, priceUnit)
+      toast.success('가격이 수정되었습니다')
+      queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
+    } catch {
+      toast.error('가격 수정에 실패했습니다')
+    }
   }
 
   async function handleDeleteIngredient() {
-    await deleteIngredient(ingredientId)
-    toast.success('재료가 삭제되었습니다')
-    setDeleteIngredientOpen(false)
-    queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
-    onIngredientDeleted()
+    try {
+      await deleteIngredient(ingredientId)
+      toast.success('재료가 삭제되었습니다')
+      setDeleteIngredientOpen(false)
+      queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
+      onIngredientDeleted()
+    } catch {
+      toast.error('재료 삭제에 실패했습니다')
+    }
   }
 
   return {

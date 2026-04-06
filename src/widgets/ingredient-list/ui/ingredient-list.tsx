@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { LayoutGrid, List, Package, Search, Star, Trophy } from 'lucide-react'
@@ -26,6 +26,7 @@ export function IngredientList() {
   const [newUnitPrice, setNewUnitPrice] = useState('')
   const [newPriceUnit, setNewPriceUnit] = useState('원/g')
   const [isAdding, setIsAdding] = useState(false)
+  const addingRef = useRef(false)
   const [search, setSearch] = useState('')
 
   const filteredIngredients = useMemo(() => {
@@ -36,6 +37,8 @@ export function IngredientList() {
 
   async function handleAddIngredient() {
     if (!newName.trim() || !user) return
+    if (addingRef.current) return
+    addingRef.current = true
     setIsAdding(true)
     try {
       const pricing = newUnitPrice.trim()
@@ -52,6 +55,7 @@ export function IngredientList() {
       toast.error('재료 추가에 실패했습니다')
     } finally {
       setIsAdding(false)
+      addingRef.current = false
     }
   }
 
