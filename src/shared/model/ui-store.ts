@@ -17,13 +17,14 @@ interface UIStore {
   setIngredientViewMode: (mode: 'card' | 'table') => void
 }
 
-export const useUIStore = create<UIStore>((set) => ({
+export const useUIStore = create<UIStore>((set, get) => ({
   ingredientViewMode: loadViewMode(),
   setIngredientViewMode: (mode) => {
+    if (mode === get().ingredientViewMode) return
     try {
       localStorage.setItem(UI_STORAGE_KEY, JSON.stringify({ ingredientViewMode: mode }))
     } catch {
-      // localStorage 접근 실패 시 무시
+      // ignore
     }
     set({ ingredientViewMode: mode })
   },
