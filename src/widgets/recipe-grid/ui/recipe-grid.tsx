@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { useRecipes } from '@/entities/recipe'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { useIntersectionObserver } from '@/shared/hooks/use-intersection-observer'
 
 import { RecipeCard } from './recipe-card'
@@ -20,6 +21,8 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
   const [sortBy, setSortBy] = useState<'created_at' | 'total_score'>('created_at')
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTag ? [initialTag] : [])
 
+  const debouncedSearch = useDebouncedValue(search, 300)
+
   const toggleTag = useCallback((tag: string) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }, [])
@@ -27,7 +30,7 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
   const clearTags = useCallback(() => setSelectedTags([]), [])
 
   const { items, isLoading, isFetchingMore, hasNextPage, fetchMore } = useRecipes(
-    search,
+    debouncedSearch,
     sortBy,
     selectedTags.length > 0 ? selectedTags : undefined
   )
