@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import { createRootRouteWithContext, Outlet, useRouterState } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import type { Session } from '@supabase/supabase-js'
 

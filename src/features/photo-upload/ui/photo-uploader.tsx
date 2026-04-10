@@ -8,6 +8,8 @@ import { cn } from '@/shared/lib/utils'
 
 const MAX_FILES = 5
 const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB (압축 전 원본 허용)
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const ALLOWED_TYPES_ACCEPT = [...ALLOWED_TYPES].join(',')
 
 interface PhotoItem {
   file: File
@@ -21,13 +23,19 @@ interface Props {
 export function PhotoUploader({ onChange }: Props) {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [thumbnailIndex, setThumbnailIndex] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const isProcessingRef = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const photosRef = useRef<PhotoItem[]>([])
+  const thumbnailIndexRef = useRef(0)
 
-  // photosRef를 최신 photos와 동기화
   useEffect(() => {
     photosRef.current = photos
   }, [photos])
+
+  useEffect(() => {
+    thumbnailIndexRef.current = thumbnailIndex
+  }, [thumbnailIndex])
 
   // 언마운트 시 생성된 모든 object URL 해제
   useEffect(() => {
@@ -38,11 +46,18 @@ export function PhotoUploader({ onChange }: Props) {
 
   const processFiles = useCallback(
     async (incoming: FileList | File[]) => {
+      if (isProcessingRef.current) return
       const files = Array.from(incoming)
-      const currentCount = photos.length
+      const currentCount = photosRef.current.length
 
       if (currentCount + files.length > MAX_FILES) {
         toast.error(`사진은 최대 ${MAX_FILES}장까지 업로드할 수 있습니다`)
+        return
+      }
+
+      const invalid = files.find((f) => !ALLOWED_TYPES.has(f.type))
+      if (invalid) {
+        toast.error(`지원하지 않는 파일 형식입니다: ${invalid.name}`)
         return
       }
 
@@ -52,21 +67,42 @@ export function PhotoUploader({ onChange }: Props) {
         return
       }
 
-      const compressed = await Promise.all(files.map(compressImage))
+      isProcessingRef.current = true
+      setIsProcessing(true)
+      try {
+        const compressed: File[] = []
+        for (let i = 0; i < files.length; i += 2) {
+          const batch = files.slice(i, i + 2)
+          const results = await Promise.all(batch.map(compressImage))
+          compressed.push(...results)
+        }
 
-      const newItems: PhotoItem[] = compressed.map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-      }))
+        // 압축 완료 후 최신 상태 기준으로 재검증
+        const latest = photosRef.current
+        if (latest.length + compressed.length > MAX_FILES) {
+          toast.error(`사진은 최대 ${MAX_FILES}장까지 업로드할 수 있습니다`)
+          return
+        }
 
-      const updated = [...photos, ...newItems]
-      setPhotos(updated)
-      onChange(
-        updated.map((p) => p.file),
-        thumbnailIndex
-      )
+        const newItems: PhotoItem[] = compressed.map((file) => ({
+          file,
+          preview: URL.createObjectURL(file),
+        }))
+
+        const updated = [...latest, ...newItems]
+        setPhotos(updated)
+        onChange(
+          updated.map((p) => p.file),
+          thumbnailIndexRef.current
+        )
+      } catch {
+        toast.error('사진 처리 중 오류가 발생했습니다')
+      } finally {
+        isProcessingRef.current = false
+        setIsProcessing(false)
+      }
     },
-    [photos, thumbnailIndex, onChange]
+    [onChange]
   )
 
   const handleDrop = useCallback(
@@ -135,10 +171,13 @@ export function PhotoUploader({ onChange }: Props) {
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-border bg-surface text-muted-foreground"
+        disabled={isProcessing}
+        className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-border bg-surface text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ImagePlus size={28} className="text-primary" />
-        <span className="text-sm">클릭 또는 드래그하여 사진 추가</span>
+        <span className="text-sm">
+          {isProcessing ? '처리 중...' : '클릭 또는 드래그하여 사진 추가'}
+        </span>
         <span className="text-xs text-muted-foreground">최대 {MAX_FILES}장, 각 20MB 이하</span>
       </button>
 
@@ -146,7 +185,7 @@ export function PhotoUploader({ onChange }: Props) {
         ref={inputRef}
         type="file"
         multiple
-        accept="image/*"
+        accept={ALLOWED_TYPES_ACCEPT}
         className="hidden"
         onChange={handleFileChange}
       />
