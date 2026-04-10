@@ -3,10 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ImagePlus, Star, X } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { compressImage } from '@/shared/lib/compress-image'
 import { cn } from '@/shared/lib/utils'
 
 const MAX_FILES = 5
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB (압축 전 원본 허용)
 
 interface PhotoItem {
   file: File
@@ -36,7 +37,7 @@ export function PhotoUploader({ onChange }: Props) {
   }, [])
 
   const processFiles = useCallback(
-    (incoming: FileList | File[]) => {
+    async (incoming: FileList | File[]) => {
       const files = Array.from(incoming)
       const currentCount = photos.length
 
@@ -47,11 +48,13 @@ export function PhotoUploader({ onChange }: Props) {
 
       const oversized = files.find((f) => f.size > MAX_FILE_SIZE)
       if (oversized) {
-        toast.error(`파일 크기는 5MB 이하여야 합니다: ${oversized.name}`)
+        toast.error(`파일 크기는 20MB 이하여야 합니다: ${oversized.name}`)
         return
       }
 
-      const newItems: PhotoItem[] = files.map((file) => ({
+      const compressed = await Promise.all(files.map(compressImage))
+
+      const newItems: PhotoItem[] = compressed.map((file) => ({
         file,
         preview: URL.createObjectURL(file),
       }))
@@ -136,7 +139,7 @@ export function PhotoUploader({ onChange }: Props) {
       >
         <ImagePlus size={28} className="text-primary" />
         <span className="text-sm">클릭 또는 드래그하여 사진 추가</span>
-        <span className="text-xs text-muted-foreground">최대 {MAX_FILES}장, 각 5MB 이하</span>
+        <span className="text-xs text-muted-foreground">최대 {MAX_FILES}장, 각 20MB 이하</span>
       </button>
 
       <input

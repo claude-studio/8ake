@@ -209,7 +209,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
         const safePath = `${user.id}/${targetRecipeId}/${Date.now()}-${i}.${ext}`
         const { error: uploadError } = await supabase.storage
           .from('recipe-photos')
-          .upload(safePath, file)
+          .upload(safePath, file, { cacheControl: '3600', contentType: file.type })
 
         if (uploadError) {
           console.error('Photo upload failed:', uploadError)
