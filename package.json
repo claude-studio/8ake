@@ -14,9 +14,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:typegen": "supabase gen types --lang typescript --project-id \"$SUPABASE_PROJECT_ID\" > src/shared/api/database.types.ts"
   },
   "devDependencies": {
+    "supabase": "^2",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^9.39.4",
