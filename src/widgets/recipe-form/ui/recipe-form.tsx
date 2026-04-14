@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { fetchIngredients } from '@/entities/ingredient'
 import { createRecipe, updateRecipe, fetchRecipe, recipeKeys } from '@/entities/recipe'
 import { useAuthStore } from '@/features/auth'
+import type { PhotoUploadStatus } from '@/features/photo-upload'
 import { supabase } from '@/shared/api'
 import { PageHeader } from '@/shared/ui'
 
@@ -116,6 +117,11 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     thumbnailIndex: 0,
   })
 
+  // 업로드 상태 추적
+  const [uploadStates, setUploadStates] = useState<PhotoUploadStatus[]>([])
+  // 실패한 사진 재시도를 위한 상태 (recipeId 확정 후 사용)
+  const pendingRetryRef = useRef<{ recipeId: string; thumbnailIndex: number } | null>(null)
+
   const {
     control,
     register,
@@ -195,6 +201,8 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
   const handlePhotoChange = useCallback(
     (files: File[], thumbnailIndex: number) => {
       photosRef.current = { files, thumbnailIndex }
+      // 파일 목록이 바뀌면 업로드 상태 초기화
+      setUploadStates(files.map(() => 'idle'))
       if (mode === 'edit') setPhotosChanged(true)
     },
     [mode]
@@ -204,6 +212,9 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     async (targetRecipeId: string, files: File[], thumbnailIndex: number) => {
       if (!user || files.length === 0) return
 
+      // 업로드 시작 — 모든 파일 'uploading' 상태로
+      setUploadStates(files.map(() => 'uploading'))
+
       const uploadOne = async (file: File, i: number): Promise<string | null> => {
         const ext = file.name.split('.').pop() ?? 'jpg'
         const safePath = `${user.id}/${targetRecipeId}/${Date.now()}-${i}.${ext}`
@@ -212,7 +223,11 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           .upload(safePath, file, { cacheControl: '3600', contentType: file.type })
 
         if (uploadError) {
-          console.error('Photo upload failed:', uploadError)
+          setUploadStates((prev) => {
+            const next = [...prev]
+            next[i] = 'error'
+            return next
+          })
           return null
         }
 
@@ -223,10 +238,19 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
           .single()
 
         if (insertError) {
-          console.error('Photo record insert failed:', insertError)
+          setUploadStates((prev) => {
+            const next = [...prev]
+            next[i] = 'error'
+            return next
+          })
           return null
         }
 
+        setUploadStates((prev) => {
+          const next = [...prev]
+          next[i] = 'done'
+          return next
+        })
         return photoRow.id
       }
 
@@ -236,8 +260,76 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
       if (photoIds.length > 0 && photoIds[thumbnailIndex]) {
         await updateRecipe(targetRecipeId, { thumbnail_photo_id: photoIds[thumbnailIndex] })
       }
+
+      // 실패 파일이 있으면 재시도 정보 저장
+      const hasError = results.some((r) => r === null)
+      if (hasError) {
+        pendingRetryRef.current = { recipeId: targetRecipeId, thumbnailIndex }
+        toast.error('일부 사진 업로드에 실패했습니다. 썸네일의 재시도 버튼을 눌러주세요.')
+      }
     },
     [user]
+  )
+
+  const handleRetryUpload = useCallback(
+    async (index: number) => {
+      const retry = pendingRetryRef.current
+      const file = photosRef.current.files[index]
+      if (!retry || !file || !user) return
+
+      setUploadStates((prev) => {
+        const next = [...prev]
+        next[index] = 'uploading'
+        return next
+      })
+
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const safePath = `${user.id}/${retry.recipeId}/${Date.now()}-${index}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('recipe-photos')
+        .upload(safePath, file, { cacheControl: '3600', contentType: file.type })
+
+      if (uploadError) {
+        setUploadStates((prev) => {
+          const next = [...prev]
+          next[index] = 'error'
+          return next
+        })
+        toast.error('재업로드에 실패했습니다')
+        return
+      }
+
+      const { data: photoRow, error: insertError } = await supabase
+        .from('recipe_photos')
+        .insert({ recipe_id: retry.recipeId, storage_path: safePath, order: index })
+        .select('id')
+        .single()
+
+      if (insertError) {
+        setUploadStates((prev) => {
+          const next = [...prev]
+          next[index] = 'error'
+          return next
+        })
+        toast.error('재업로드에 실패했습니다')
+        return
+      }
+
+      setUploadStates((prev) => {
+        const next = [...prev]
+        next[index] = 'done'
+        return next
+      })
+
+      // 재시도한 것이 썸네일이면 thumbnail_photo_id 갱신
+      if (index === retry.thumbnailIndex) {
+        await updateRecipe(retry.recipeId, { thumbnail_photo_id: photoRow.id })
+      }
+
+      queryClient.invalidateQueries({ queryKey: recipeKeys.detail(retry.recipeId) })
+      toast.success('사진이 업로드되었습니다')
+    },
+    [user, queryClient]
   )
 
   const onSubmit = useCallback(
@@ -392,7 +484,11 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
         {/* Section 4: Photos */}
         <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
           <CardHeader index={3} />
-          <PhotoSection onChange={handlePhotoChange} />
+          <PhotoSection
+            onChange={handlePhotoChange}
+            uploadStates={uploadStates.length > 0 ? uploadStates : undefined}
+            onRetry={handleRetryUpload}
+          />
         </section>
       </div>
 
