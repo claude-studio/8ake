@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { ImagePlus, Star, X } from 'lucide-react'
+import { CheckCircle2, ImagePlus, Loader2, RotateCcw, Star, X, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { compressImage } from '@/shared/lib/compress-image'
 import { cn } from '@/shared/lib/utils'
+
+import type { PhotoUploadStatus } from '../model/types'
 
 const MAX_FILES = 5
 const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB (압축 전 원본 허용)
@@ -18,9 +20,11 @@ interface PhotoItem {
 
 interface Props {
   onChange: (files: File[], thumbnailIndex: number) => void
+  uploadStates?: PhotoUploadStatus[]
+  onRetry?: (index: number) => void
 }
 
-export function PhotoUploader({ onChange }: Props) {
+export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [thumbnailIndex, setThumbnailIndex] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -163,6 +167,8 @@ export function PhotoUploader({ onChange }: Props) {
     [photos, onChange]
   )
 
+  const isUploading = uploadStates?.some((s) => s === 'uploading')
+
   return (
     <div className="space-y-3">
       {/* Drop zone */}
@@ -171,7 +177,7 @@ export function PhotoUploader({ onChange }: Props) {
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        disabled={isProcessing}
+        disabled={isProcessing || isUploading}
         className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-border bg-surface text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ImagePlus size={28} className="text-primary" />
@@ -193,55 +199,91 @@ export function PhotoUploader({ onChange }: Props) {
       {/* Previews */}
       {photos.length > 0 && (
         <div className="grid grid-cols-5 gap-2">
-          {photos.map((photo, index) => (
-            <div
-              key={photo.preview}
-              className={cn(
-                'relative aspect-square rounded-lg overflow-hidden group',
-                index === thumbnailIndex ? 'border-2 border-primary' : 'border border-border'
-              )}
-            >
-              <img
-                src={photo.preview}
-                alt={`사진 ${index + 1}`}
-                className="size-full  object-cover"
-              />
+          {photos.map((photo, index) => {
+            const status = uploadStates?.[index] ?? 'idle'
+            return (
+              <div
+                key={photo.preview}
+                className={cn(
+                  'relative aspect-square rounded-lg overflow-hidden group',
+                  status === 'error'
+                    ? 'border-2 border-destructive'
+                    : index === thumbnailIndex
+                      ? 'border-2 border-primary'
+                      : 'border border-border'
+                )}
+              >
+                <img
+                  src={photo.preview}
+                  alt={`사진 ${index + 1}`}
+                  className="size-full object-cover"
+                />
 
-              {/* Overlay buttons */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-start justify-between p-1">
-                {/* Thumbnail star */}
-                <button
-                  type="button"
-                  onClick={() => handleSetThumbnail(index)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="썸네일로 지정"
-                >
-                  <Star
-                    size={18}
-                    fill={index === thumbnailIndex ? 'currentColor' : 'none'}
-                    className={index === thumbnailIndex ? 'text-primary' : 'text-white'}
-                  />
-                </button>
+                {/* 업로드 상태 오버레이 */}
+                {status === 'uploading' && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Loader2 size={20} className="text-white animate-spin" />
+                  </div>
+                )}
+                {status === 'done' && (
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <CheckCircle2 size={22} className="text-white drop-shadow" />
+                  </div>
+                )}
+                {status === 'error' && (
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+                    <XCircle size={20} className="text-destructive" />
+                    {onRetry && (
+                      <button
+                        type="button"
+                        onClick={() => onRetry(index)}
+                        className="flex items-center gap-0.5 text-[10px] font-bold text-white bg-destructive/80 px-2 py-0.5 rounded-full"
+                      >
+                        <RotateCcw size={9} />
+                        재시도
+                      </button>
+                    )}
+                  </div>
+                )}
 
-                {/* Remove button */}
-                <button
-                  type="button"
-                  onClick={() => handleRemove(index)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 bg-(--overlay-bg)"
-                  title="삭제"
-                >
-                  <X size={14} className="text-primary-foreground" />
-                </button>
+                {/* 일반 호버 버튼 — 업로드 중이 아닐 때만 */}
+                {status === 'idle' && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-start justify-between p-1">
+                    {/* Thumbnail star */}
+                    <button
+                      type="button"
+                      onClick={() => handleSetThumbnail(index)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="썸네일로 지정"
+                    >
+                      <Star
+                        size={18}
+                        fill={index === thumbnailIndex ? 'currentColor' : 'none'}
+                        className={index === thumbnailIndex ? 'text-primary' : 'text-white'}
+                      />
+                    </button>
+
+                    {/* Remove button */}
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(index)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 bg-(--overlay-bg)"
+                      title="삭제"
+                    >
+                      <X size={14} className="text-primary-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Thumbnail badge */}
+                {index === thumbnailIndex && status === 'idle' && (
+                  <div className="absolute bottom-0 inset-x-0 text-center text-[10px] py-0.5 font-medium bg-primary text-primary-foreground">
+                    썸네일
+                  </div>
+                )}
               </div>
-
-              {/* Thumbnail badge */}
-              {index === thumbnailIndex && (
-                <div className="absolute bottom-0 inset-x-0 text-center text-[10px] py-0.5 font-medium bg-primary text-primary-foreground">
-                  썸네일
-                </div>
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

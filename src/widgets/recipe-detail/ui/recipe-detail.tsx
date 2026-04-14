@@ -21,6 +21,7 @@ import {
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { useRecipe } from '@/entities/recipe'
 import { cn } from '@/shared/lib/utils'
+import { RecipeDetailSkeleton, RouteError } from '@/shared/ui'
 
 import { PhotoGallery } from './photo-gallery'
 
@@ -45,9 +46,17 @@ interface Props {
   recipeId: string
   reviewListSlot?: React.ReactNode
   deleteSlot?: React.ReactNode
+  isOwner?: boolean
+  onTogglePublic?: () => void
 }
 
-export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
+export function RecipeDetail({
+  recipeId,
+  reviewListSlot,
+  deleteSlot,
+  isOwner,
+  onTogglePublic,
+}: Props) {
   const { data: recipe, isLoading, error } = useRecipe(recipeId)
   const [tab, setTab] = useState<'recipe' | 'reviews'>('recipe')
   const [multiplier, setMultiplier] = useState(1)
@@ -85,19 +94,11 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
   const mainCount = [ovenTemp, bakeTime, quantity].filter(Boolean).length
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        불러오는 중...
-      </div>
-    )
+    return <RecipeDetailSkeleton />
   }
 
   if (error || !recipe) {
-    return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        레시피를 찾을 수 없습니다.
-      </div>
-    )
+    return <RouteError error={error} showHome={false} />
   }
 
   const hasMeta =
@@ -143,22 +144,44 @@ export function RecipeDetail({ recipeId, reviewListSlot, deleteSlot }: Props) {
 
         {/* Badges row: visibility + tags */}
         <div className={cn('flex items-center flex-wrap gap-1.5', hasMeta ? 'mb-3' : 'mb-0')}>
-          <span
-            className={cn(
-              'inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full',
-              recipe.is_public
-                ? 'bg-(--success-bg) text-(--success-text) border border-(--success-border)'
-                : 'bg-surface text-muted-foreground border border-border'
-            )}
-          >
-            {recipe.is_public ? (
-              '공개'
-            ) : (
-              <>
-                <Lock size={11} /> 비공개
-              </>
-            )}
-          </span>
+          {isOwner && onTogglePublic ? (
+            <button
+              type="button"
+              onClick={onTogglePublic}
+              title={recipe.is_public ? '비공개로 전환' : '공개로 전환'}
+              className={cn(
+                'inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full border transition-colors cursor-pointer',
+                recipe.is_public
+                  ? 'bg-(--success-bg) text-(--success-text) border-(--success-border) hover:opacity-80'
+                  : 'bg-surface text-muted-foreground border-border hover:bg-muted'
+              )}
+            >
+              {recipe.is_public ? (
+                '공개'
+              ) : (
+                <>
+                  <Lock size={11} /> 비공개
+                </>
+              )}
+            </button>
+          ) : (
+            <span
+              className={cn(
+                'inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full',
+                recipe.is_public
+                  ? 'bg-(--success-bg) text-(--success-text) border border-(--success-border)'
+                  : 'bg-surface text-muted-foreground border border-border'
+              )}
+            >
+              {recipe.is_public ? (
+                '공개'
+              ) : (
+                <>
+                  <Lock size={11} /> 비공개
+                </>
+              )}
+            </span>
+          )}
           {recipe.tags.map((tag) => (
             <Link
               key={tag}

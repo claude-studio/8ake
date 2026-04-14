@@ -10,6 +10,7 @@ import { createIngredient, useIngredients, ingredientKeys } from '@/entities/ing
 import { useAuthStore } from '@/features/auth'
 import { cn } from '@/shared/lib/utils'
 import { useUIStore } from '@/shared/model/ui-store'
+import { IngredientListSkeleton } from '@/shared/ui'
 
 import { IngredientCardView } from './ingredient-card-view'
 import { IngredientTableView } from './ingredient-table-view'
@@ -184,7 +185,7 @@ export function IngredientList() {
 
       {/* 목록 */}
       {isLoading ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
+        <IngredientListSkeleton />
       ) : filteredIngredients.length === 0 && ingredients.length === 0 ? (
         <div className="flex min-h-[calc(100dvh-var(--header-h)-var(--tabbar-h)-var(--safe-bottom)-12rem)] flex-col items-center justify-center gap-2 text-center">
           <Package size={36} className="text-muted-foreground opacity-40" />
