@@ -37,6 +37,8 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
               src={getPhotoUrl(displayed.storage_path)}
               alt="레시피 사진"
               className="size-full  object-cover"
+              decoding="async"
+              fetchPriority="high"
             />
           ) : (
             <div className="relative flex size-full flex-col items-center justify-center gap-3 overflow-hidden bg-surface">
@@ -73,6 +75,8 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                   src={getPhotoUrl(mainPhoto.storage_path)}
                   alt="메인"
                   className="size-full  object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 <div className="flex size-full items-center justify-center bg-surface">
@@ -97,6 +101,7 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                   alt="서브"
                   className="size-full  object-cover"
                   loading="lazy"
+                  decoding="async"
                 />
               </button>
             ))}

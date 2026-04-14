@@ -69,6 +69,7 @@ export function RecipeCard({
               alt={name}
               className="absolute inset-0 size-full  object-cover"
               loading="lazy"
+              decoding="async"
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-(--card-placeholder-bg)">
