@@ -5,6 +5,7 @@
 ## 문서 참조
 
 구현 전 반드시 확인:
+
 - PRD: `docs/00-pm/ui.prd.md`
 - 구현 계획: `docs/01-plan/features/ui.plan.md`
 - 설계 (FSD 구조, API, 스키마, 토큰): `docs/02-design/features/ui.design.md`
@@ -30,16 +31,17 @@ Vite 8 + React 19 + TypeScript / TailwindCSS v4 (CSS-first) / shadcn/ui (new-yor
 app → routes → pages → widgets → features → entities → shared
 ```
 
-| 레이어 | 역할 | 의존 가능 |
-|--------|------|----------|
-| `routes` | TanStack Router 파일 라우트 — pages import 후 re-export만 | pages 이하 |
-| `pages` | widget 조합만 — 비즈니스 로직/API 호출 금지 | widgets 이하 |
-| `widgets` | 독립 UI 블록 (features + entities 조합) | features, entities, shared |
-| `features` | 사용자 인터랙션 단위 | entities, shared |
-| `entities` | 도메인 타입 + API 훅 | shared |
-| `shared` | 공통 유틸, UI 프리미티브 | 없음 |
+| 레이어     | 역할                                                      | 의존 가능                  |
+| ---------- | --------------------------------------------------------- | -------------------------- |
+| `routes`   | TanStack Router 파일 라우트 — pages import 후 re-export만 | pages 이하                 |
+| `pages`    | widget 조합만 — 비즈니스 로직/API 호출 금지               | widgets 이하               |
+| `widgets`  | 독립 UI 블록 (features + entities 조합)                   | features, entities, shared |
+| `features` | 사용자 인터랙션 단위                                      | entities, shared           |
+| `entities` | 도메인 타입 + API 훅                                      | shared                     |
+| `shared`   | 공통 유틸, UI 프리미티브                                  | 없음                       |
 
 **금지 사항**
+
 - 같은 레이어 간 참조 금지 (widget → widget 금지)
 - 하위 레이어에서 상위 레이어 참조 금지
 - 슬라이스 외부에서 내부 파일 직접 import 금지 → 반드시 `index.ts` 경유
@@ -89,3 +91,8 @@ src/
 ## 커밋 컨벤션
 
 `feat` / `fix` / `design` / `refactor` / `chore` / `docs` / `test` / `revert`
+
+## impeccable
+
+- IMPORTANT: impeccable 의 결과물은 반드시 `design` 폴더 하위에 생성되어야 합니다.
+- IMPORTANT: 스킬의 역할에 맞는 폴더명을 생성하고 하위에 파일을 생성해야 합니다.
