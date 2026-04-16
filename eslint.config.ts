@@ -54,13 +54,13 @@ export default tseslint.config(
     rules: {
       // 정확성: 충돌·중복 클래스 감지
       'better-tailwindcss/no-conflicting-classes': 'error',
-      'better-tailwindcss/no-duplicate-classes': 'warn',
+      'better-tailwindcss/no-duplicate-classes': 'error',
       // 스타일: CSS 변수 문법 통일 (border-[var(--x)] → border-(--x))
-      'better-tailwindcss/enforce-consistent-variable-syntax': ['warn', { syntax: 'shorthand' }],
+      'better-tailwindcss/enforce-consistent-variable-syntax': ['error', { syntax: 'shorthand' }],
       // 스타일: 축약 클래스 (w-full h-full → size-full 등)
-      'better-tailwindcss/enforce-shorthand-classes': 'warn',
+      'better-tailwindcss/enforce-shorthand-classes': 'error',
       // 스타일: canonical 클래스명 강제 (suggestCanonicalClasses 경고 대응)
-      'better-tailwindcss/enforce-canonical-classes': 'warn',
+      'better-tailwindcss/enforce-canonical-classes': 'error',
     },
   },
   { ignores: ['dist/', 'src/routeTree.gen.ts', 'node_modules/'] }

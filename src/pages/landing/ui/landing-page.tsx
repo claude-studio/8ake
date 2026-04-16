@@ -4,7 +4,6 @@ import {
   HeroSection,
   LandingFooter,
   LandingNav,
-  StepsSection,
   WhySection,
 } from '@/widgets/landing'
 
@@ -15,7 +14,6 @@ export function LandingPage() {
       <main>
         <HeroSection />
         <FeaturesSection />
-        <StepsSection />
         <WhySection />
         <BottomCtaSection />
       </main>

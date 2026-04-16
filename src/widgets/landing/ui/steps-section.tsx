@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-import { EASE, VIEWPORT_ONCE } from '@/shared/lib/motion'
+import { EASE_EXPO, VIEWPORT_NEAR } from '@/shared/lib/motion'
 
 const steps = [
   {
@@ -22,34 +22,42 @@ const steps = [
 
 export function StepsSection() {
   return (
-    <section className="px-5 py-16">
-      <div className="mx-auto max-w-[1024px]">
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={VIEWPORT_ONCE}
-          transition={{ duration: 0.5, ease: EASE }}
-          className="mb-10 text-center text-xl font-bold tracking-[-0.02em] text-foreground"
+    <section className="bg-surface/40 px-6 py-20 md:px-12">
+      <div className="mx-auto max-w-2xl">
+        {/* Section label */}
+        <motion.div
+          initial={{ opacity: 0, x: -8 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={VIEWPORT_NEAR}
+          transition={{ duration: 0.5, ease: EASE_EXPO }}
+          className="mb-16 flex items-center gap-3"
         >
-          3단계로 시작하는 베이킹 아카이브
-        </motion.h2>
+          <div className="h-px w-6 bg-primary/40" />
+          <span className="font-display text-[0.65rem] italic tracking-[0.18em] text-muted-foreground">
+            3단계로 시작하는 베이킹 아카이브
+          </span>
+        </motion.div>
 
-        <div className="flex flex-col gap-5 md:flex-row md:gap-6">
+        {/* Steps */}
+        <div className="flex flex-col gap-12 md:flex-row md:gap-6">
           {steps.map((step, i) => (
             <motion.div
               key={step.num}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={VIEWPORT_ONCE}
-              transition={{ duration: 0.5, delay: i * 0.15, ease: EASE }}
-              className="flex flex-1 flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-(--shadow-card)"
+              viewport={VIEWPORT_NEAR}
+              transition={{ duration: 0.65, delay: i * 0.1, ease: EASE_EXPO }}
+              className="flex flex-1 flex-col"
             >
-              <div className="flex size-9 items-center justify-center rounded-full bg-primary">
-                <span className="text-xs font-bold text-primary-foreground">{step.num}</span>
+              {/* Display number */}
+              <div className="font-display mb-4 text-[5.5rem] font-bold leading-none tracking-[-0.04em] text-primary/15">
+                {step.num}
               </div>
-              <div className="flex flex-col gap-1.5">
-                <p className="text-sm font-bold text-foreground">{step.title}</p>
-                <p className="text-xs/relaxed text-muted-foreground">{step.desc}</p>
+              <div className="flex flex-col gap-2">
+                <p className="text-xl font-extrabold tracking-[-0.03em] text-foreground/80">
+                  {step.title}
+                </p>
+                <p className="text-xs/relaxed font-normal text-muted-foreground">{step.desc}</p>
               </div>
             </motion.div>
           ))}
