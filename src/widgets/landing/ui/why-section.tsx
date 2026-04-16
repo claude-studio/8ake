@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion'
 
-import { EASE, VIEWPORT_ONCE } from '@/shared/lib/motion'
+import { EASE_EXPO, VIEWPORT_NEAR } from '@/shared/lib/motion'
 
 const points = [
   {
-    title: '같은 레시피를 여러 번 만들어도 괜찮아요',
-    desc: '한 레시피에 여러 번의 베이킹 기록을 쌓아가세요.',
+    title: '레시피, 기록, 재료가 하나로 연결',
+    desc: '노트앱에 흩어지던 메모·사진·재료 정보가 레시피를 중심으로 체계적으로 묶여요.',
   },
   {
     title: '매번 성장하는 나의 베이킹',
@@ -19,35 +19,42 @@ const points = [
 
 export function WhySection() {
   return (
-    <section className="px-5 py-16">
-      <div className="mx-auto max-w-[1024px]">
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={VIEWPORT_ONCE}
-          transition={{ duration: 0.5, ease: EASE }}
-          className="mb-8 text-center text-xl font-bold tracking-[-0.02em] text-foreground"
+    <section className="bg-surface/40 px-6 py-20 md:px-12">
+      <div className="mx-auto max-w-2xl">
+        {/* Section label */}
+        <motion.div
+          initial={{ opacity: 0, x: -8 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={VIEWPORT_NEAR}
+          transition={{ duration: 0.5, ease: EASE_EXPO }}
+          className="mb-14 flex items-center gap-3"
         >
-          왜 8ake인가요?
-        </motion.h2>
+          <div className="h-px w-6 bg-primary/40" />
+          <span className="font-display text-[0.65rem] italic tracking-[0.18em] text-muted-foreground">
+            왜 8ake인가요?
+          </span>
+        </motion.div>
 
-        <div className="flex flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-(--shadow-card)">
+        <div className="flex flex-col gap-12">
           {points.map((point, i) => (
             <motion.div
               key={point.title}
-              initial={{ opacity: 0, x: -12 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={VIEWPORT_ONCE}
-              transition={{ duration: 0.45, delay: i * 0.12, ease: EASE }}
-              className="flex items-start gap-4 p-5"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT_NEAR}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: EASE_EXPO }}
+              className="flex flex-col gap-2"
             >
-              <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-(--primary-dim)">
-                <div className="size-1.5 rounded-full bg-primary" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-semibold text-foreground">{point.title}</p>
-                <p className="text-xs/relaxed text-muted-foreground">{point.desc}</p>
-              </div>
+              {/* Index marker */}
+              <span className="font-display text-[0.625rem] italic tracking-[0.2em] text-primary/50 uppercase">
+                0{i + 1}
+              </span>
+              <p className="text-2xl/tight font-black tracking-[-0.04em] text-foreground/75">
+                {point.title}
+              </p>
+              <p className="max-w-[44ch] text-xs/relaxed font-normal text-muted-foreground">
+                {point.desc}
+              </p>
             </motion.div>
           ))}
         </div>

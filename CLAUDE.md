@@ -92,7 +92,69 @@ src/
 
 `feat` / `fix` / `design` / `refactor` / `chore` / `docs` / `test` / `revert`
 
-## impeccable
+## design/ 폴더 구조
 
-- IMPORTANT: impeccable 의 결과물은 반드시 `design` 폴더 하위에 생성되어야 합니다.
-- IMPORTANT: 스킬의 역할에 맞는 폴더명을 생성하고 하위에 파일을 생성해야 합니다.
+```
+design/
+├── brief/          ← 기능별 디자인 브리프 문서 (.md)
+├── <skill-name>/   ← 스킬이 생성한 스크린샷/이미지
+└── _common/        ← 스킬을 특정할 수 없는 스크린샷/이미지
+```
+
+### brief/ — 디자인 브리프 문서
+
+기능 단위로 디자인 의도·섹션 명세·인터랙션 모델·카피 원칙을 기록한 마크다운 문서.  
+**파일명**: `<feature-slug>.md` (예: `landing-page.md`, `recipe-detail.md`)
+
+브리프 문서에 포함해야 할 항목:
+
+| 섹션                       | 내용                              |
+| -------------------------- | --------------------------------- |
+| Feature Summary            | 기능 목적 한 문단                 |
+| Target Audience            | 주 사용자 + 정서적 상태           |
+| Primary User Action        | 핵심 CTA 흐름                     |
+| Design Direction           | 무드·팔레트·폰트 방향             |
+| Page / Component Structure | 위젯 트리                         |
+| Section Specs              | 섹션별 레이아웃·타이포·애니메이션 |
+| Interaction Model          | 이징·스태거·트리거 기준           |
+| Copy Principles            | 문구 규칙                         |
+| What Was Removed           | 제거 항목 + 이유                  |
+| Open Questions             | 미결 사항                         |
+
+> 구현이 완료되면 브리프 상단 `상태: 구현 완료`로 업데이트한다.
+
+---
+
+## 디자인 스킬 출력 규칙
+
+스킬이 생성하는 모든 스크린샷/이미지는 `design/` 하위에 저장한다. 루트 직접 저장 금지.
+
+### 저장 경로 결정 규칙
+
+```
+design/
+├── <skill-name>/   ← 파일명에 스킬명이 포함되면 해당 폴더
+└── _common/        ← 스킬명을 특정할 수 없으면 여기
+```
+
+**스킬명 판별 기준**: 파일명이 `<skill>-*` 또는 `*-<skill>` 또는 `*<skill>*` 패턴이면 해당 스킬 폴더에 저장.  
+**판별 불가**: 어떤 스킬명도 포함되지 않으면 `_common/`에 저장.
+
+### 스킬 → 폴더 매핑
+
+| 스킬       | 폴더                 |
+| ---------- | -------------------- |
+| impeccable | `design/impeccable/` |
+| bolder     | `design/bolder/`     |
+| clarify    | `design/clarify/`    |
+| distill    | `design/distill/`    |
+| layout     | `design/layout/`     |
+| colorize   | `design/colorize/`   |
+| typeset    | `design/typeset/`    |
+| delight    | `design/delight/`    |
+| animate    | `design/animate/`    |
+| overdrive  | `design/overdrive/`  |
+| quieter    | `design/quieter/`    |
+| 판별 불가  | `design/_common/`    |
+
+> 새 스킬이 추가되면 위 표에 행을 추가한다.
