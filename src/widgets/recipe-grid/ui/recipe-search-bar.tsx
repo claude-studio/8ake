@@ -1,13 +1,6 @@
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { cn } from '@/shared/lib/utils'
 
 interface Props {
   search: string
@@ -16,37 +9,57 @@ interface Props {
   onSortByChange: (value: 'created_at' | 'total_score') => void
 }
 
+const SORT_OPTIONS = [
+  { value: 'created_at', label: '최신순' },
+  { value: 'total_score', label: '평점순' },
+] as const
+
 export function RecipeSearchBar({ search, onSearchChange, sortBy, onSortByChange }: Props) {
   return (
-    <div className="flex gap-2">
-      {/* Search Input */}
+    <div className="flex items-end gap-4">
+      {/* Underline search input */}
       <div className="relative flex-1">
         <Search
-          size={15}
-          className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"
+          size={13}
+          className="absolute left-0 bottom-[8px] pointer-events-none text-muted-foreground/50"
         />
-        <Input
+        <input
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="레시피 검색..."
-          className="pl-9"
+          className="w-full bg-transparent border-0 border-b border-border pl-5 pb-2 pr-6 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary transition-colors"
         />
+        {search.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onSearchChange('')}
+            className="absolute right-0 bottom-[6px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+            aria-label="검색 초기화"
+          >
+            <X size={13} />
+          </button>
+        )}
       </div>
 
-      {/* Sort Select */}
-      <Select
-        value={sortBy}
-        onValueChange={(v) => onSortByChange(v as 'created_at' | 'total_score')}
-      >
-        <SelectTrigger className="w-[100px] shrink-0">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="created_at">최신순</SelectItem>
-          <SelectItem value="total_score">평점순</SelectItem>
-        </SelectContent>
-      </Select>
+      {/* Sort toggle buttons */}
+      <div className="flex gap-1 shrink-0 pb-0.5">
+        {SORT_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => onSortByChange(value)}
+            className={cn(
+              'px-2.5 py-1 rounded-full text-[0.68rem] font-semibold border transition-colors',
+              sortBy === value
+                ? 'bg-(--primary-dim) border-(--primary-border) text-primary'
+                : 'border-border text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

@@ -43,6 +43,7 @@ export function useRecipes(search: string, sortBy: 'created_at' | 'total_score',
         query.fetchNextPage()
       }
     },
+    isError: query.isError,
     refetch: query.refetch,
   }
 }
