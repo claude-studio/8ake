@@ -44,7 +44,7 @@
 
     /* 텍스트 */
     --foreground: #1e1410;
-    --muted-foreground: #7a6a59;
+    --muted-foreground: #6b5a4a;
 
     /* 액센트 */
     --primary: #c2673a;
@@ -323,6 +323,18 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Reduced motion — disable entrance animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
