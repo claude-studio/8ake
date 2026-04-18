@@ -8,6 +8,7 @@ import type { Recipe, RecipePhoto } from '../model/types'
 
 interface RecipeRow extends Recipe {
   recipe_photos: RecipePhoto[]
+  total_score: number | null
 }
 
 export function useRecipes(search: string, sortBy: 'created_at' | 'total_score', tags?: string[]) {

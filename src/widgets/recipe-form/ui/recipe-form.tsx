@@ -60,7 +60,18 @@ function CardHeader({ index, extra }: { index: number; extra?: React.ReactNode }
   )
 }
 
-function SectionSkeleton() {
+function SectionSkeleton({ variant = 'fields' }: { variant?: 'fields' | 'steps' }) {
+  if (variant === 'steps') {
+    return (
+      <div className="flex flex-col gap-3 animate-pulse">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-9 rounded-md bg-muted" />
+          <div className="h-9 rounded-md bg-muted" />
+        </div>
+        <div className="h-[250px] rounded-lg bg-muted mt-2" />
+      </div>
+    )
+  }
   return (
     <div className="flex flex-col gap-4 animate-pulse">
       <div className="flex flex-col gap-1.5">
@@ -150,12 +161,20 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
   const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [photosChanged, setPhotosChanged] = useState(false)
   const [unitsChanged, setUnitsChanged] = useState(false)
   const [loadKey, setLoadKey] = useState(0)
   const [bakeTimeUnit, setBakeTimeUnit] = useState<'분' | '시간'>('분')
   const [preheatTimeUnit, setPreheatTimeUnit] = useState<'분' | '시간'>('분')
   const formLoaded = useRef(false)
+
+  useEffect(
+    () => () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+    },
+    []
+  )
 
   const unitsRef = useRef<{ bakeTimeUnit: string; preheatTimeUnit: string }>({
     bakeTimeUnit: '분',
@@ -444,7 +463,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           setIsSaved(true)
           toast.success('레시피가 등록되었습니다')
           queryClient.invalidateQueries({ queryKey: recipeKeys.lists() })
-          setTimeout(() => {
+          savedTimerRef.current = setTimeout(() => {
             router.navigate({ to: '/recipe/$id', params: { id: recipe.id } })
           }, 350)
         } else if (recipeId) {
@@ -474,7 +493,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           formLoaded.current = false
           setPhotosChanged(false)
           setUnitsChanged(false)
-          setTimeout(() => {
+          savedTimerRef.current = setTimeout(() => {
             setIsSaved(false)
             setLoadKey((k) => k + 1)
           }, 350)
@@ -495,7 +514,6 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
     <form onSubmit={handleSubmit(onSubmit as never)} className="pb-28">
       <PageHeader title={mode === 'create' ? '레시피 추가' : '레시피 수정'} right={headerRight} />
       <div className="max-w-[720px] mx-auto px-4 pt-6 flex flex-col gap-5">
-        {/* Section 1: Basic Info — primary section, slightly elevated */}
         <section className="bg-card border border-border rounded-2xl p-6 shadow-(--shadow-card)">
           <CardHeader index={0} />
           {isDataLoading ? (
@@ -505,7 +523,6 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           )}
         </section>
 
-        {/* Section 2: Ingredients */}
         <section className="bg-card border border-border rounded-2xl p-5 shadow-(--shadow-card)">
           <CardHeader
             index={1}
@@ -529,17 +546,10 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           )}
         </section>
 
-        {/* Section 3: Steps */}
         <section className="bg-card border border-border rounded-2xl p-5 shadow-(--shadow-card)">
           <CardHeader index={2} />
           {isDataLoading ? (
-            <div className="flex flex-col gap-3 animate-pulse">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="h-9 rounded-md bg-muted" />
-                <div className="h-9 rounded-md bg-muted" />
-              </div>
-              <div className="h-[250px] rounded-lg bg-muted mt-2" />
-            </div>
+            <SectionSkeleton variant="steps" />
           ) : (
             <StepsSection
               register={register}
@@ -560,7 +570,6 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           )}
         </section>
 
-        {/* Section 4: Photos — visually lighter (optional) */}
         <section className="bg-card/60 border border-dashed border-border rounded-2xl p-5">
           <CardHeader index={3} />
           <PhotoSection
