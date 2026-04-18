@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import { Link } from '@tanstack/react-router'
 import { ImageOff } from 'lucide-react'
 
@@ -24,7 +26,7 @@ const sourceLabel: Record<string, string> = {
 
 export const rotations = [-1, 0.5, -0.8, 1, -0.3, 0.7, -0.6, 0.9, -1.1, 0.4]
 
-export function RecipeCard({
+export const RecipeCard = memo(function RecipeCard({
   id,
   name,
   tags,
@@ -134,4 +136,4 @@ export function RecipeCard({
       </div>
     </Link>
   )
-}
+})

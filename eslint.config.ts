@@ -63,5 +63,5 @@ export default tseslint.config(
       'better-tailwindcss/enforce-canonical-classes': 'error',
     },
   },
-  { ignores: ['dist/', 'src/routeTree.gen.ts', 'node_modules/'] }
+  { ignores: ['dist/', 'src/routeTree.gen.ts', 'node_modules/', '.agents/'] }
 )
