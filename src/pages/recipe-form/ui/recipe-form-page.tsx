@@ -17,7 +17,7 @@ export function RecipeFormPage({ mode, recipeId }: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { data: recipe } = useRecipe(recipeId ?? '')
+  const { data: recipe, isLoading: recipeLoading } = useRecipe(recipeId ?? '')
 
   const isEdit = mode === 'edit' && !!recipeId
   const isOwner = !isEdit || (!!user && !!recipe && recipe.user_id === user.id)
@@ -33,6 +33,7 @@ export function RecipeFormPage({ mode, recipeId }: Props) {
       <RecipeForm
         mode={mode}
         recipeId={recipeId}
+        isDataLoading={isEdit && recipeLoading}
         headerRight={
           <HeaderMenu onDelete={isEdit && isOwner ? () => setDeleteOpen(true) : undefined} />
         }

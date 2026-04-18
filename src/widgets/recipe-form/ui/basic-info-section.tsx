@@ -115,7 +115,7 @@ export function BasicInfoSection({ control, errors }: Props) {
           출처 <span className="text-destructive">*</span>
         </label>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {SOURCE_TYPES.map((st) => {
             const isActive = sourceType.field.value === st.value
             const isYoutube = st.value === 'youtube'
@@ -126,12 +126,14 @@ export function BasicInfoSection({ control, errors }: Props) {
                 type="button"
                 onClick={() => sourceType.field.onChange(st.value)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150',
+                  'inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-all duration-150',
                   {
-                    'border-(--youtube) bg-(--youtube) text-white': isActive && isYoutube,
-                    'border-primary bg-primary text-primary-foreground': isActive && !isYoutube,
+                    'border-(--youtube) bg-(--youtube) text-white shadow-sm': isActive && isYoutube,
+                    'border-primary bg-primary text-primary-foreground shadow-sm':
+                      isActive && !isYoutube,
                     'border-destructive bg-destructive/5 text-destructive': !isActive && hasError,
-                    'border-border bg-surface text-muted-foreground': !isActive && !hasError,
+                    'border-border bg-surface text-muted-foreground hover:border-primary/40 hover:text-foreground':
+                      !isActive && !hasError,
                   }
                 )}
               >
@@ -183,7 +185,7 @@ export function BasicInfoSection({ control, errors }: Props) {
             return (
               <div className="relative">
                 <div
-                  className="flex flex-wrap items-center gap-1.5 bg-surface border-[1.5px] border-border rounded-[6px] px-[10px] py-2 min-h-11 cursor-text"
+                  className="flex flex-wrap items-center gap-1.5 bg-surface border border-border rounded-xl px-[10px] py-2 min-h-11 cursor-text"
                   onClick={() => document.getElementById('tag-input-field')?.focus()}
                 >
                   {tags.map((tag, i) => (
@@ -251,40 +253,33 @@ export function BasicInfoSection({ control, errors }: Props) {
         control={control}
         name="is_public"
         render={({ field }) => (
-          <div className="flex items-center justify-between bg-surface border-[1.5px] border-border rounded-[6px] px-4 py-3">
+          <div className="flex items-center justify-between py-1">
             <div className="flex items-center gap-2">
               {field.value ? (
-                <Globe size={18} className="text-primary" />
+                <Globe size={14} className="text-primary shrink-0" />
               ) : (
-                <Lock size={18} className="text-muted-foreground" />
+                <Lock size={14} className="text-muted-foreground shrink-0" />
               )}
-              <div className="flex flex-col gap-1.5">
-                <div className="text-sm font-medium text-foreground">
-                  {field.value ? '공개' : '비공개'}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {field.value ? '다른 사람이 볼 수 있어요' : '나만 볼 수 있어요'}
-                </div>
-              </div>
+              <span className="text-sm text-muted-foreground">
+                {field.value ? '공개' : '비공개'}
+              </span>
             </div>
             <button
               type="button"
               role="switch"
               aria-checked={field.value}
+              aria-label="공개 여부"
               onClick={() => field.onChange(!field.value)}
               className={cn(
-                'relative w-11 h-6 rounded-xl cursor-pointer shrink-0 transition-all duration-200',
-                field.value
-                  ? 'bg-primary border-[1.5px] border-primary'
-                  : 'bg-surface border-[1.5px] border-border'
+                'relative w-10 h-5 rounded-full cursor-pointer shrink-0 transition-all duration-200',
+                field.value ? 'bg-primary' : 'bg-border'
               )}
             >
               <span
                 className={cn(
-                  'absolute top-[3px] size-4 rounded-full transition-all duration-200',
-                  field.value ? 'bg-primary-foreground' : 'bg-muted-foreground'
+                  'absolute top-0.5 size-4 rounded-full bg-primary-foreground shadow-sm transition-all duration-200',
+                  field.value ? 'left-[22px]' : 'left-0.5'
                 )}
-                style={{ left: field.value ? 23 : 3 }}
               />
             </button>
           </div>

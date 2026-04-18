@@ -104,11 +104,11 @@ const IngredientRow = memo(function IngredientRow({
                               if (val && isNaN(Number(val))) amountField.onChange('')
                             }
                           }}
-                          className="h-full w-[48px] flex-none rounded-none rounded-r-md border-0 pl-2 pr-4 py-0 text-[11px] font-semibold text-foreground bg-surface focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
+                          className="h-full w-[56px] flex-none rounded-none rounded-r-md border-0 pl-2 pr-5 py-0 text-[11px] font-semibold text-foreground bg-surface focus:ring-0 shadow-none cursor-pointer hover:bg-primary/8 transition-colors"
                         >
                           <NativeSelectOption value="g">g</NativeSelectOption>
                           <NativeSelectOption value="개">개</NativeSelectOption>
-                          <NativeSelectOption value="직접입력">직접</NativeSelectOption>
+                          <NativeSelectOption value="직접입력">직접입력</NativeSelectOption>
                         </NativeSelect>
                       </div>
                     </div>
@@ -124,7 +124,7 @@ const IngredientRow = memo(function IngredientRow({
                     type="button"
                     onClick={onRemove}
                     disabled={!canDelete}
-                    className="size-8 flex items-center justify-center rounded-[6px] text-muted-foreground transition-colors hover:text-destructive disabled:opacity-30 disabled:cursor-not-allowed shrink-0 self-start"
+                    className="relative size-8 flex items-center justify-center rounded-[6px] text-muted-foreground transition-colors hover:text-destructive disabled:opacity-30 disabled:cursor-not-allowed shrink-0 self-start before:absolute before:inset-[-6px] before:content-['']"
                     title="삭제"
                   >
                     <Trash2 size={15} />

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { Loader2, Plus } from 'lucide-react'
+import { Check, Loader2, Plus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -13,6 +13,7 @@ import { createRecipe, updateRecipe, fetchRecipe, recipeKeys } from '@/entities/
 import { useAuthStore } from '@/features/auth'
 import type { PhotoUploadStatus } from '@/features/photo-upload'
 import { supabase } from '@/shared/api'
+import { cn } from '@/shared/lib/utils'
 import { PageHeader } from '@/shared/ui'
 
 import { BasicInfoSection } from './basic-info-section'
@@ -28,32 +29,54 @@ import {
 interface Props {
   mode: 'create' | 'edit'
   recipeId?: string
+  isDataLoading?: boolean
   headerRight?: React.ReactNode
 }
 
-const STEP_LABELS = ['기본정보', '재료', '만드는 법', '사진'] as const
+const STEP_LABELS = ['메뉴 정보', '재료 목록', '만드는 법 · 메모', '완성 사진'] as const
+const STEP_OPTIONAL = [false, false, false, true] as const
 
-function CardHeader({
-  index,
-  extra,
-  required,
-}: {
-  index: number
-  extra?: React.ReactNode
-  required?: boolean
-}) {
+function CardHeader({ index, extra }: { index: number; extra?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between mb-5">
-      <div className="flex items-center gap-2">
-        <span className="size-6 rounded-full bg-(--primary-dim) border border-(--primary-border) flex items-center justify-center text-[11px] font-bold text-primary">
+      <div className="flex items-center gap-2.5">
+        <span
+          className="size-6 rounded-full bg-(--primary-dim) border border-(--primary-border) flex items-center justify-center text-[11px] font-bold text-primary shrink-0"
+          aria-hidden
+        >
           {index + 1}
         </span>
-        <h2 className="text-[15px] font-bold tracking-[-0.02em] text-foreground m-0">
+        <h2 className="text-[16px] font-bold tracking-[-0.03em] text-foreground m-0">
           {STEP_LABELS[index]}
-          {required && <span className="text-destructive ml-0.5">*</span>}
         </h2>
+        {STEP_OPTIONAL[index] && (
+          <span className="text-[10px] font-semibold text-muted-foreground bg-surface border border-border rounded-full px-2 py-0.5">
+            선택사항
+          </span>
+        )}
       </div>
       {extra}
+    </div>
+  )
+}
+
+function SectionSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 animate-pulse">
+      <div className="flex flex-col gap-1.5">
+        <div className="h-3 w-14 rounded bg-muted" />
+        <div className="h-11 rounded-lg bg-muted" />
+      </div>
+      <div className="h-px bg-border" />
+      <div className="flex flex-col gap-1.5">
+        <div className="h-3 w-10 rounded bg-muted" />
+        <div className="h-10 rounded-lg bg-muted" />
+      </div>
+      <div className="h-px bg-border" />
+      <div className="flex flex-col gap-1.5">
+        <div className="h-3 w-8 rounded bg-muted" />
+        <div className="h-10 rounded-lg bg-muted" />
+      </div>
     </div>
   )
 }
@@ -94,11 +117,39 @@ function buildIngredientRows(
   }))
 }
 
-export function RecipeForm({ mode, recipeId, headerRight }: Props) {
+function submitButtonContent({
+  isSaved,
+  isSubmitting,
+  isEditUnchanged,
+}: {
+  isSaved: boolean
+  isSubmitting: boolean
+  isEditUnchanged: boolean
+}) {
+  if (isSaved)
+    return (
+      <>
+        <Check size={16} className="animate-in fade-in-0 zoom-in-95 duration-150" />
+        저장됨
+      </>
+    )
+  if (isSubmitting)
+    return (
+      <>
+        <Loader2 size={16} className="animate-spin" />
+        저장 중...
+      </>
+    )
+  if (isEditUnchanged) return '변경한 내용이 없어요'
+  return '저장하기'
+}
+
+export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props) {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
   const [photosChanged, setPhotosChanged] = useState(false)
   const [unitsChanged, setUnitsChanged] = useState(false)
   const [loadKey, setLoadKey] = useState(0)
@@ -132,7 +183,7 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     resolver: zodResolver(RecipeSchemaRefined) as never,
     defaultValues: {
       name: '',
-      source_type: undefined,
+      source_type: 'etc',
       source_url: '',
       oven_temp: undefined,
       bake_time: undefined,
@@ -390,9 +441,12 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
             files.length > 0 ? uploadPhotos(recipe.id, files, thumbnailIndex) : Promise.resolve(),
           ])
 
+          setIsSaved(true)
           toast.success('레시피가 등록되었습니다')
           queryClient.invalidateQueries({ queryKey: recipeKeys.lists() })
-          router.navigate({ to: '/recipe/$id', params: { id: recipe.id } })
+          setTimeout(() => {
+            router.navigate({ to: '/recipe/$id', params: { id: recipe.id } })
+          }, 350)
         } else if (recipeId) {
           const replaceIngredients = supabase
             .from('recipe_ingredients')
@@ -413,13 +467,17 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
             files.length > 0 ? uploadPhotos(recipeId, files, thumbnailIndex) : Promise.resolve(),
           ])
 
+          setIsSaved(true)
           toast.success('레시피가 수정되었습니다')
           queryClient.invalidateQueries({ queryKey: recipeKeys.detail(recipeId) })
           queryClient.invalidateQueries({ queryKey: recipeKeys.lists() })
           formLoaded.current = false
           setPhotosChanged(false)
           setUnitsChanged(false)
-          setLoadKey((k) => k + 1)
+          setTimeout(() => {
+            setIsSaved(false)
+            setLoadKey((k) => k + 1)
+          }, 350)
         }
       } catch (err) {
         console.error('Submit error:', err)
@@ -431,58 +489,79 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
     [mode, recipeId, user, router, uploadPhotos, queryClient]
   )
 
+  const isEditUnchanged = mode === 'edit' && !isDirty && !photosChanged && !unitsChanged
+
   return (
-    <form onSubmit={handleSubmit(onSubmit as never)} className="pb-24">
+    <form onSubmit={handleSubmit(onSubmit as never)} className="pb-28">
       <PageHeader title={mode === 'create' ? '레시피 추가' : '레시피 수정'} right={headerRight} />
-      <div className="max-w-[720px] mx-auto px-4 pt-5 flex flex-col gap-5">
-        {/* Section 1: Basic Info */}
-        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
+      <div className="max-w-[720px] mx-auto px-4 pt-6 flex flex-col gap-5">
+        {/* Section 1: Basic Info — primary section, slightly elevated */}
+        <section className="bg-card border border-border rounded-2xl p-6 shadow-(--shadow-card)">
           <CardHeader index={0} />
-          <BasicInfoSection control={control} errors={errors} />
+          {isDataLoading ? (
+            <SectionSkeleton />
+          ) : (
+            <BasicInfoSection control={control} errors={errors} />
+          )}
         </section>
 
         {/* Section 2: Ingredients */}
-        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
+        <section className="bg-card border border-border rounded-2xl p-5 shadow-(--shadow-card)">
           <CardHeader
             index={1}
-            required
             extra={
-              <button
-                type="button"
-                onClick={() => appendIngredientRef.current()}
-                className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg text-primary bg-(--primary-dim) border border-(--primary-border) cursor-pointer"
-              >
-                <Plus size={12} />
-                재료 추가
-              </button>
+              !isDataLoading ? (
+                <button
+                  type="button"
+                  onClick={() => appendIngredientRef.current()}
+                  className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg text-primary bg-(--primary-dim) border border-(--primary-border) cursor-pointer transition-colors hover:bg-(--primary-border)"
+                >
+                  <Plus size={12} />
+                  재료 추가
+                </button>
+              ) : null
             }
           />
-          <IngredientsSection control={control} errors={errors} onAppendRef={handleAppendRef} />
+          {isDataLoading ? (
+            <SectionSkeleton />
+          ) : (
+            <IngredientsSection control={control} errors={errors} onAppendRef={handleAppendRef} />
+          )}
         </section>
 
         {/* Section 3: Steps */}
-        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
+        <section className="bg-card border border-border rounded-2xl p-5 shadow-(--shadow-card)">
           <CardHeader index={2} />
-          <StepsSection
-            register={register}
-            errors={errors}
-            bakeTimeUnit={bakeTimeUnit}
-            preheatTimeUnit={preheatTimeUnit}
-            onBakeTimeUnitChange={(u) => {
-              setBakeTimeUnit(u)
-              unitsRef.current = { ...unitsRef.current, bakeTimeUnit: u }
-              if (mode === 'edit') setUnitsChanged(true)
-            }}
-            onPreheatTimeUnitChange={(u) => {
-              setPreheatTimeUnit(u)
-              unitsRef.current = { ...unitsRef.current, preheatTimeUnit: u }
-              if (mode === 'edit') setUnitsChanged(true)
-            }}
-          />
+          {isDataLoading ? (
+            <div className="flex flex-col gap-3 animate-pulse">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="h-9 rounded-md bg-muted" />
+                <div className="h-9 rounded-md bg-muted" />
+              </div>
+              <div className="h-[250px] rounded-lg bg-muted mt-2" />
+            </div>
+          ) : (
+            <StepsSection
+              register={register}
+              errors={errors}
+              bakeTimeUnit={bakeTimeUnit}
+              preheatTimeUnit={preheatTimeUnit}
+              onBakeTimeUnitChange={(u) => {
+                setBakeTimeUnit(u)
+                unitsRef.current = { ...unitsRef.current, bakeTimeUnit: u }
+                if (mode === 'edit') setUnitsChanged(true)
+              }}
+              onPreheatTimeUnitChange={(u) => {
+                setPreheatTimeUnit(u)
+                unitsRef.current = { ...unitsRef.current, preheatTimeUnit: u }
+                if (mode === 'edit') setUnitsChanged(true)
+              }}
+            />
+          )}
         </section>
 
-        {/* Section 4: Photos */}
-        <section className="note-card-accent bg-card border border-border rounded-xl p-6 shadow-(--shadow-card) relative overflow-hidden">
+        {/* Section 4: Photos — visually lighter (optional) */}
+        <section className="bg-card/60 border border-dashed border-border rounded-2xl p-5">
           <CardHeader index={3} />
           <PhotoSection
             onChange={handlePhotoChange}
@@ -493,26 +572,30 @@ export function RecipeForm({ mode, recipeId, headerRight }: Props) {
       </div>
 
       {/* Fixed bottom action bar */}
-      <div className="fixed bottom-0 inset-x-0 z-60 h-16 bg-card border-t border-border shadow-(--shadow-md)">
-        <div className="max-w-[720px] mx-auto px-4 h-full flex items-center justify-between gap-[10px]">
+      <div
+        className="fixed bottom-0 inset-x-0 z-60 bg-card/85 border-t border-border"
+        style={{
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
+        <div className="max-w-[720px] mx-auto px-4 h-16 flex items-center gap-3">
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             onClick={() => router.history.back()}
-            className="min-[475px]:w-auto flex-1 min-[475px]:flex-none"
+            className="shrink-0 text-muted-foreground"
           >
             취소
           </Button>
 
           <Button
             type="submit"
-            disabled={
-              isSubmitting || (mode === 'edit' && !isDirty && !photosChanged && !unitsChanged)
-            }
-            className="min-[475px]:min-w-[100px] flex-1 min-[475px]:flex-none"
+            disabled={isSubmitting || isEditUnchanged || isSaved}
+            className={cn('flex-1', isSaved && 'scale-[1.04]')}
           >
-            {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-            {isSubmitting ? '저장 중...' : '저장하기'}
+            {submitButtonContent({ isSaved, isSubmitting, isEditUnchanged })}
           </Button>
         </div>
       </div>
