@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
+import { handleSupabaseError } from '@/shared/lib/handle-error'
 
 export const reviewKeys = {
   all: ['reviews'] as const,
@@ -12,13 +13,13 @@ export async function fetchReviews(recipeId: string) {
     .select('*')
     .eq('recipe_id', recipeId)
     .order('created_at', { ascending: false })
-  if (error) throw error
+  if (error) handleSupabaseError(error, '회고 목록 조회')
   return data ?? []
 }
 
 export async function createReview(values: TablesInsert<'reviews'>) {
   const { data, error } = await supabase.from('reviews').insert(values).select().single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '회고 등록')
   return data
 }
 
@@ -29,11 +30,11 @@ export async function updateReview(id: string, values: TablesUpdate<'reviews'>) 
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '회고 수정')
   return data
 }
 
 export async function deleteReview(id: string) {
   const { error } = await supabase.from('reviews').delete().eq('id', id)
-  if (error) throw error
+  if (error) handleSupabaseError(error, '회고 삭제')
 }

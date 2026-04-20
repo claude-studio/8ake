@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 import { supabase } from '@/shared/api'
+import { toastSupabaseError } from '@/shared/lib/handle-error'
 
 import type { Session, User } from '@supabase/supabase-js'
 
@@ -22,18 +23,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isLoading: true,
   setSession: (session) => set({ session, user: session?.user ?? null, isLoading: false }),
   signOut: async () => {
-    await supabase.auth.signOut()
-    set({ user: null, session: null })
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) toastSupabaseError(error, '로그아웃')
+    } finally {
+      set({ user: null, session: null })
+    }
   },
   initialize: async () => {
-    const { data } = await supabase.auth.getSession()
-    set({ session: data.session, user: data.session?.user ?? null, isLoading: false })
+    try {
+      const { data, error } = await supabase.auth.getSession()
+      if (error) toastSupabaseError(error, '세션 초기화')
+      set({ session: data.session, user: data.session?.user ?? null, isLoading: false })
 
-    if (!authListenerRegistered) {
-      authListenerRegistered = true
-      supabase.auth.onAuthStateChange((_event, session) => {
-        set({ session, user: session?.user ?? null })
-      })
+      if (!authListenerRegistered) {
+        authListenerRegistered = true
+        supabase.auth.onAuthStateChange((_event, session) => {
+          set({ session, user: session?.user ?? null })
+        })
+      }
+    } catch {
+      set({ isLoading: false })
     }
   },
 }))

@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { supabase } from '@/shared/api'
+import { handleSupabaseError } from '@/shared/lib/handle-error'
+
+import type { QueryClient } from '@tanstack/react-query'
 
 export interface CalendarEntry {
   id: string
@@ -18,7 +21,7 @@ function toLocalDate(isoStr: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-async function fetchCalendarEntries(year: number, month: number) {
+export async function fetchCalendarEntries(year: number, month: number) {
   // 로컬 타임존 기준 월 시작/끝을 UTC로 변환하여 필터링
   const localStart = new Date(year, month - 1, 1)
   const localEnd = new Date(year, month, 1)
@@ -41,8 +44,8 @@ async function fetchCalendarEntries(year: number, month: number) {
       .order('created_at', { ascending: true }),
   ])
 
-  if (recipesResult.error) throw recipesResult.error
-  if (reviewsResult.error) throw reviewsResult.error
+  if (recipesResult.error) handleSupabaseError(recipesResult.error, '캘린더 데이터 조회')
+  if (reviewsResult.error) handleSupabaseError(reviewsResult.error, '캘린더 데이터 조회')
 
   const entries: CalendarEntry[] = []
 
@@ -73,6 +76,18 @@ async function fetchCalendarEntries(year: number, month: number) {
   }
 
   return entries.sort((a, b) => a.created_at.localeCompare(b.created_at))
+}
+
+export function prefetchCalendarEntries(
+  queryClient: QueryClient,
+  year: number,
+  month: number
+): void {
+  void queryClient.prefetchQuery({
+    queryKey: ['calendar', year, month],
+    queryFn: () => fetchCalendarEntries(year, month),
+    staleTime: 1000 * 60,
+  })
 }
 
 export function useCalendarEntries(year: number, month: number) {

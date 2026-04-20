@@ -1,14 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight, CookingPot, MessageSquare } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import type { CalendarEntry } from '@/entities/review'
-import { useCalendarEntries } from '@/entities/review'
+import { useCalendarEntries, prefetchCalendarEntries } from '@/entities/review'
 import { cn } from '@/shared/lib/utils'
 
+import { calculateStreak } from '../lib/streak'
+
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const
+
+const WEEKDAY_HEADER = (
+  <div className="mb-2 grid grid-cols-7 gap-1">
+    {WEEKDAYS.map((day) => (
+      <div key={day} className="text-center text-[11px] font-medium text-muted-foreground">
+        {day}
+      </div>
+    ))}
+  </div>
+)
 
 function getMonthDays(year: number, month: number) {
   const firstDay = new Date(year, month - 1, 1).getDay()
@@ -32,12 +45,23 @@ export function BakingCalendar() {
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const { data: entries, isLoading } = useCalendarEntries(year, month)
-  const entriesByDate = groupByDate(entries)
-  const { firstDay, daysInMonth } = getMonthDays(year, month)
+
+  const entriesByDate = useMemo(() => groupByDate(entries), [entries])
+  const { firstDay, daysInMonth } = useMemo(() => getMonthDays(year, month), [year, month])
+  const sortedDates = useMemo(() => [...entriesByDate.keys()].sort(), [entriesByDate])
+  const streak = useMemo(() => calculateStreak(sortedDates), [sortedDates])
 
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+  // 다음 달 데이터 프리패치
+  useEffect(() => {
+    const nextMonth = month === 12 ? 1 : month + 1
+    const nextYear = month === 12 ? year + 1 : year
+    prefetchCalendarEntries(queryClient, nextYear, nextMonth)
+  }, [year, month, queryClient])
 
   const goPrev = () => {
     if (month === 1) {
@@ -57,20 +81,6 @@ export function BakingCalendar() {
       setMonth(month + 1)
     }
     setSelectedDate(null)
-  }
-
-  // 연속 베이킹 스트릭 계산
-  const sortedDates = [...entriesByDate.keys()].sort()
-  let streak = 0
-  if (sortedDates.length > 0) {
-    streak = 1
-    for (let i = sortedDates.length - 1; i > 0; i--) {
-      const curr = new Date(sortedDates[i])
-      const prev = new Date(sortedDates[i - 1])
-      const diff = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24)
-      if (diff === 1) streak++
-      else break
-    }
   }
 
   const selectedEntries = selectedDate ? (entriesByDate.get(selectedDate) ?? []) : []
@@ -111,13 +121,7 @@ export function BakingCalendar() {
       {/* 캘린더 그리드 */}
       <div className="rounded-2xl border border-border bg-card p-3">
         {/* 요일 헤더 */}
-        <div className="mb-2 grid grid-cols-7 gap-1">
-          {WEEKDAYS.map((day) => (
-            <div key={day} className="text-center text-[11px] font-medium text-muted-foreground">
-              {day}
-            </div>
-          ))}
-        </div>
+        {WEEKDAY_HEADER}
 
         {/* 날짜 셀 */}
         <div className="grid grid-cols-7 gap-1">
