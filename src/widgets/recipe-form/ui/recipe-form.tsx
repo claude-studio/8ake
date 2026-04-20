@@ -471,7 +471,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
                   .from('recipe_ingredients')
                   .insert(buildIngredientRows(recipe.id, ingredients, priceMap))
                   .then(({ error }) => {
-                    if (error) console.error('Ingredient insert failed:', error)
+                    if (error) toast.error('재료 저장에 실패했습니다')
                   })
               : Promise.resolve(),
             files.length > 0 ? uploadPhotos(recipe.id, files, thumbnailIndex) : Promise.resolve(),
@@ -493,7 +493,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
                 const { error } = await supabase
                   .from('recipe_ingredients')
                   .insert(buildIngredientRows(recipeId, ingredients, priceMap))
-                if (error) console.error('Ingredient insert failed:', error)
+                if (error) toast.error('재료 저장에 실패했습니다')
               }
             })
 

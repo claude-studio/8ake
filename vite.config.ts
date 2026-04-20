@@ -96,6 +96,13 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    minify: 'esbuild',
+    target: 'esnext',
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   server: {
     host: true,
   },
