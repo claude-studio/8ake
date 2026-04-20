@@ -1,7 +1,7 @@
 import { memo } from 'react'
 
 import { Link } from '@tanstack/react-router'
-import { ImageOff } from 'lucide-react'
+import { ImageOff, Lock } from 'lucide-react'
 
 import { getPhotoUrl, type RecipePhoto } from '@/entities/recipe'
 import { CupcakeScore } from '@/shared/ui'
@@ -15,6 +15,7 @@ interface Props {
   createdAt: string
   photos: RecipePhoto[]
   index: number
+  isPublic?: boolean
 }
 
 const sourceLabel: Record<string, string> = {
@@ -35,6 +36,7 @@ export const RecipeCard = memo(function RecipeCard({
   createdAt,
   photos,
   index,
+  isPublic = true,
 }: Props) {
   const rotation = rotations[index % rotations.length]
   const thumbnail = photos.find((p) => p.order === 0) ?? photos[0]
@@ -79,6 +81,12 @@ export const RecipeCard = memo(function RecipeCard({
               <span className="text-[0.65rem] text-(--card-placeholder-text) font-semibold max-w-[80%] text-center leading-tight line-clamp-2">
                 {name}
               </span>
+            </div>
+          )}
+          {!isPublic && (
+            <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 bg-black/50 text-white rounded-[4px] px-1.5 py-0.5">
+              <Lock size={9} strokeWidth={2.5} />
+              <span className="text-[0.55rem] font-bold tracking-wide">비공개</span>
             </div>
           )}
         </div>

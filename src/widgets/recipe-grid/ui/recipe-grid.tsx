@@ -151,6 +151,7 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
                 createdAt={recipe.created_at}
                 photos={recipe.recipe_photos}
                 index={index}
+                isPublic={recipe.is_public}
               />
             ))}
           </div>
