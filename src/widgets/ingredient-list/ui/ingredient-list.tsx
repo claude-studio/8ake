@@ -84,7 +84,7 @@ export function IngredientList() {
             />
             <Input
               type="search"
-              placeholder="재료명, 메모 검색..."
+              placeholder="재료명 검색..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8 text-sm"
