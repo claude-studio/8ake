@@ -35,6 +35,19 @@
   --shadow-floating: var(--shadow-floating);
 }
 
+/* Dark mode color transition — smooth theme switching (200ms ease) */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    fill 200ms ease,
+    stroke 200ms ease;
+}
+
 @layer base {
   :root {
     /* 배경 */
