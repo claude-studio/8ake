@@ -13,6 +13,16 @@ import { calculateStreak } from '../lib/streak'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const
 
+const WEEKDAY_HEADER = (
+  <div className="mb-2 grid grid-cols-7 gap-1">
+    {WEEKDAYS.map((day) => (
+      <div key={day} className="text-center text-[11px] font-medium text-muted-foreground">
+        {day}
+      </div>
+    ))}
+  </div>
+)
+
 function getMonthDays(year: number, month: number) {
   const firstDay = new Date(year, month - 1, 1).getDay()
   const daysInMonth = new Date(year, month, 0).getDate()
@@ -111,13 +121,7 @@ export function BakingCalendar() {
       {/* 캘린더 그리드 */}
       <div className="rounded-2xl border border-border bg-card p-3">
         {/* 요일 헤더 */}
-        <div className="mb-2 grid grid-cols-7 gap-1">
-          {WEEKDAYS.map((day) => (
-            <div key={day} className="text-center text-[11px] font-medium text-muted-foreground">
-              {day}
-            </div>
-          ))}
-        </div>
+        {WEEKDAY_HEADER}
 
         {/* 날짜 셀 */}
         <div className="grid grid-cols-7 gap-1">

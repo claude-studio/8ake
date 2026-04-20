@@ -36,14 +36,19 @@ function getKoreanMessage(error: unknown): string {
   return '알 수 없는 오류가 발생했습니다'
 }
 
-export function handleSupabaseError(error: unknown, context?: string): never {
+function buildMessage(error: unknown, context?: string): string {
   const base = getKoreanMessage(error)
-  const message = context ? `${context}: ${base}` : base
-  throw new AppError(message, isPostgrestError(error) ? error.code : undefined, error)
+  return context ? `${context}: ${base}` : base
+}
+
+export function handleSupabaseError(error: unknown, context?: string): never {
+  throw new AppError(
+    buildMessage(error, context),
+    isPostgrestError(error) ? error.code : undefined,
+    error
+  )
 }
 
 export function toastSupabaseError(error: unknown, context?: string): void {
-  const base = getKoreanMessage(error)
-  const message = context ? `${context}: ${base}` : base
-  toast.error(message)
+  toast.error(buildMessage(error, context))
 }
