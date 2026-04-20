@@ -13,6 +13,7 @@ import { createRecipe, updateRecipe, fetchRecipe, recipeKeys } from '@/entities/
 import { useAuthStore } from '@/features/auth'
 import type { PhotoUploadStatus } from '@/features/photo-upload'
 import { supabase } from '@/shared/api'
+import { toastSupabaseError } from '@/shared/lib/handle-error'
 import { cn } from '@/shared/lib/utils'
 import { PageHeader } from '@/shared/ui'
 
@@ -260,8 +261,8 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
                 })
               : [{ name: '', amount: '', unit: 'g' as const }],
         })
-      } catch {
-        toast.error('레시피를 불러오는데 실패했습니다')
+      } catch (err) {
+        toastSupabaseError(err, '레시피 불러오기')
       }
     }
 
@@ -365,7 +366,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           next[index] = 'error'
           return next
         })
-        toast.error('재업로드에 실패했습니다')
+        toastSupabaseError(uploadError, '사진 재업로드')
         return
       }
 
@@ -381,7 +382,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           next[index] = 'error'
           return next
         })
-        toast.error('재업로드에 실패했습니다')
+        toastSupabaseError(insertError, '사진 정보 저장')
         return
       }
 
@@ -499,8 +500,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           }, 350)
         }
       } catch (err) {
-        console.error('Submit error:', err)
-        toast.error(mode === 'create' ? '레시피 등록에 실패했습니다' : '레시피 수정에 실패했습니다')
+        toastSupabaseError(err, mode === 'create' ? '레시피 등록' : '레시피 수정')
       } finally {
         setIsSubmitting(false)
       }

@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
+import { handleSupabaseError } from '@/shared/lib/handle-error'
 
 export const ingredientKeys = {
   all: ['ingredients'] as const,
@@ -12,7 +13,7 @@ export async function fetchIngredients() {
     .from('ingredients')
     .select('*')
     .order('name', { ascending: true })
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 목록 조회')
   return data ?? []
 }
 
@@ -34,7 +35,7 @@ export async function createIngredient(
     })
     .select()
     .single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 등록')
   return data
 }
 
@@ -53,13 +54,13 @@ export async function updateIngredientPrice(
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 단가 수정')
   return data
 }
 
 export async function deleteIngredient(id: string) {
   const { error } = await supabase.from('ingredients').delete().eq('id', id)
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 삭제')
 }
 
 export async function fetchIngredientReviews(ingredientId: string) {
@@ -68,13 +69,13 @@ export async function fetchIngredientReviews(ingredientId: string) {
     .select('*')
     .eq('ingredient_id', ingredientId)
     .order('created_at', { ascending: false })
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 리뷰 조회')
   return data ?? []
 }
 
 export async function createIngredientReview(values: TablesInsert<'ingredient_reviews'>) {
   const { data, error } = await supabase.from('ingredient_reviews').insert(values).select().single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 리뷰 등록')
   return data
 }
 
@@ -88,11 +89,11 @@ export async function updateIngredientReview(
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 리뷰 수정')
   return data
 }
 
 export async function deleteIngredientReview(id: string) {
   const { error } = await supabase.from('ingredient_reviews').delete().eq('id', id)
-  if (error) throw error
+  if (error) handleSupabaseError(error, '재료 리뷰 삭제')
 }

@@ -8,4 +8,4 @@ export {
 } from './api/review-api'
 export { useReviews } from './api/use-reviews'
 export type { CalendarEntry } from './api/use-calendar-reviews'
-export { useCalendarEntries } from './api/use-calendar-reviews'
+export { useCalendarEntries, prefetchCalendarEntries } from './api/use-calendar-reviews'

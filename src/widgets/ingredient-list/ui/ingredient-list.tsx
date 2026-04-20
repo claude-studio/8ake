@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createIngredient, useIngredients, ingredientKeys } from '@/entities/ingredient'
 import { useAuthStore } from '@/features/auth'
+import { toastSupabaseError } from '@/shared/lib/handle-error'
 import { cn } from '@/shared/lib/utils'
 import { useUIStore } from '@/shared/model/ui-store'
 import { IngredientListSkeleton } from '@/shared/ui'
@@ -49,8 +50,8 @@ export function IngredientList() {
       setNewPriceUnit('원/g')
       setShowAddForm(false)
       queryClient.invalidateQueries({ queryKey: ingredientKeys.list() })
-    } catch {
-      toast.error('재료 추가에 실패했습니다')
+    } catch (err) {
+      toastSupabaseError(err, '재료 추가')
     } finally {
       setIsAdding(false)
     }

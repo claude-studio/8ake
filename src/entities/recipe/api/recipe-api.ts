@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
+import { handleSupabaseError } from '@/shared/lib/handle-error'
 
 import type { RecipeWithDetails } from '../model/types'
 
@@ -48,7 +49,7 @@ export async function fetchRecipes({
   }
 
   const { data, error } = await query
-  if (error) throw error
+  if (error) handleSupabaseError(error, '레시피 목록 조회')
   return data ?? []
 }
 
@@ -59,14 +60,14 @@ export async function fetchRecipe(id: string): Promise<RecipeWithDetails> {
     .eq('id', id)
     .single()
 
-  if (error) throw error
+  if (error) handleSupabaseError(error, '레시피 상세 조회')
   // Supabase returns related rows as arrays when using wildcard select
   return data as unknown as RecipeWithDetails
 }
 
 export async function createRecipe(values: TablesInsert<'recipes'>) {
   const { data, error } = await supabase.from('recipes').insert(values).select().single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '레시피 등록')
   return data
 }
 
@@ -77,16 +78,21 @@ export async function updateRecipe(id: string, values: TablesUpdate<'recipes'>) 
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) handleSupabaseError(error, '레시피 수정')
   return data
 }
 
 export async function deleteRecipe(id: string) {
   const { error } = await supabase.from('recipes').delete().eq('id', id)
-  if (error) throw error
+  if (error) handleSupabaseError(error, '레시피 삭제')
 }
 
-export function getPhotoUrl(storagePath: string) {
+const photoUrlCache = new Map<string, string>()
+
+export function getPhotoUrl(storagePath: string): string {
+  const cached = photoUrlCache.get(storagePath)
+  if (cached) return cached
   const { data } = supabase.storage.from('recipe-photos').getPublicUrl(storagePath)
+  photoUrlCache.set(storagePath, data.publicUrl)
   return data.publicUrl
 }
