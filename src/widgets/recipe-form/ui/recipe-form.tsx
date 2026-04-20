@@ -321,6 +321,8 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
             insertError.message?.includes('recipe_photos_limit')
           ) {
             toast.error('레시피 사진은 최대 2장까지 저장할 수 있습니다')
+          } else {
+            toastSupabaseError(insertError, '사진 정보 저장')
           }
           return null
         }
