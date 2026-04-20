@@ -26,7 +26,11 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-dvh gap-4 bg-background text-foreground">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="flex flex-col items-center justify-center min-h-dvh gap-4 bg-background text-foreground"
+        >
           <p className="text-lg font-medium">문제가 발생했습니다</p>
           <button
             onClick={this.handleReset}
