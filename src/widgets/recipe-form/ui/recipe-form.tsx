@@ -326,10 +326,9 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
       }
 
       const results = await Promise.all(files.map((file, i) => uploadOne(file, i)))
-      const photoIds = results.filter((id): id is string => id !== null)
 
-      if (photoIds.length > 0 && photoIds[thumbnailIndex]) {
-        await updateRecipe(targetRecipeId, { thumbnail_photo_id: photoIds[thumbnailIndex] })
+      if (results[thumbnailIndex]) {
+        await updateRecipe(targetRecipeId, { thumbnail_photo_id: results[thumbnailIndex] })
       }
 
       // 실패 파일이 있으면 재시도 정보 저장
