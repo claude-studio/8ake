@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { NotebookPen } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -123,8 +124,14 @@ export function ReviewList({ recipeId }: Props) {
 
       {/* Review cards */}
       {reviews.length === 0 && !showForm ? (
-        <div className="flex min-h-40 items-center justify-center text-center text-sm text-muted-foreground">
-          아직 회고가 없습니다. 첫 회고를 작성해보세요!
+        <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-8 text-center dark:bg-muted/10">
+          <NotebookPen size={32} className="text-muted-foreground opacity-40" strokeWidth={1.5} />
+          <p className="text-sm text-muted-foreground">
+            아직 회고가 없어요. 첫 회고를 작성해보세요!
+          </p>
+          <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
+            + 회고 추가
+          </Button>
         </div>
       ) : (
         <div className="space-y-3">
