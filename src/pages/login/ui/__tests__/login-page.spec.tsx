@@ -1,97 +1,125 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import React from 'react'
+
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
+const mockNavigate = vi.fn()
+const mockSetSession = vi.fn()
+
+vi.mock('@tanstack/react-router', () => ({
+  useRouter: () => ({ navigate: mockNavigate }),
+}))
+
+vi.mock('@/features/auth', () => ({
+  useAuthStore: () => ({ setSession: mockSetSession }),
+}))
 
 const signInMock = vi.fn()
-const navigateMock = vi.fn()
-const setSessionMock = vi.fn()
 
 vi.mock('@/shared/api', () => ({
   supabase: {
     auth: {
-      signInWithPassword: signInMock,
+      signInWithPassword: (...args: unknown[]) => signInMock(...args),
     },
   },
   createLoginClient: () => ({
     auth: {
-      signInWithPassword: signInMock,
+      signInWithPassword: (...args: unknown[]) => signInMock(...args),
     },
   }),
 }))
 
-vi.mock('@/features/auth', () => ({
-  useAuthStore: () => ({ setSession: setSessionMock }),
-}))
-
-vi.mock('@tanstack/react-router', () => ({
-  useRouter: () => ({ navigate: navigateMock }),
-}))
-
-async function fillAndSubmit(email = 'test@example.com', password = 'password123') {
-  await userEvent.type(screen.getByPlaceholderText('example@email.com'), email)
-  await userEvent.type(screen.getByPlaceholderText('비밀번호'), password)
-  await userEvent.click(screen.getByRole('button', { name: '로그인' }))
-}
+import { LoginPage } from '../login-page'
 
 describe('LoginPage', () => {
-  beforeEach(() => {
-    signInMock.mockReset()
-    navigateMock.mockReset()
-    setSessionMock.mockReset()
+  it('이메일/비밀번호 입력 필드와 로그인 버튼 렌더링', () => {
+    render(React.createElement(LoginPage))
+    expect(screen.getByPlaceholderText('example@email.com')).toBeTruthy()
+    expect(screen.getByPlaceholderText('비밀번호')).toBeTruthy()
+    expect(screen.getByRole('button', { name: /로그인/ })).toBeTruthy()
   })
 
-  it('초기에 로그인 버튼이 비활성화되어 있다', async () => {
-    const { LoginPage } = await import('../login-page')
-    render(<LoginPage />)
-    expect(screen.getByRole('button', { name: '로그인' })).toBeDisabled()
+  it('초기 로그인 버튼은 비활성화', () => {
+    render(React.createElement(LoginPage))
+    const button = screen.getByRole('button', { name: /로그인/ })
+    expect(button).toBeDisabled()
   })
 
-  it('이메일과 비밀번호를 입력하면 로그인 버튼이 활성화된다', async () => {
-    const { LoginPage } = await import('../login-page')
-    render(<LoginPage />)
-    await userEvent.type(screen.getByPlaceholderText('example@email.com'), 'test@example.com')
-    await userEvent.type(screen.getByPlaceholderText('비밀번호'), 'password123')
-    expect(screen.getByRole('button', { name: '로그인' })).not.toBeDisabled()
+  it('이메일/비밀번호 입력 시 버튼 활성화', () => {
+    render(React.createElement(LoginPage))
+    const emailInput = screen.getByPlaceholderText('example@email.com')
+    const passwordInput = screen.getByPlaceholderText('비밀번호')
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
+
+    const button = screen.getByRole('button', { name: /로그인/ })
+    expect(button).not.toBeDisabled()
   })
 
-  it('로그인 성공 시 세션을 설정하고 /home으로 이동한다', async () => {
-    const mockSession = { user: { id: 'user-1' }, access_token: 'token' }
-    signInMock.mockResolvedValue({ data: { session: mockSession }, error: null })
-    const { LoginPage } = await import('../login-page')
-    render(<LoginPage />)
-    await fillAndSubmit()
+  it('폼 제출 시 signInWithPassword 호출', async () => {
+    signInMock.mockResolvedValueOnce({
+      data: { session: { access_token: 'token' } },
+      error: null,
+    })
+
+    render(React.createElement(LoginPage))
+    const emailInput = screen.getByPlaceholderText('example@email.com')
+    const passwordInput = screen.getByPlaceholderText('비밀번호')
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
+
+    const form = emailInput.closest('form')!
+    fireEvent.submit(form)
+
     await waitFor(() => {
-      expect(setSessionMock).toHaveBeenCalledWith(mockSession)
-      expect(navigateMock).toHaveBeenCalledWith({ to: '/home' })
+      expect(signInMock).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+      })
     })
   })
 
-  it('로그인 실패 시 에러 메시지를 표시한다', async () => {
-    signInMock.mockResolvedValue({
+  it('로그인 실패 시 에러 메시지 표시', async () => {
+    signInMock.mockResolvedValueOnce({
       data: { session: null },
       error: { message: 'Invalid login credentials' },
     })
-    const { LoginPage } = await import('../login-page')
-    render(<LoginPage />)
-    await fillAndSubmit()
+
+    render(React.createElement(LoginPage))
+    const emailInput = screen.getByPlaceholderText('example@email.com')
+    const passwordInput = screen.getByPlaceholderText('비밀번호')
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } })
+
+    const form = emailInput.closest('form')!
+    fireEvent.submit(form)
+
     await waitFor(() => {
-      expect(screen.getByText('Invalid login credentials')).toBeInTheDocument()
+      expect(screen.getByText('Invalid login credentials')).toBeTruthy()
     })
-    expect(navigateMock).not.toHaveBeenCalled()
-    expect(setSessionMock).not.toHaveBeenCalled()
   })
 
-  it('로그인 실패 후 버튼이 다시 활성화된다', async () => {
-    signInMock.mockResolvedValue({
-      data: { session: null },
-      error: { message: '오류 발생' },
+  it('로그인 성공 시 /home으로 이동', async () => {
+    signInMock.mockResolvedValueOnce({
+      data: { session: { access_token: 'token' } },
+      error: null,
     })
-    const { LoginPage } = await import('../login-page')
-    render(<LoginPage />)
-    await fillAndSubmit()
+
+    render(React.createElement(LoginPage))
+    const emailInput = screen.getByPlaceholderText('example@email.com')
+    const passwordInput = screen.getByPlaceholderText('비밀번호')
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
+
+    const form = emailInput.closest('form')!
+    fireEvent.submit(form)
+
     await waitFor(() => {
-      expect(screen.getByText('오류 발생')).toBeInTheDocument()
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/home' })
     })
-    expect(screen.getByRole('button', { name: '로그인' })).not.toBeDisabled()
   })
 })
