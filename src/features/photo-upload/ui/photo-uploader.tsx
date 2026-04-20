@@ -8,7 +8,7 @@ import { cn } from '@/shared/lib/utils'
 
 import type { PhotoUploadStatus } from '../model/types'
 
-const MAX_FILES = 5
+const MAX_FILES = 2
 const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB (압축 전 원본 허용)
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const ALLOWED_TYPES_ACCEPT = [...ALLOWED_TYPES].join(',')
@@ -198,7 +198,7 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
 
       {/* Previews */}
       {photos.length > 0 && (
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {photos.map((photo, index) => {
             const status = uploadStates?.[index] ?? 'idle'
             return (
