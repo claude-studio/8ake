@@ -15,6 +15,10 @@ export const recipeKeys = {
 
 export const PAGE_SIZE = 12
 
+type CreatedAtCursor = { created_at: string; id: string }
+type TotalScoreCursor = { total_score: number; id: string }
+export type RecipeCursor = CreatedAtCursor | TotalScoreCursor
+
 export async function fetchRecipes({
   search,
   sortBy,
@@ -23,7 +27,7 @@ export async function fetchRecipes({
 }: {
   search: string
   sortBy: 'created_at' | 'total_score'
-  cursor?: { created_at: string; id: string }
+  cursor?: RecipeCursor
   tags?: string[]
 }) {
   let query = supabase
@@ -41,10 +45,13 @@ export async function fetchRecipes({
     query = query.contains('tags', tags)
   }
 
-  // cursor pagination은 created_at 정렬 시에만 유효
-  if (cursor && sortBy === 'created_at') {
+  if (cursor && sortBy === 'created_at' && 'created_at' in cursor) {
     query = query.or(
       `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
+    )
+  } else if (cursor && sortBy === 'total_score' && 'total_score' in cursor) {
+    query = query.or(
+      `total_score.lt.${cursor.total_score},and(total_score.eq.${cursor.total_score},id.lt.${cursor.id})`
     )
   }
 

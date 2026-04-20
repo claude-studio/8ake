@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { fetchRecipes, PAGE_SIZE, recipeKeys } from './recipe-api'
+import { fetchRecipes, PAGE_SIZE, recipeKeys, type RecipeCursor } from './recipe-api'
 
 import type { Recipe, RecipePhoto } from '../model/types'
 
@@ -21,10 +21,13 @@ export function useRecipes(search: string, sortBy: 'created_at' | 'total_score',
         cursor: pageParam,
         tags,
       }),
-    initialPageParam: undefined as { created_at: string; id: string } | undefined,
+    initialPageParam: undefined as RecipeCursor | undefined,
     getNextPageParam: (lastPage) => {
       if (lastPage.length < PAGE_SIZE) return undefined
-      const last = lastPage[lastPage.length - 1]
+      const last = lastPage[lastPage.length - 1] as RecipeRow
+      if (sortBy === 'total_score') {
+        return { total_score: last.total_score ?? 0, id: last.id }
+      }
       return { created_at: last.created_at, id: last.id }
     },
   })
