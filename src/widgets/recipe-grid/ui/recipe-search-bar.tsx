@@ -7,6 +7,7 @@ interface Props {
   onSearchChange: (value: string) => void
   sortBy: 'created_at' | 'total_score'
   onSortByChange: (value: 'created_at' | 'total_score') => void
+  isSearching?: boolean
 }
 
 const SORT_OPTIONS = [
@@ -14,7 +15,13 @@ const SORT_OPTIONS = [
   { value: 'total_score', label: '평점순' },
 ] as const
 
-export function RecipeSearchBar({ search, onSearchChange, sortBy, onSortByChange }: Props) {
+export function RecipeSearchBar({
+  search,
+  onSearchChange,
+  sortBy,
+  onSortByChange,
+  isSearching,
+}: Props) {
   return (
     <div className="flex items-end gap-4">
       {/* Underline search input */}
@@ -31,14 +38,20 @@ export function RecipeSearchBar({ search, onSearchChange, sortBy, onSortByChange
           className="w-full bg-transparent border-0 border-b border-border pl-5 pb-2 pr-6 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary transition-colors"
         />
         {search.length > 0 && (
-          <button
-            type="button"
-            onClick={() => onSearchChange('')}
-            className="absolute right-0 bottom-[6px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-            aria-label="검색 초기화"
-          >
-            <X size={13} />
-          </button>
+          <div className="absolute right-0 bottom-[6px]">
+            {isSearching ? (
+              <div className="size-3 rounded-full border border-current animate-spin border-t-transparent text-muted-foreground/50" />
+            ) : (
+              <button
+                type="button"
+                onClick={() => onSearchChange('')}
+                className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                aria-label="검색 초기화"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
         )}
       </div>
 

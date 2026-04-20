@@ -37,6 +37,7 @@ export function useRecipes(search: string, sortBy: 'created_at' | 'total_score',
   return {
     items,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     isFetchingMore: query.isFetchingNextPage,
     hasNextPage: query.hasNextPage ?? false,
     fetchMore: () => {

@@ -29,11 +29,10 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
 
   const clearTags = useCallback(() => setSelectedTags([]), [])
 
-  const { items, isLoading, isError, isFetchingMore, hasNextPage, fetchMore, refetch } = useRecipes(
-    debouncedSearch,
-    sortBy,
-    selectedTags.length > 0 ? selectedTags : undefined
-  )
+  const { items, isLoading, isFetching, isError, isFetchingMore, hasNextPage, fetchMore, refetch } =
+    useRecipes(debouncedSearch, sortBy, selectedTags.length > 0 ? selectedTags : undefined)
+
+  const isSearchPending = search !== debouncedSearch
 
   const sentinelRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetchingMore) {
@@ -50,6 +49,7 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
         onSearchChange={setSearch}
         sortBy={sortBy}
         onSortByChange={setSortBy}
+        isSearching={isSearchPending || (isFetching && !isLoading)}
       />
 
       <TagFilterBar selectedTags={selectedTags} onToggleTag={toggleTag} onClearTags={clearTags} />
