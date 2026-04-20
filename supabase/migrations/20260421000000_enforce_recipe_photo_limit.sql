@@ -2,7 +2,6 @@
 -- CLA-69 / Fix for CLA-11
 
 -- 트리거 함수: INSERT/UPDATE 전에 레시피당 사진 수가 2장을 초과하는지 검사
--- 동시 INSERT 경쟁 조건 방지: recipes 행에 FOR UPDATE 락을 걸어 직렬화
 CREATE OR REPLACE FUNCTION check_recipe_photo_limit()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -11,10 +10,6 @@ DECLARE
 BEGIN
   -- UPDATE 시 recipe_id가 바뀔 수 있으므로 NEW 기준으로 확인
   target_recipe_id := NEW.recipe_id;
-
-  -- 동시 INSERT 직렬화: 같은 recipe_id에 대한 트랜잭션을 순차 실행
-  -- recipes 부모 행에 FOR UPDATE 락을 획득해 COUNT 검사를 원자적으로 수행
-  PERFORM id FROM recipes WHERE id = target_recipe_id FOR UPDATE;
 
   SELECT COUNT(*) INTO photo_count
   FROM recipe_photos
@@ -38,4 +33,4 @@ CREATE TRIGGER trg_recipe_photo_limit
   FOR EACH ROW
   EXECUTE FUNCTION check_recipe_photo_limit();
 
-COMMENT ON FUNCTION check_recipe_photo_limit() IS '레시피당 사진을 최대 2장으로 제한한다. 3번째 INSERT 또는 다른 레시피로의 UPDATE 시 check_violation 예외를 발생시킨다. recipes 행에 FOR UPDATE 락을 걸어 동시 INSERT 경쟁 조건을 방지한다.';
+COMMENT ON FUNCTION check_recipe_photo_limit() IS '레시피당 사진을 최대 2장으로 제한한다. 3번째 INSERT 또는 다른 레시피로의 UPDATE 시 check_violation 예외를 발생시킨다.';
