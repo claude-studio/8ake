@@ -39,7 +39,6 @@ CREATE POLICY "공개 레시피 댓글 조회" ON recipe_comments
       WHERE recipes.id = recipe_comments.recipe_id
         AND recipes.is_public = true
     )
-    OR auth.uid() IS NOT NULL
   );
 
 -- 로그인한 사용자는 댓글 작성 가능
