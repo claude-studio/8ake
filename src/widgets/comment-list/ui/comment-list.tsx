@@ -20,6 +20,7 @@ import {
   useComments,
 } from '@/entities/comment'
 import { useAuthStore } from '@/features/auth'
+import { toastSupabaseError } from '@/shared/lib/handle-error'
 
 import { CommentCard } from './comment-card'
 import { CommentForm } from './comment-form'
@@ -33,7 +34,13 @@ interface Props {
 
 export function CommentList({ recipeId, isPublic }: Props) {
   const user = useAuthStore((s) => s.user)
-  const { data: comments = [], isLoading } = useComments(recipeId, isPublic)
+  const {
+    data: comments = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useComments(recipeId, isPublic)
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,8 +69,9 @@ export function CommentList({ recipeId, isPublic }: Props) {
       await updateComment(id, values)
       toast.success('댓글이 수정되었습니다.')
       queryClient.invalidateQueries({ queryKey: commentKeys.list(recipeId) })
-    } catch {
+    } catch (err) {
       toast.error('댓글 수정에 실패했습니다.')
+      throw err
     }
   }
 
@@ -108,6 +116,20 @@ export function CommentList({ recipeId, isPublic }: Props) {
 
       {isLoading ? (
         <div className="py-6 text-center text-sm text-muted-foreground">댓글을 불러오는 중...</div>
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-2 py-6 text-center text-sm text-destructive">
+          <span>댓글 목록을 불러오지 못했습니다.</span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              toastSupabaseError(error, '댓글 목록 조회')
+              void refetch()
+            }}
+          >
+            다시 시도
+          </Button>
+        </div>
       ) : comments.length === 0 && !showForm ? (
         <div className="flex min-h-32 items-center justify-center text-center text-sm text-muted-foreground">
           {user ? '첫 댓글을 작성해보세요!' : '로그인하면 댓글을 작성할 수 있습니다.'}
