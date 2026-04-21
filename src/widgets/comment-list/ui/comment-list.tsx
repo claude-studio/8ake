@@ -34,10 +34,16 @@ interface Props {
 
 export function CommentList({ recipeId, isPublic }: Props) {
   const user = useAuthStore((s) => s.user)
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteComments(
-    recipeId,
-    isPublic
-  )
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteComments(recipeId, isPublic)
   const { data: totalCount = 0 } = useCommentsCount(recipeId, isPublic)
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
@@ -120,6 +126,15 @@ export function CommentList({ recipeId, isPublic }: Props) {
 
       {isLoading ? (
         <div className="py-6 text-center text-sm text-muted-foreground">댓글을 불러오는 중...</div>
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-3 py-6 text-center">
+          <p className="text-sm text-destructive">
+            {error instanceof Error ? error.message : '댓글을 불러오지 못했습니다.'}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            다시 시도
+          </Button>
+        </div>
       ) : comments.length === 0 && !showForm ? (
         <div className="flex min-h-32 items-center justify-center text-center text-sm text-muted-foreground">
           {user ? '첫 댓글을 작성해보세요!' : '로그인하면 댓글을 작성할 수 있습니다.'}
