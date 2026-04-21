@@ -36,6 +36,22 @@
 }
 
 @layer base {
+  /* Dark mode color transition — 테마 전환 중에만 한정 적용 */
+  .theme-transitioning,
+  .theme-transitioning *,
+  .theme-transitioning *::before,
+  .theme-transitioning *::after {
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      fill 200ms ease,
+      stroke 200ms ease !important;
+  }
+}
+
+@layer base {
   :root {
     /* 배경 */
     --background: #f5ede0;
@@ -197,9 +213,6 @@
     min-height: 100dvh;
     overflow-x: hidden;
     position: relative;
-    transition:
-      background-color var(--transition),
-      color var(--transition);
   }
 
   /* Paper noise texture */
