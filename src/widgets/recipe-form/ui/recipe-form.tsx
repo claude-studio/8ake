@@ -164,7 +164,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
   const [isSaved, setIsSaved] = useState(false)
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [photosChanged, setPhotosChanged] = useState(false)
-  const [unitsChanged, setUnitsChanged] = useState(false)
+  const unitsChangedRef = useRef(false)
   const [loadKey, setLoadKey] = useState(0)
   const [bakeTimeUnit, setBakeTimeUnit] = useState<'분' | '시간'>('분')
   const [preheatTimeUnit, setPreheatTimeUnit] = useState<'분' | '시간'>('분')
@@ -309,19 +309,11 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           .single()
 
         if (insertError) {
-          // DB 삽입 실패 시 Storage에 올라간 고아 객체 정리
-          await supabase.storage.from('recipe-photos').remove([safePath])
           setUploadStates((prev) => {
             const next = [...prev]
             next[i] = 'error'
             return next
           })
-          if (
-            insertError.code === '23514' ||
-            insertError.message?.includes('recipe_photos_limit')
-          ) {
-            toast.error('레시피 사진은 최대 2장까지 저장할 수 있습니다')
-          }
           return null
         }
 
@@ -335,8 +327,9 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
 
       const results = await Promise.all(files.map((file, i) => uploadOne(file, i)))
 
-      if (results[thumbnailIndex]) {
-        await updateRecipe(targetRecipeId, { thumbnail_photo_id: results[thumbnailIndex] })
+      const thumbnailPhotoId = results[thumbnailIndex]
+      if (thumbnailPhotoId) {
+        await updateRecipe(targetRecipeId, { thumbnail_photo_id: thumbnailPhotoId })
       }
 
       // 실패 파일이 있으면 재시도 정보 저장
@@ -384,18 +377,12 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
         .single()
 
       if (insertError) {
-        // DB 삽입 실패 시 Storage 고아 객체 정리
-        await supabase.storage.from('recipe-photos').remove([safePath])
         setUploadStates((prev) => {
           const next = [...prev]
           next[index] = 'error'
           return next
         })
-        if (insertError.code === '23514' || insertError.message?.includes('recipe_photos_limit')) {
-          toast.error('레시피 사진은 최대 2장까지 저장할 수 있습니다')
-        } else {
-          toastSupabaseError(insertError, '사진 정보 저장')
-        }
+        toastSupabaseError(insertError, '사진 정보 저장')
         return
       }
 
@@ -506,7 +493,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           queryClient.invalidateQueries({ queryKey: recipeKeys.lists() })
           formLoaded.current = false
           setPhotosChanged(false)
-          setUnitsChanged(false)
+          unitsChangedRef.current = false
           savedTimerRef.current = setTimeout(() => {
             setIsSaved(false)
             setLoadKey((k) => k + 1)
@@ -521,7 +508,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
     [mode, recipeId, user, router, uploadPhotos, queryClient]
   )
 
-  const isEditUnchanged = mode === 'edit' && !isDirty && !photosChanged && !unitsChanged
+  const isEditUnchanged = mode === 'edit' && !isDirty && !photosChanged && !unitsChangedRef.current
 
   return (
     <form onSubmit={handleSubmit(onSubmit as never)} className="pb-28">
@@ -572,12 +559,12 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
               onBakeTimeUnitChange={(u) => {
                 setBakeTimeUnit(u)
                 unitsRef.current = { ...unitsRef.current, bakeTimeUnit: u }
-                if (mode === 'edit') setUnitsChanged(true)
+                if (mode === 'edit') unitsChangedRef.current = true
               }}
               onPreheatTimeUnitChange={(u) => {
                 setPreheatTimeUnit(u)
                 unitsRef.current = { ...unitsRef.current, preheatTimeUnit: u }
-                if (mode === 'edit') setUnitsChanged(true)
+                if (mode === 'edit') unitsChangedRef.current = true
               }}
             />
           )}
