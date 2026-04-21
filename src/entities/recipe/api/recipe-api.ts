@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
+import { AppError } from '@/shared/lib/api-error'
 import { handleSupabaseError } from '@/shared/lib/handle-error'
 
 import type { RecipeWithDetails } from '../model/types'
@@ -84,6 +85,7 @@ export async function fetchRecipe(id: string): Promise<RecipeWithDetails> {
 export async function createRecipe(values: TablesInsert<'recipes'>) {
   const { data, error } = await supabase.from('recipes').insert(values).select().single()
   if (error) handleSupabaseError(error, '레시피 등록')
+  if (!data) throw new AppError('레시피 등록 후 데이터를 가져올 수 없습니다')
   return data
 }
 
@@ -95,6 +97,7 @@ export async function updateRecipe(id: string, values: TablesUpdate<'recipes'>) 
     .select()
     .single()
   if (error) handleSupabaseError(error, '레시피 수정')
+  if (!data) throw new AppError('레시피 수정 후 데이터를 가져올 수 없습니다')
   return data
 }
 

@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
+import { AppError } from '@/shared/lib/api-error'
 import { handleSupabaseError } from '@/shared/lib/handle-error'
 
 export const ingredientKeys = {
@@ -36,6 +37,7 @@ export async function createIngredient(
     .select()
     .single()
   if (error) handleSupabaseError(error, '재료 등록')
+  if (!data) throw new AppError('재료 등록 후 데이터를 가져올 수 없습니다')
   return data
 }
 
@@ -55,6 +57,7 @@ export async function updateIngredientPrice(
     .select()
     .single()
   if (error) handleSupabaseError(error, '재료 단가 수정')
+  if (!data) throw new AppError('재료 단가 수정 후 데이터를 가져올 수 없습니다')
   return data
 }
 
@@ -76,6 +79,7 @@ export async function fetchIngredientReviews(ingredientId: string) {
 export async function createIngredientReview(values: TablesInsert<'ingredient_reviews'>) {
   const { data, error } = await supabase.from('ingredient_reviews').insert(values).select().single()
   if (error) handleSupabaseError(error, '재료 리뷰 등록')
+  if (!data) throw new AppError('재료 리뷰 등록 후 데이터를 가져올 수 없습니다')
   return data
 }
 
@@ -90,6 +94,7 @@ export async function updateIngredientReview(
     .select()
     .single()
   if (error) handleSupabaseError(error, '재료 리뷰 수정')
+  if (!data) throw new AppError('재료 리뷰 수정 후 데이터를 가져올 수 없습니다')
   return data
 }
 

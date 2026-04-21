@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
+import { AppError } from '@/shared/lib/api-error'
 import { handleSupabaseError } from '@/shared/lib/handle-error'
 
 export const reviewKeys = {
@@ -20,6 +21,7 @@ export async function fetchReviews(recipeId: string) {
 export async function createReview(values: TablesInsert<'reviews'>) {
   const { data, error } = await supabase.from('reviews').insert(values).select().single()
   if (error) handleSupabaseError(error, '회고 등록')
+  if (!data) throw new AppError('회고 등록 후 데이터를 가져올 수 없습니다')
   return data
 }
 
@@ -31,6 +33,7 @@ export async function updateReview(id: string, values: TablesUpdate<'reviews'>) 
     .select()
     .single()
   if (error) handleSupabaseError(error, '회고 수정')
+  if (!data) throw new AppError('회고 수정 후 데이터를 가져올 수 없습니다')
   return data
 }
 
