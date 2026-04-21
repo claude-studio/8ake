@@ -30,8 +30,14 @@ export function CommentForm({ defaultValues, onSubmit, onCancel, isSubmitting }:
         placeholder="댓글을 입력하세요 (최대 500자)"
         rows={3}
         className="resize-none"
+        aria-label="댓글 내용"
+        aria-describedby={errors.content ? 'comment-error' : undefined}
       />
-      {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}
+      {errors.content && (
+        <p id="comment-error" className="text-xs text-destructive">
+          {errors.content.message}
+        </p>
+      )}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={isSubmitting}>
           취소
