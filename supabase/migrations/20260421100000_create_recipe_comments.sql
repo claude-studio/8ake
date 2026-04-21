@@ -41,10 +41,17 @@ CREATE POLICY "공개 레시피 댓글 조회" ON recipe_comments
     )
   );
 
--- 로그인한 사용자는 댓글 작성 가능
+-- 로그인한 사용자는 공개 레시피에만 댓글 작성 가능
 CREATE POLICY "로그인 사용자 댓글 작성" ON recipe_comments
   FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (
+    auth.uid() = user_id
+    AND EXISTS (
+      SELECT 1 FROM recipes
+      WHERE recipes.id = recipe_comments.recipe_id
+        AND recipes.is_public = true
+    )
+  );
 
 -- 본인 댓글만 수정 가능
 CREATE POLICY "본인 댓글 수정" ON recipe_comments
