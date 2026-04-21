@@ -68,8 +68,10 @@ export async function fetchRecipe(id: string): Promise<RecipeWithDetails> {
     .single()
 
   if (error) handleSupabaseError(error, '레시피 상세 조회')
-  // Supabase returns related rows as arrays when using wildcard select
-  return data as unknown as RecipeWithDetails
+  // handleSupabaseError는 항상 throw하므로, 여기까지 오면 data는 null이 아님.
+  // Supabase select 쿼리가 반환하는 관계 배열 타입(recipe_ingredients, recipe_photos)이
+  // RecipeWithDetails 구조와 동일하지만 TS 추론이 정확히 일치하지 않아 assertion 사용.
+  return data as RecipeWithDetails
 }
 
 export async function createRecipe(values: TablesInsert<'recipes'>) {
