@@ -101,19 +101,27 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
           control={control}
           render={({ field }) => <ScorePicker value={field.value} onChange={field.onChange} />}
         />
+        {errors.total_score && (
+          <p className="text-xs text-destructive">{errors.total_score.message}</p>
+        )}
       </div>
 
       {/* 5-axis scores */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-foreground">세부 점수</p>
         {SCORE_FIELDS.map(({ name, label }) => (
-          <div key={name} className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{label}</span>
-            <Controller
-              name={name}
-              control={control}
-              render={({ field }) => <ScorePicker value={field.value} onChange={field.onChange} />}
-            />
+          <div key={name} className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{label}</span>
+              <Controller
+                name={name}
+                control={control}
+                render={({ field }) => (
+                  <ScorePicker value={field.value} onChange={field.onChange} />
+                )}
+              />
+            </div>
+            {errors[name] && <p className="text-xs text-destructive">{errors[name]?.message}</p>}
           </div>
         ))}
       </div>
