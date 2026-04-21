@@ -11,6 +11,7 @@ export default defineConfig({
     setupFiles: ['./src/test-setup.ts'],
     include: ['src/**/*.{spec,test}.{ts,tsx}'],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: ['src/routeTree.gen.ts', 'src/**/*.d.ts'],
