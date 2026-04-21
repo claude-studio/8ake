@@ -16,7 +16,7 @@ export const recipeKeys = {
 export const PAGE_SIZE = 12
 
 type CreatedAtCursor = { created_at: string; id: string }
-type TotalScoreCursor = { total_score: number; id: string }
+type TotalScoreCursor = { total_score: number | null; id: string }
 export type RecipeCursor = CreatedAtCursor | TotalScoreCursor
 
 export async function fetchRecipes({
@@ -50,9 +50,16 @@ export async function fetchRecipes({
       `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
     )
   } else if (cursor && sortBy === 'total_score' && 'total_score' in cursor) {
-    query = query.or(
-      `total_score.lt.${cursor.total_score},and(total_score.eq.${cursor.total_score},id.lt.${cursor.id})`
-    )
+    const tsCursor = cursor as TotalScoreCursor
+    if (tsCursor.total_score === null) {
+      // NULL 구간: total_score가 NULL인 레시피에서 id 기준으로만 페이징
+      query = query.is('total_score', null).lt('id', tsCursor.id)
+    } else {
+      // 평점 구간: 더 낮은 평점, NULL 평점(NULLS LAST 맨 뒤), 동일 평점에서 id 작은 것
+      query = query.or(
+        `total_score.lt.${tsCursor.total_score},total_score.is.null,and(total_score.eq.${tsCursor.total_score},id.lt.${tsCursor.id})`
+      )
+    }
   }
 
   const { data, error } = await query

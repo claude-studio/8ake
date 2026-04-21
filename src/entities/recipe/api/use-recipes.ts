@@ -26,7 +26,7 @@ export function useRecipes(search: string, sortBy: 'created_at' | 'total_score',
       if (lastPage.length < PAGE_SIZE) return undefined
       const last = lastPage[lastPage.length - 1] as RecipeRow
       if (sortBy === 'total_score') {
-        return { total_score: last.total_score ?? 0, id: last.id }
+        return { total_score: last.total_score, id: last.id }
       }
       return { created_at: last.created_at, id: last.id }
     },
