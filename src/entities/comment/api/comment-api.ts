@@ -8,19 +8,58 @@ import { recipeCommentSchema } from '../model/types'
 
 import type { RecipeComment } from '../model/types'
 
+export const PAGE_SIZE = 20
+
 export const commentKeys = {
   all: ['recipe_comments'] as const,
   list: (recipeId: string) => [...commentKeys.all, 'list', recipeId] as const,
+  infinite: (recipeId: string) => [...commentKeys.all, 'infinite', recipeId] as const,
+  count: (recipeId: string) => [...commentKeys.all, 'count', recipeId] as const,
 }
 
-export async function fetchComments(recipeId: string): Promise<RecipeComment[]> {
-  const { data, error } = await supabase
+export interface CommentsPage {
+  comments: RecipeComment[]
+  nextCursor: string | null
+}
+
+export async function fetchComments({
+  recipeId,
+  limit = PAGE_SIZE,
+  cursor = null,
+}: {
+  recipeId: string
+  limit?: number
+  cursor?: string | null
+}): Promise<CommentsPage> {
+  let query = supabase
     .from('recipe_comments')
     .select('*')
     .eq('recipe_id', recipeId)
     .order('created_at', { ascending: true })
+    .order('id', { ascending: true })
+    .limit(limit)
+
+  if (cursor) {
+    query = query.gt('created_at', cursor)
+  }
+
+  const { data, error } = await query
   if (error) handleSupabaseError(error, '댓글 목록 조회')
-  return z.array(recipeCommentSchema).parse(data ?? [])
+
+  const comments = z.array(recipeCommentSchema).parse(data ?? [])
+  const nextCursor =
+    comments.length === limit ? (comments[comments.length - 1]?.created_at ?? null) : null
+
+  return { comments, nextCursor }
+}
+
+export async function fetchCommentsCount(recipeId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('recipe_comments')
+    .select('*', { count: 'exact', head: true })
+    .eq('recipe_id', recipeId)
+  if (error) handleSupabaseError(error, '댓글 수 조회')
+  return count ?? 0
 }
 
 export async function createComment(

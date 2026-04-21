@@ -17,10 +17,10 @@ import {
   createComment,
   updateComment,
   deleteComment,
-  useComments,
+  useInfiniteComments,
+  useCommentsCount,
 } from '@/entities/comment'
 import { useAuthStore } from '@/features/auth'
-import { toastSupabaseError } from '@/shared/lib/handle-error'
 
 import { CommentCard } from './comment-card'
 import { CommentForm } from './comment-form'
@@ -34,13 +34,11 @@ interface Props {
 
 export function CommentList({ recipeId, isPublic }: Props) {
   const user = useAuthStore((s) => s.user)
-  const {
-    data: comments = [],
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useComments(recipeId, isPublic)
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteComments(
+    recipeId,
+    isPublic
+  )
+  const { data: totalCount = 0 } = useCommentsCount(recipeId, isPublic)
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -49,6 +47,13 @@ export function CommentList({ recipeId, isPublic }: Props) {
 
   if (!isPublic) return null
 
+  const comments = data?.pages.flatMap((page) => page.comments) ?? []
+
+  const invalidateComments = () => {
+    queryClient.invalidateQueries({ queryKey: commentKeys.infinite(recipeId) })
+    queryClient.invalidateQueries({ queryKey: commentKeys.count(recipeId) })
+  }
+
   const handleCreate = async (values: CommentFormValues) => {
     if (!user) return
     setIsSubmitting(true)
@@ -56,7 +61,7 @@ export function CommentList({ recipeId, isPublic }: Props) {
       await createComment({ ...values, recipe_id: recipeId, user_id: user.id })
       toast.success('댓글이 추가되었습니다.')
       setShowForm(false)
-      queryClient.invalidateQueries({ queryKey: commentKeys.list(recipeId) })
+      invalidateComments()
     } catch {
       toast.error('댓글 추가에 실패했습니다.')
     } finally {
@@ -68,10 +73,9 @@ export function CommentList({ recipeId, isPublic }: Props) {
     try {
       await updateComment(id, values)
       toast.success('댓글이 수정되었습니다.')
-      queryClient.invalidateQueries({ queryKey: commentKeys.list(recipeId) })
-    } catch (err) {
+      invalidateComments()
+    } catch {
       toast.error('댓글 수정에 실패했습니다.')
-      throw err
     }
   }
 
@@ -82,7 +86,7 @@ export function CommentList({ recipeId, isPublic }: Props) {
       await deleteComment(deletingId)
       toast.success('댓글이 삭제되었습니다.')
       setDeletingId(null)
-      queryClient.invalidateQueries({ queryKey: commentKeys.list(recipeId) })
+      invalidateComments()
     } catch {
       toast.error('댓글 삭제에 실패했습니다.')
     } finally {
@@ -95,8 +99,8 @@ export function CommentList({ recipeId, isPublic }: Props) {
       <div className="flex items-center justify-between">
         <h2 className="font-bold text-lg text-foreground">
           댓글{' '}
-          {comments.length > 0 && (
-            <span className="text-muted-foreground text-base font-normal">({comments.length})</span>
+          {totalCount > 0 && (
+            <span className="text-muted-foreground text-base font-normal">({totalCount})</span>
           )}
         </h2>
         {user && !showForm && (
@@ -116,20 +120,6 @@ export function CommentList({ recipeId, isPublic }: Props) {
 
       {isLoading ? (
         <div className="py-6 text-center text-sm text-muted-foreground">댓글을 불러오는 중...</div>
-      ) : isError ? (
-        <div className="flex flex-col items-center gap-2 py-6 text-center text-sm text-destructive">
-          <span>댓글 목록을 불러오지 못했습니다.</span>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              toastSupabaseError(error, '댓글 목록 조회')
-              void refetch()
-            }}
-          >
-            다시 시도
-          </Button>
-        </div>
       ) : comments.length === 0 && !showForm ? (
         <div className="flex min-h-32 items-center justify-center text-center text-sm text-muted-foreground">
           {user ? '첫 댓글을 작성해보세요!' : '로그인하면 댓글을 작성할 수 있습니다.'}
@@ -144,6 +134,18 @@ export function CommentList({ recipeId, isPublic }: Props) {
               onDelete={(id) => setDeletingId(id)}
             />
           ))}
+          {hasNextPage && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? '불러오는 중...' : '댓글 더 보기'}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
