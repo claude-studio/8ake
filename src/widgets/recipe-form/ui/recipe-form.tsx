@@ -164,6 +164,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
   const [isSaved, setIsSaved] = useState(false)
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [photosChanged, setPhotosChanged] = useState(false)
+  const [existingPhotoCount, setExistingPhotoCount] = useState(0)
   const unitsChangedRef = useRef(false)
   const [loadKey, setLoadKey] = useState(0)
   const [bakeTimeUnit, setBakeTimeUnit] = useState<'분' | '시간'>('분')
@@ -239,6 +240,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
         unitsRef.current = units
         setBakeTimeUnit(units.bakeTimeUnit)
         setPreheatTimeUnit(units.preheatTimeUnit)
+        setExistingPhotoCount(recipe.recipe_photos.length)
 
         reset({
           name: recipe.name,
@@ -282,6 +284,13 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
   const uploadPhotos = useCallback(
     async (targetRecipeId: string, files: File[], thumbnailIndex: number) => {
       if (!user || files.length === 0) return
+
+      // 편집 모드: 기존 사진 수 + 새 사진 수가 2장 초과이면 차단
+      if (mode === 'edit' && existingPhotoCount + files.length > 2) {
+        toast.error('레시피 사진은 최대 2장까지 저장할 수 있습니다')
+        setUploadStates(files.map(() => 'error'))
+        return
+      }
 
       // 업로드 시작 — 모든 파일 'uploading' 상태로
       setUploadStates(files.map(() => 'uploading'))
@@ -349,7 +358,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
         toast.error('일부 사진 업로드에 실패했습니다. 썸네일의 재시도 버튼을 눌러주세요.')
       }
     },
-    [user]
+    [user, mode, existingPhotoCount]
   )
 
   const handleRetryUpload = useCallback(
@@ -592,6 +601,7 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
             onChange={handlePhotoChange}
             uploadStates={uploadStates.length > 0 ? uploadStates : undefined}
             onRetry={handleRetryUpload}
+            existingPhotoCount={mode === 'edit' ? existingPhotoCount : 0}
           />
         </section>
       </div>

@@ -30,9 +30,10 @@ interface Props {
   onChange: (files: File[], thumbnailIndex: number) => void
   uploadStates?: PhotoUploadStatus[]
   onRetry?: (index: number) => void
+  existingPhotoCount?: number
 }
 
-export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
+export function PhotoUploader({ onChange, uploadStates, onRetry, existingPhotoCount = 0 }: Props) {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [thumbnailIndex, setThumbnailIndex] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -63,8 +64,8 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
       const files = Array.from(incoming)
       const currentCount = photosRef.current.length
 
-      if (currentCount + files.length > MAX_FILES) {
-        toast.error(`사진은 최대 ${MAX_FILES}장까지 업로드할 수 있습니다`)
+      if (existingPhotoCount + currentCount + files.length > MAX_FILES) {
+        toast.error(`사진은 최대 ${MAX_FILES}장까지 저장할 수 있습니다`)
         return
       }
 
@@ -105,8 +106,8 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
 
         // 압축 완료 후 최신 상태 기준으로 재검증
         const latest = photosRef.current
-        if (latest.length + results.length > MAX_FILES) {
-          toast.error(`사진은 최대 ${MAX_FILES}장까지 업로드할 수 있습니다`)
+        if (existingPhotoCount + latest.length + results.length > MAX_FILES) {
+          toast.error(`사진은 최대 ${MAX_FILES}장까지 저장할 수 있습니다`)
           return
         }
 
@@ -131,7 +132,7 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
         setCompressProgress(0)
       }
     },
-    [onChange]
+    [onChange, existingPhotoCount]
   )
 
   const handleDrop = useCallback(
@@ -193,6 +194,7 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
   )
 
   const isUploading = uploadStates?.some((s) => s === 'uploading')
+  const isFull = existingPhotoCount + photos.length >= MAX_FILES
 
   return (
     <div className="space-y-3">
@@ -202,7 +204,7 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        disabled={isProcessing || isUploading}
+        disabled={isProcessing || isUploading || isFull}
         className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-border bg-surface text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ImagePlus size={28} className="text-primary" />
