@@ -1,0 +1,148 @@
+import { useState } from 'react'
+
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  commentKeys,
+  createComment,
+  updateComment,
+  deleteComment,
+  useComments,
+} from '@/entities/comment'
+import { useAuthStore } from '@/features/auth'
+
+import { CommentCard } from './comment-card'
+import { CommentForm } from './comment-form'
+
+import type { CommentFormValues } from '../model/comment-schema'
+
+interface Props {
+  recipeId: string
+  isPublic: boolean
+}
+
+export function CommentList({ recipeId, isPublic }: Props) {
+  const user = useAuthStore((s) => s.user)
+  const { data: comments = [], isLoading } = useComments(recipeId)
+  const queryClient = useQueryClient()
+  const [showForm, setShowForm] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  if (!isPublic) return null
+
+  const handleCreate = async (values: CommentFormValues) => {
+    if (!user) return
+    setIsSubmitting(true)
+    try {
+      await createComment({ ...values, recipe_id: recipeId, user_id: user.id })
+      toast.success('댓글이 추가되었습니다.')
+      setShowForm(false)
+      queryClient.invalidateQueries({ queryKey: commentKeys.list(recipeId) })
+    } catch {
+      toast.error('댓글 추가에 실패했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdate = async (id: string, values: CommentFormValues) => {
+    try {
+      await updateComment(id, values)
+      toast.success('댓글이 수정되었습니다.')
+      queryClient.invalidateQueries({ queryKey: commentKeys.list(recipeId) })
+    } catch {
+      toast.error('댓글 수정에 실패했습니다.')
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deletingId) return
+    setIsDeleting(true)
+    try {
+      await deleteComment(deletingId)
+      toast.success('댓글이 삭제되었습니다.')
+      setDeletingId(null)
+      queryClient.invalidateQueries({ queryKey: commentKeys.list(recipeId) })
+    } catch {
+      toast.error('댓글 삭제에 실패했습니다.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-bold text-lg text-foreground">
+          댓글{' '}
+          {comments.length > 0 && (
+            <span className="text-muted-foreground text-base font-normal">({comments.length})</span>
+          )}
+        </h2>
+        {user && !showForm && (
+          <Button size="sm" onClick={() => setShowForm(true)}>
+            + 댓글 작성
+          </Button>
+        )}
+      </div>
+
+      {showForm && (
+        <CommentForm
+          onSubmit={handleCreate}
+          onCancel={() => setShowForm(false)}
+          isSubmitting={isSubmitting}
+        />
+      )}
+
+      {isLoading ? (
+        <div className="py-6 text-center text-sm text-muted-foreground">댓글을 불러오는 중...</div>
+      ) : comments.length === 0 && !showForm ? (
+        <div className="flex min-h-32 items-center justify-center text-center text-sm text-muted-foreground">
+          {user ? '첫 댓글을 작성해보세요!' : '로그인하면 댓글을 작성할 수 있습니다.'}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {comments.map((comment) => (
+            <CommentCard
+              key={comment.id}
+              comment={comment}
+              onUpdate={handleUpdate}
+              onDelete={(id) => setDeletingId(id)}
+            />
+          ))}
+        </div>
+      )}
+
+      <Dialog open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>댓글 삭제</DialogTitle>
+            <DialogDescription>
+              이 댓글을 삭제하면 되돌릴 수 없습니다. 정말 삭제하시겠어요?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingId(null)} disabled={isDeleting}>
+              취소
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? '삭제 중...' : '삭제'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

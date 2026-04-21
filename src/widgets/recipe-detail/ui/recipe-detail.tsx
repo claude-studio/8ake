@@ -45,6 +45,7 @@ const SOURCE_LABELS: Record<string, string> = {
 interface Props {
   recipeId: string
   reviewListSlot?: React.ReactNode
+  commentListSlot?: React.ReactNode
   deleteSlot?: React.ReactNode
   isOwner?: boolean
   onTogglePublic?: () => void
@@ -53,6 +54,7 @@ interface Props {
 export function RecipeDetail({
   recipeId,
   reviewListSlot,
+  commentListSlot,
   deleteSlot,
   isOwner,
   onTogglePublic,
@@ -380,6 +382,9 @@ export function RecipeDetail({
                 ) : null}
               </div>
             ) : null}
+
+            {/* Comments */}
+            {commentListSlot}
 
             {/* Delete */}
             {deleteSlot}
