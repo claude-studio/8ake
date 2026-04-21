@@ -41,7 +41,7 @@ export function ScorePicker({ value, onChange, max = 5 }: Props) {
             key={score}
             type="button"
             role="radio"
-            aria-checked={filled}
+            aria-checked={isSelected}
             aria-label={`${score}점`}
             data-score={score}
             tabIndex={isSelected || (value === 0 && score === 1) ? 0 : -1}
