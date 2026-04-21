@@ -33,6 +33,8 @@
   --radius-sm: var(--radius-sm-val);
   --radius-md: var(--radius-md-val);
   --shadow-floating: var(--shadow-floating);
+  /* 스킵 내비게이션 z-index — sticky PageHeader(z-50)보다 높아야 함 */
+  --z-9999: 9999;
 }
 
 @layer base {
