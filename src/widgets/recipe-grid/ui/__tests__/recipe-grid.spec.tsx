@@ -45,6 +45,7 @@ function baseRecipeState() {
   return {
     items: [],
     isLoading: false,
+    isFetching: false,
     isError: false,
     isFetchingMore: false,
     hasNextPage: false,
@@ -88,8 +89,19 @@ describe('RecipeGrid', () => {
           source_type: 'etc',
           created_at: '2024-01-01T00:00:00Z',
           recipe_photos: [],
+          is_public: true,
+          bake_time: null,
+          memo: null,
+          oven_temp: null,
+          preheat_temp: null,
+          preheat_time: null,
+          quantity: null,
+          recipe_text: '',
+          source_url: null,
+          thumbnail_photo_id: null,
+          user_id: 'test-user',
         },
-      ] as ReturnType<typeof useRecipes>['items'],
+      ] as unknown as ReturnType<typeof useRecipes>['items'],
     })
 
     render(React.createElement(RecipeGrid))
