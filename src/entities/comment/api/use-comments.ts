@@ -2,7 +2,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 import { commentKeys, fetchComments, fetchCommentsCount, PAGE_SIZE } from './comment-api'
 
-import type { CommentsPage } from './comment-api'
+import type { CommentCursor, CommentsPage } from './comment-api'
 
 export function useInfiniteComments(recipeId: string, enabled = true) {
   return useInfiniteQuery<
@@ -10,15 +10,12 @@ export function useInfiniteComments(recipeId: string, enabled = true) {
     Error,
     CommentsPage,
     ReturnType<typeof commentKeys.infinite>,
-    { ts: string; id: string } | null
+    CommentCursor | null
   >({
     queryKey: commentKeys.infinite(recipeId),
     queryFn: ({ pageParam }) => fetchComments({ recipeId, limit: PAGE_SIZE, cursor: pageParam }),
     initialPageParam: null,
-    getNextPageParam: (lastPage) =>
-      lastPage.nextCursor && lastPage.nextCursorId
-        ? { ts: lastPage.nextCursor, id: lastPage.nextCursorId }
-        : null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled,
   })
 }

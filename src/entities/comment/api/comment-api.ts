@@ -17,10 +17,14 @@ export const commentKeys = {
   count: (recipeId: string) => [...commentKeys.all, 'count', recipeId] as const,
 }
 
+export interface CommentCursor {
+  created_at: string
+  id: string
+}
+
 export interface CommentsPage {
   comments: RecipeComment[]
-  nextCursor: string | null
-  nextCursorId: string | null
+  nextCursor: CommentCursor | null
 }
 
 export async function fetchComments({
@@ -30,7 +34,7 @@ export async function fetchComments({
 }: {
   recipeId: string
   limit?: number
-  cursor?: { ts: string; id: string } | null
+  cursor?: CommentCursor | null
 }): Promise<CommentsPage> {
   let query = supabase
     .from('recipe_comments')
@@ -42,7 +46,7 @@ export async function fetchComments({
 
   if (cursor) {
     query = query.or(
-      `created_at.gt.${cursor.ts},and(created_at.eq.${cursor.ts},id.gt.${cursor.id})`
+      `created_at.gt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.gt.${cursor.id})`
     )
   }
 
@@ -58,10 +62,9 @@ export async function fetchComments({
   )
 
   const lastComment = comments.length === limit ? (comments[comments.length - 1] ?? null) : null
-  const nextCursor = lastComment?.created_at ?? null
-  const nextCursorId = lastComment?.id ?? null
+  const nextCursor = lastComment ? { created_at: lastComment.created_at, id: lastComment.id } : null
 
-  return { comments, nextCursor, nextCursorId }
+  return { comments, nextCursor }
 }
 
 export async function fetchCommentsCount(recipeId: string): Promise<number> {
