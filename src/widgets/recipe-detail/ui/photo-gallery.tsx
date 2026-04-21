@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { ChefHat } from 'lucide-react'
 
@@ -25,17 +25,48 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
   const [activePhoto, setActivePhoto] = useState<RecipePhoto | null>(null)
   const displayed = activePhoto ?? mainPhoto
 
+  // 썸네일 목록: 메인 + 서브 순서로 구성
+  const allPhotos = mainPhoto ? [mainPhoto, ...subPhotos] : subPhotos
+  const activeIndex = activePhoto ? allPhotos.findIndex((p) => p.id === activePhoto.id) : 0
+
+  const thumbGroupRef = useRef<HTMLDivElement>(null)
+
+  const selectByIndex = (index: number) => {
+    if (index === 0) {
+      setActivePhoto(null)
+    } else {
+      setActivePhoto(allPhotos[index] ?? null)
+    }
+    // 포커스 이동
+    const btns = thumbGroupRef.current?.querySelectorAll<HTMLElement>('button')
+    btns?.[index]?.focus()
+  }
+
+  const handleThumbKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      selectByIndex(Math.min(index + 1, allPhotos.length - 1))
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      selectByIndex(Math.max(index - 1, 0))
+    }
+  }
+
   return (
     <div className="bg-background px-4 pb-2 pt-4">
       {/* 이미지 컨테이너 — 카드처럼 rounded */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-(--shadow-card)">
         {/* 메인 이미지 */}
-        <div className="relative aspect-4/3 w-full overflow-hidden">
+        <div
+          className="relative aspect-4/3 w-full overflow-hidden"
+          aria-live="polite"
+          aria-label={`레시피 사진 ${activeIndex + 1} / ${sorted.length}`}
+        >
           {displayed ? (
             <img
               key={displayed.id}
               src={getPhotoUrl(displayed.storage_path)}
-              alt="레시피 사진"
+              alt={`레시피 사진 ${activeIndex + 1}`}
               className="size-full  object-cover"
               decoding="async"
               fetchPriority="high"
@@ -53,27 +84,38 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
 
           {/* 사진 카운트 */}
           {sorted.length > 1 && (
-            <span className="absolute right-3 top-3 rounded-full bg-black/30 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-              {sorted.indexOf(displayed!) + 1} / {sorted.length}
+            <span
+              className="absolute right-3 top-3 rounded-full bg-black/30 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm"
+              aria-hidden
+            >
+              {activeIndex + 1} / {sorted.length}
             </span>
           )}
         </div>
 
         {/* 서브 썸네일 */}
         {subPhotos.length > 0 && (
-          <div className="flex gap-1.5 bg-card px-3 py-2.5">
+          <div
+            ref={thumbGroupRef}
+            className="flex gap-1.5 bg-card px-3 py-2.5"
+            role="group"
+            aria-label="사진 선택"
+          >
             <button
               type="button"
               onClick={() => setActivePhoto(null)}
+              onKeyDown={(e) => handleThumbKeyDown(e, 0)}
+              aria-label={`사진 1 보기${!activePhoto ? ' (현재 표시 중)' : ''}`}
+              aria-pressed={!activePhoto}
               className={cn(
-                'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
+                'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
                 !activePhoto ? 'border-primary' : 'border-transparent opacity-50 hover:opacity-75'
               )}
             >
               {mainPhoto ? (
                 <img
                   src={getPhotoUrl(mainPhoto.storage_path)}
-                  alt="메인"
+                  alt=""
                   className="size-full  object-cover"
                   loading="lazy"
                   decoding="async"
@@ -84,27 +126,32 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
                 </div>
               )}
             </button>
-            {subPhotos.map((photo) => (
-              <button
-                key={photo.id}
-                type="button"
-                onClick={() => setActivePhoto(photo)}
-                className={cn(
-                  'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150',
-                  activePhoto?.id === photo.id
-                    ? 'border-primary'
-                    : 'border-transparent opacity-50 hover:opacity-75'
-                )}
-              >
-                <img
-                  src={getPhotoUrl(photo.storage_path)}
-                  alt="서브"
-                  className="size-full  object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </button>
-            ))}
+            {subPhotos.map((photo, i) => {
+              const thumbIndex = i + 1
+              const isActive = activePhoto?.id === photo.id
+              return (
+                <button
+                  key={photo.id}
+                  type="button"
+                  onClick={() => setActivePhoto(photo)}
+                  onKeyDown={(e) => handleThumbKeyDown(e, thumbIndex)}
+                  aria-label={`사진 ${thumbIndex + 1} 보기${isActive ? ' (현재 표시 중)' : ''}`}
+                  aria-pressed={isActive}
+                  className={cn(
+                    'size-12  shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                    isActive ? 'border-primary' : 'border-transparent opacity-50 hover:opacity-75'
+                  )}
+                >
+                  <img
+                    src={getPhotoUrl(photo.storage_path)}
+                    alt=""
+                    className="size-full  object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
