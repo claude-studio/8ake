@@ -4,11 +4,17 @@ interface Props {
   value: number
   onChange: (v: number) => void
   max?: number
+  'aria-labelledby'?: string
 }
 
-export function ScorePicker({ value, onChange, max = 5 }: Props) {
+export function ScorePicker({
+  value,
+  onChange,
+  max = 5,
+  'aria-labelledby': ariaLabelledBy,
+}: Props) {
   return (
-    <div className="flex gap-1" role="radiogroup">
+    <div className="flex gap-1" role="radiogroup" aria-labelledby={ariaLabelledBy}>
       {Array.from({ length: max }, (_, i) => {
         const score = i + 1
         const filled = score <= value

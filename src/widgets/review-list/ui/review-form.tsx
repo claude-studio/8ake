@@ -61,10 +61,13 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
     >
       {/* Date */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">날짜</label>
+        <label htmlFor="review-date" className="text-sm font-medium text-foreground">
+          날짜
+        </label>
         <Popover open={calOpen} onOpenChange={setCalOpen}>
           <PopoverTrigger asChild>
             <button
+              id="review-date"
               type="button"
               className={cn(
                 'flex h-10 w-full items-center justify-between rounded-xl border border-border bg-background px-3 text-sm transition-colors',
@@ -95,11 +98,19 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
 
       {/* Total score */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">총점</label>
+        <label id="total-score-label" className="text-sm font-medium text-foreground">
+          총점
+        </label>
         <Controller
           name="total_score"
           control={control}
-          render={({ field }) => <ScorePicker value={field.value} onChange={field.onChange} />}
+          render={({ field }) => (
+            <ScorePicker
+              value={field.value}
+              onChange={field.onChange}
+              aria-labelledby="total-score-label"
+            />
+          )}
         />
         {errors.total_score && (
           <p className="text-xs text-destructive">{errors.total_score.message}</p>
@@ -128,9 +139,12 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
 
       {/* Comment */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">코멘트</label>
+        <label htmlFor="review-comment" className="text-sm font-medium text-foreground">
+          코멘트
+        </label>
         <Textarea
           {...register('comment')}
+          id="review-comment"
           rows={3}
           className="resize-none text-sm"
           placeholder="맛, 개선점, 다음에 시도할 것..."
@@ -139,9 +153,12 @@ export function ReviewForm({ defaultValues, onSubmit, onCancel }: Props) {
 
       {/* Storage memo */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">보관 메모</label>
+        <label htmlFor="review-storage-memo" className="text-sm font-medium text-foreground">
+          보관 메모
+        </label>
         <Textarea
           {...register('storage_memo')}
+          id="review-storage-memo"
           rows={2}
           className="resize-none text-sm"
           placeholder="보관 방법, 유통기한..."
