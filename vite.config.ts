@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     TanStackRouterVite({
       routesDirectory: './src/routes',
@@ -96,6 +96,13 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    minify: 'esbuild',
+    target: 'esnext',
+  },
+  esbuild: {
+    drop: mode === 'production' ? (['console', 'debugger'] as ('console' | 'debugger')[]) : [],
+  },
   server: {
     host: true,
   },
@@ -104,4 +111,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-})
+}))
