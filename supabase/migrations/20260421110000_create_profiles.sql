@@ -9,10 +9,20 @@ CREATE TABLE profiles (
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- 로그인한 사용자는 모든 프로필 조회 가능 (이메일 표시 목적)
-CREATE POLICY "로그인 사용자 프로필 조회" ON profiles
+-- 본인 프로필 또는 공개 레시피에 댓글을 작성한 사용자 프로필만 조회 가능
+-- (로그인 사용자 전체 이메일 노출 방지)
+CREATE POLICY "댓글 작성자 프로필 조회" ON profiles
   FOR SELECT
-  USING (auth.uid() IS NOT NULL);
+  USING (
+    auth.uid() = id
+    OR EXISTS (
+      SELECT 1
+      FROM recipe_comments rc
+      JOIN recipes r ON r.id = rc.recipe_id
+      WHERE rc.user_id = profiles.id
+        AND r.is_public = true
+    )
+  );
 
 -- 본인 프로필만 수정 가능
 CREATE POLICY "본인 프로필 수정" ON profiles
