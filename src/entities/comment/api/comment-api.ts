@@ -33,7 +33,7 @@ export async function fetchComments({
 }): Promise<CommentsPage> {
   let query = supabase
     .from('recipe_comments')
-    .select('*')
+    .select('*, profiles(email)')
     .eq('recipe_id', recipeId)
     .order('created_at', { ascending: true })
     .order('id', { ascending: true })
@@ -46,7 +46,13 @@ export async function fetchComments({
   const { data, error } = await query
   if (error) handleSupabaseError(error, '댓글 목록 조회')
 
-  const comments = z.array(recipeCommentSchema).parse(data ?? [])
+  const comments = z.array(recipeCommentSchema).parse(
+    (data ?? []).map((row) => ({
+      ...row,
+      author_email: (row.profiles as { email?: string } | null)?.email ?? null,
+      profiles: undefined,
+    }))
+  )
   const nextCursor =
     comments.length === limit ? (comments[comments.length - 1]?.created_at ?? null) : null
 
@@ -65,9 +71,18 @@ export async function fetchCommentsCount(recipeId: string): Promise<number> {
 export async function createComment(
   values: TablesInsert<'recipe_comments'>
 ): Promise<RecipeComment> {
-  const { data, error } = await supabase.from('recipe_comments').insert(values).select().single()
+  const { data, error } = await supabase
+    .from('recipe_comments')
+    .insert(values)
+    .select('*, profiles(email)')
+    .single()
   if (error) handleSupabaseError(error, '댓글 등록')
-  return recipeCommentSchema.parse(data)
+  const row = data as typeof data & { profiles: { email?: string } | null }
+  return recipeCommentSchema.parse({
+    ...row,
+    author_email: row?.profiles?.email ?? null,
+    profiles: undefined,
+  })
 }
 
 export async function updateComment(
@@ -78,10 +93,15 @@ export async function updateComment(
     .from('recipe_comments')
     .update(values)
     .eq('id', id)
-    .select()
+    .select('*, profiles(email)')
     .single()
   if (error) handleSupabaseError(error, '댓글 수정')
-  return recipeCommentSchema.parse(data)
+  const row = data as typeof data & { profiles: { email?: string } | null }
+  return recipeCommentSchema.parse({
+    ...row,
+    author_email: row?.profiles?.email ?? null,
+    profiles: undefined,
+  })
 }
 
 export async function deleteComment(id: string): Promise<void> {

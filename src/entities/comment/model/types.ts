@@ -1,9 +1,5 @@
 import { z } from 'zod'
 
-import type { Tables } from '@/shared/api/database.types'
-
-export type RecipeComment = Tables<'recipe_comments'>
-
 export const recipeCommentSchema = z.object({
   id: z.string(),
   recipe_id: z.string(),
@@ -11,4 +7,7 @@ export const recipeCommentSchema = z.object({
   content: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
+  author_email: z.string().nullable(),
 })
+
+export type RecipeComment = z.infer<typeof recipeCommentSchema>

@@ -39,7 +39,12 @@ export function CommentCard({ comment, onUpdate, onDelete }: Props) {
   return (
     <div className="rounded-lg border border-border bg-card p-3 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{formattedDate}</span>
+        <div className="flex flex-col gap-0.5">
+          {comment.author_email && (
+            <span className="text-xs font-medium text-foreground">{comment.author_email}</span>
+          )}
+          <span className="text-xs text-muted-foreground">{formattedDate}</span>
+        </div>
         {isOwner && !editing && (
           <div className="flex gap-1">
             <Button
