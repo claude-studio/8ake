@@ -80,8 +80,9 @@ export function CommentList({ recipeId, isPublic }: Props) {
       await updateComment(id, values)
       toast.success('댓글이 수정되었습니다.')
       invalidateComments()
-    } catch {
+    } catch (err) {
       toast.error('댓글 수정에 실패했습니다.')
+      throw err
     }
   }
 
