@@ -33,7 +33,7 @@ interface Props {
 
 export function CommentList({ recipeId, isPublic }: Props) {
   const user = useAuthStore((s) => s.user)
-  const { data: comments = [], isLoading } = useComments(recipeId)
+  const { data: comments = [], isLoading } = useComments(recipeId, isPublic)
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
