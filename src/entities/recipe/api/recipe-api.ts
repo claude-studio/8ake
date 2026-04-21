@@ -15,6 +15,10 @@ export const recipeKeys = {
 
 export const PAGE_SIZE = 12
 
+type CreatedAtCursor = { created_at: string; id: string }
+type TotalScoreCursor = { total_score: number | null; id: string }
+export type RecipeCursor = CreatedAtCursor | TotalScoreCursor
+
 export async function fetchRecipes({
   search,
   sortBy,
@@ -23,7 +27,7 @@ export async function fetchRecipes({
 }: {
   search: string
   sortBy: 'created_at' | 'total_score'
-  cursor?: { created_at: string; id: string }
+  cursor?: RecipeCursor
   tags?: string[]
 }) {
   let query = supabase
@@ -41,11 +45,21 @@ export async function fetchRecipes({
     query = query.contains('tags', tags)
   }
 
-  // cursor pagination은 created_at 정렬 시에만 유효
-  if (cursor && sortBy === 'created_at') {
+  if (cursor && sortBy === 'created_at' && 'created_at' in cursor) {
     query = query.or(
       `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
     )
+  } else if (cursor && sortBy === 'total_score' && 'total_score' in cursor) {
+    const tsCursor = cursor as TotalScoreCursor
+    if (tsCursor.total_score === null) {
+      // NULL 구간: total_score가 NULL인 레시피에서 id 기준으로만 페이징
+      query = query.is('total_score', null).lt('id', tsCursor.id)
+    } else {
+      // 평점 구간: 더 낮은 평점, NULL 평점(NULLS LAST 맨 뒤), 동일 평점에서 id 작은 것
+      query = query.or(
+        `total_score.lt.${tsCursor.total_score},total_score.is.null,and(total_score.eq.${tsCursor.total_score},id.lt.${tsCursor.id})`
+      )
+    }
   }
 
   const { data, error } = await query
@@ -61,8 +75,10 @@ export async function fetchRecipe(id: string): Promise<RecipeWithDetails> {
     .single()
 
   if (error) handleSupabaseError(error, '레시피 상세 조회')
-  // Supabase returns related rows as arrays when using wildcard select
-  return data as unknown as RecipeWithDetails
+  // handleSupabaseError는 항상 throw하므로, 여기까지 오면 data는 null이 아님.
+  // Supabase select 쿼리가 반환하는 관계 배열 타입(recipe_ingredients, recipe_photos)이
+  // RecipeWithDetails 구조와 동일하지만 TS 추론이 정확히 일치하지 않아 assertion 사용.
+  return data as RecipeWithDetails
 }
 
 export async function createRecipe(values: TablesInsert<'recipes'>) {
