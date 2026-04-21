@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 
 import { createRootRouteWithContext, Link, Outlet, useRouterState } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
@@ -74,11 +74,21 @@ function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
   )
 }
 
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-dvh bg-background">
+      <div className="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  )
+}
+
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <>
       <ScrollToTop />
-      <Outlet />
+      <Suspense fallback={<PageLoader />}>
+        <Outlet />
+      </Suspense>
       {import.meta.env.DEV && <TanStackRouterDevtools position="top-left" />}
     </>
   ),

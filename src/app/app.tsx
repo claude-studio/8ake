@@ -7,6 +7,7 @@ import { Toaster } from 'sonner'
 import { useAuthStore } from '@/features/auth'
 import { OfflineBanner, PwaPrompt } from '@/features/pwa'
 import { queryClient } from '@/shared/api'
+import { ErrorBoundary } from '@/shared/ui'
 
 import { routeTree } from '../routeTree.gen'
 
@@ -53,11 +54,13 @@ export function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} context={routerContext} />
-      <Toaster position="top-center" closeButton toastOptions={TOAST_OPTIONS} />
-      <OfflineBanner />
-      <PwaPrompt />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} context={routerContext} />
+        <Toaster position="top-center" closeButton toastOptions={TOAST_OPTIONS} />
+        <OfflineBanner />
+        <PwaPrompt />
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }

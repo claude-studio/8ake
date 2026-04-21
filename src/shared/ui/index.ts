@@ -1,3 +1,4 @@
+export { ErrorBoundary } from './error-boundary'
 export { AppLayout } from './app-layout'
 export { PageHeader } from './page-header'
 export { CupcakeScore } from './cupcake-score'
