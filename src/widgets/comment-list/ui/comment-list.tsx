@@ -102,46 +102,75 @@ export function CommentList({ recipeId, isPublic }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg text-foreground">
-          댓글{' '}
+    <div>
+      {/* 헤더 */}
+      <div
+        className="flex items-baseline justify-between pb-3 mb-1"
+        style={{ borderBottom: '1.5px solid var(--border)' }}
+      >
+        <h2
+          className="text-sm font-semibold tracking-widest uppercase"
+          style={{ color: 'var(--muted-foreground)', letterSpacing: '0.12em' }}
+        >
+          댓글
           {totalCount > 0 && (
-            <span className="text-muted-foreground text-base font-normal">({totalCount})</span>
+            <span className="ml-2 font-normal" style={{ color: 'var(--primary)', opacity: 0.8 }}>
+              {totalCount}
+            </span>
           )}
         </h2>
         {user && !showForm && (
-          <Button size="sm" onClick={() => setShowForm(true)}>
-            + 댓글 작성
-          </Button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="text-xs font-medium transition-opacity hover:opacity-70"
+            style={{ color: 'var(--primary)' }}
+          >
+            + 댓글 추가
+          </button>
         )}
       </div>
 
+      {/* 작성 폼 */}
       {showForm && (
-        <CommentForm
-          onSubmit={handleCreate}
-          onCancel={() => setShowForm(false)}
-          isSubmitting={isSubmitting}
-        />
+        <div className="pt-2 pb-1">
+          <CommentForm
+            onSubmit={handleCreate}
+            onCancel={() => setShowForm(false)}
+            isSubmitting={isSubmitting}
+          />
+        </div>
       )}
 
+      {/* 목록 */}
       {isLoading ? (
-        <div className="py-6 text-center text-sm text-muted-foreground">댓글을 불러오는 중...</div>
+        <div
+          className="py-8 text-center text-xs"
+          style={{ color: 'var(--muted-foreground)', opacity: 0.6 }}
+        >
+          불러오는 중…
+        </div>
       ) : isError ? (
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <p className="text-sm text-destructive">
-            {error instanceof Error ? error.message : '댓글을 불러오지 못했습니다.'}
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <p className="text-xs" style={{ color: 'var(--destructive)' }}>
+            {error instanceof Error ? error.message : '불러오지 못했습니다.'}
           </p>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <button
+            onClick={() => refetch()}
+            className="text-xs underline underline-offset-2"
+            style={{ color: 'var(--muted-foreground)' }}
+          >
             다시 시도
-          </Button>
+          </button>
         </div>
       ) : comments.length === 0 && !showForm ? (
-        <div className="flex min-h-32 items-center justify-center text-center text-sm text-muted-foreground">
-          {user ? '첫 댓글을 작성해보세요!' : '로그인하면 댓글을 작성할 수 있습니다.'}
+        <div
+          className="py-10 text-center text-xs"
+          style={{ color: 'var(--muted-foreground)', opacity: 0.55 }}
+        >
+          {user ? '첫 댓글을 남겨보세요.' : '로그인하면 댓글을 남길 수 있어요.'}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div>
           {comments.map((comment) => (
             <CommentCard
               key={comment.id}
@@ -151,34 +180,33 @@ export function CommentList({ recipeId, isPublic }: Props) {
             />
           ))}
           {hasNextPage && (
-            <div className="flex justify-center pt-2">
-              <Button
-                variant="outline"
-                size="sm"
+            <div className="pt-3 text-center">
+              <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
+                className="text-xs transition-opacity disabled:opacity-40 hover:opacity-70"
+                style={{ color: 'var(--muted-foreground)' }}
               >
-                {isFetchingNextPage ? '불러오는 중...' : '댓글 더 보기'}
-              </Button>
+                {isFetchingNextPage ? '불러오는 중…' : '더 보기'}
+              </button>
             </div>
           )}
         </div>
       )}
 
+      {/* 삭제 확인 다이얼로그 */}
       <Dialog open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>댓글 삭제</DialogTitle>
-            <DialogDescription>
-              이 댓글을 삭제하면 되돌릴 수 없습니다. 정말 삭제하시겠어요?
-            </DialogDescription>
+            <DialogDescription>삭제하면 되돌릴 수 없습니다. 정말 삭제하시겠어요?</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingId(null)} disabled={isDeleting}>
               취소
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? '삭제 중...' : '삭제'}
+              {isDeleting ? '삭제 중…' : '삭제'}
             </Button>
           </DialogFooter>
         </DialogContent>

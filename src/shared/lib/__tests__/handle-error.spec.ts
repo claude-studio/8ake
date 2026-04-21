@@ -1,8 +1,7 @@
+import { toast } from 'sonner'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }))
-
-import { toast } from 'sonner'
 
 import { AppError } from '../api-error'
 import { handleSupabaseError, toastSupabaseError } from '../handle-error'

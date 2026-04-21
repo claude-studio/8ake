@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/button'
 import type { RecipeComment } from '@/entities/comment'
 import { useAuthStore } from '@/features/auth'
 
@@ -14,11 +13,17 @@ interface Props {
   onDelete: (id: string) => void
 }
 
+function getHandle(email: string | null | undefined) {
+  if (!email) return '익명'
+  return email.split('@')[0]
+}
+
 export function CommentCard({ comment, onUpdate, onDelete }: Props) {
   const user = useAuthStore((s) => s.user)
   const isOwner = !!user && user.id === comment.user_id
   const [editing, setEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
   const handleUpdate = async (values: CommentFormValues) => {
     setIsSubmitting(true)
@@ -36,47 +41,69 @@ export function CommentCard({ comment, onUpdate, onDelete }: Props) {
     day: 'numeric',
   })
 
-  return (
-    <div className="rounded-lg border border-border bg-card p-3 space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          {comment.author_email && (
-            <span className="text-xs font-medium text-foreground">{comment.author_email}</span>
-          )}
-          <span className="text-xs text-muted-foreground">{formattedDate}</span>
-        </div>
-        {isOwner && !editing && (
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-xs"
-              onClick={() => setEditing(true)}
-            >
-              수정
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-              onClick={() => onDelete(comment.id)}
-            >
-              삭제
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {editing ? (
+  if (editing) {
+    return (
+      <div className="py-3">
         <CommentForm
           defaultValues={{ content: comment.content }}
           onSubmit={handleUpdate}
           onCancel={() => setEditing(false)}
           isSubmitting={isSubmitting}
         />
-      ) : (
-        <p className="text-sm text-foreground whitespace-pre-wrap">{comment.content}</p>
-      )}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="group py-3"
+      style={{ borderBottom: '1px solid var(--rule)' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* 상단 메타 */}
+      <div className="flex items-baseline justify-between gap-2 mb-1.5">
+        <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>
+          {getHandle(comment.author_email)}
+        </span>
+        <span
+          className="text-[11px] tabular-nums shrink-0"
+          style={{ color: 'var(--muted-foreground)', opacity: 0.7 }}
+        >
+          {formattedDate}
+        </span>
+      </div>
+
+      {/* 본문 + 오너 액션 */}
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm/relaxed whitespace-pre-wrap" style={{ color: 'var(--foreground)' }}>
+          {comment.content}
+        </p>
+
+        {isOwner && (
+          <div
+            className="flex gap-2 shrink-0 transition-opacity duration-150 pt-0.5"
+            style={{ opacity: hovered ? 1 : 0 }}
+          >
+            <button
+              className="text-[11px] font-medium"
+              style={{ color: 'var(--muted-foreground)' }}
+              onClick={() => setEditing(true)}
+              aria-label="댓글 수정"
+            >
+              수정
+            </button>
+            <button
+              className="text-[11px] font-medium"
+              style={{ color: 'var(--destructive)', opacity: 0.8 }}
+              onClick={() => onDelete(comment.id)}
+              aria-label="댓글 삭제"
+            >
+              삭제
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
