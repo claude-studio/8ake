@@ -8,6 +8,7 @@ import { updateRecipe, recipeKeys, useRecipe } from '@/entities/recipe'
 import { useAuthStore } from '@/features/auth'
 import { DeleteDialog } from '@/features/recipe-delete'
 import { PageHeader } from '@/shared/ui'
+import { CommentList } from '@/widgets/comment-list'
 import { HeaderMenu } from '@/widgets/header-menu'
 import { RecipeDetail } from '@/widgets/recipe-detail'
 import { ReviewList } from '@/widgets/review-list'
@@ -63,6 +64,7 @@ export function RecipeDetailPage({ recipeId }: Props) {
       <RecipeDetail
         recipeId={recipeId}
         reviewListSlot={<ReviewList recipeId={recipeId} />}
+        commentListSlot={<CommentList recipeId={recipeId} isPublic={recipe?.is_public ?? false} />}
         isOwner={isOwner}
         onTogglePublic={handleTogglePublic}
       />

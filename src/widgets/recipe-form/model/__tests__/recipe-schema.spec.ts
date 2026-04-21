@@ -82,14 +82,8 @@ describe('RecipeSchema', () => {
   })
 
   it('tags/memo/preheat는 optional', () => {
-    const {
-      tags: _tags,
-      memo: _memo,
-      preheat_temp: _pt,
-      preheat_time: _ptime,
-      source_url: _su,
-      ...rest
-    } = validInput
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { tags, memo, preheat_temp, preheat_time, source_url, ...rest } = validInput
     const result = RecipeSchema.safeParse({ ...rest, source_type: 'etc' as const })
     expect(result.success).toBe(true)
   })
