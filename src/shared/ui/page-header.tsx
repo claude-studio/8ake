@@ -20,10 +20,10 @@ export function PageHeader({ title, right }: Props) {
           variant="ghost"
           size="icon-sm"
           onClick={() => router.history.back()}
-          title="뒤로가기"
+          aria-label="뒤로가기"
           className="shrink-0 text-muted-foreground"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={18} aria-hidden />
         </Button>
 
         {/* 가운데: 타이틀 */}
