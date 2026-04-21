@@ -13,9 +13,15 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB (압축 전 원본 허용)
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const ALLOWED_TYPES_ACCEPT = [...ALLOWED_TYPES].join(',')
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`
+}
+
 interface PhotoItem {
   file: File
   preview: string
+  compressedSize?: number
 }
 
 interface Props {
@@ -28,6 +34,7 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [thumbnailIndex, setThumbnailIndex] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [compressionProgress, setCompressionProgress] = useState<number>(0)
   const isProcessingRef = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const photosRef = useRef<PhotoItem[]>([])
@@ -73,13 +80,24 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
 
       isProcessingRef.current = true
       setIsProcessing(true)
+      setCompressionProgress(0)
+
       try {
-        const compressed: File[] = []
-        for (let i = 0; i < files.length; i += 2) {
-          const batch = files.slice(i, i + 2)
-          const results = await Promise.all(batch.map(compressImage))
-          compressed.push(...results)
+        const compressed: Array<{ file: File; compressedSize: number }> = []
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
+          const baseProgress = Math.round((i / files.length) * 100)
+
+          const result = await compressImage(file, (fileProgress) => {
+            const overall = Math.round(baseProgress + fileProgress / files.length)
+            setCompressionProgress(overall)
+          })
+
+          compressed.push({ file: result, compressedSize: result.size })
         }
+
+        setCompressionProgress(100)
 
         // 압축 완료 후 최신 상태 기준으로 재검증
         const latest = photosRef.current
@@ -88,9 +106,10 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
           return
         }
 
-        const newItems: PhotoItem[] = compressed.map((file) => ({
+        const newItems: PhotoItem[] = compressed.map(({ file, compressedSize }) => ({
           file,
           preview: URL.createObjectURL(file),
+          compressedSize,
         }))
 
         const updated = [...latest, ...newItems]
@@ -104,6 +123,7 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
       } finally {
         isProcessingRef.current = false
         setIsProcessing(false)
+        setCompressionProgress(0)
       }
     },
     [onChange]
@@ -181,10 +201,22 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
         className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-lg cursor-pointer transition-colors border-2 border-dashed border-border bg-surface text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ImagePlus size={28} className="text-primary" />
-        <span className="text-sm">
-          {isProcessing ? '처리 중...' : '클릭 또는 드래그하여 사진 추가'}
-        </span>
-        <span className="text-xs text-muted-foreground">최대 {MAX_FILES}장, 각 20MB 이하</span>
+        {isProcessing ? (
+          <div className="flex flex-col items-center gap-1 w-full px-8">
+            <span className="text-sm">압축 중... {compressionProgress}%</span>
+            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-200"
+                style={{ width: `${compressionProgress}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <span className="text-sm">클릭 또는 드래그하여 사진 추가</span>
+            <span className="text-xs text-muted-foreground">최대 {MAX_FILES}장, 각 20MB 이하</span>
+          </>
+        )}
       </button>
 
       <input
@@ -218,6 +250,13 @@ export function PhotoUploader({ onChange, uploadStates, onRetry }: Props) {
                   alt={`사진 ${index + 1}`}
                   className="size-full object-cover"
                 />
+
+                {/* 압축 후 파일 크기 배지 */}
+                {photo.compressedSize !== undefined && status === 'idle' && (
+                  <div className="absolute top-0 inset-x-0 text-center text-[9px] py-0.5 bg-black/50 text-white">
+                    {formatBytes(photo.compressedSize)}
+                  </div>
+                )}
 
                 {/* 업로드 상태 오버레이 */}
                 {status === 'uploading' && (
