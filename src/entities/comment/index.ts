@@ -1,4 +1,5 @@
 export type { RecipeComment } from './model/types'
+export { recipeCommentSchema } from './model/types'
 export {
   commentKeys,
   fetchComments,
