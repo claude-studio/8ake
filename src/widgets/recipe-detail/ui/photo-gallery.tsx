@@ -57,11 +57,11 @@ export function PhotoGallery({ photos, thumbnailPhotoId, children }: Props) {
       {/* 이미지 컨테이너 — 카드처럼 rounded */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-(--shadow-card)">
         {/* 메인 이미지 */}
-        <div
-          className="relative aspect-4/3 w-full overflow-hidden"
-          aria-live="polite"
-          aria-label={`레시피 사진 ${activeIndex + 1} / ${sorted.length}`}
-        >
+        <div className="relative aspect-4/3 w-full overflow-hidden">
+          {/* 스크린리더: 사진 전환 알림 (이미지 alt 전체 반복 낭독 방지) */}
+          <span className="sr-only" aria-live="polite" aria-atomic="true">
+            {`레시피 사진 ${activeIndex + 1} / ${sorted.length}`}
+          </span>
           {displayed ? (
             <img
               key={displayed.id}
