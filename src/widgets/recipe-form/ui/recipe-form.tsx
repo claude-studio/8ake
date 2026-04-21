@@ -309,11 +309,21 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
           .single()
 
         if (insertError) {
+          // DB 삽입 실패 시 Storage에 올라간 고아 객체 정리
+          await supabase.storage.from('recipe-photos').remove([safePath])
           setUploadStates((prev) => {
             const next = [...prev]
             next[i] = 'error'
             return next
           })
+          if (
+            insertError.code === '23514' ||
+            insertError.message?.includes('recipe_photos_limit')
+          ) {
+            toast.error('레시피 사진은 최대 2장까지 저장할 수 있습니다')
+          } else {
+            toastSupabaseError(insertError, '사진 정보 저장')
+          }
           return null
         }
 
@@ -377,12 +387,18 @@ export function RecipeForm({ mode, recipeId, isDataLoading, headerRight }: Props
         .single()
 
       if (insertError) {
+        // DB 삽입 실패 시 Storage 고아 객체 정리
+        await supabase.storage.from('recipe-photos').remove([safePath])
         setUploadStates((prev) => {
           const next = [...prev]
           next[index] = 'error'
           return next
         })
-        toastSupabaseError(insertError, '사진 정보 저장')
+        if (insertError.code === '23514' || insertError.message?.includes('recipe_photos_limit')) {
+          toast.error('레시피 사진은 최대 2장까지 저장할 수 있습니다')
+        } else {
+          toastSupabaseError(insertError, '사진 정보 저장')
+        }
         return
       }
 
