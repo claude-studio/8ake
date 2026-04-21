@@ -1,6 +1,9 @@
-import { supabase } from '@/shared/api/supabase-client'
+import { supabase } from '@/shared/api'
 
 export async function getTotalRecipeCount() {
-  const { data } = await supabase.from('recipes').select('id')
-  return data?.length ?? 0
+  const { count, error } = await supabase
+    .from('recipes')
+    .select('*', { count: 'exact', head: true })
+  if (error) throw error
+  return count ?? 0
 }
