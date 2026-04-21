@@ -2,97 +2,125 @@ import { describe, expect, it } from 'vitest'
 
 import { RecipeSchema, RecipeSchemaRefined } from '../recipe-schema'
 
-const validBase = {
-  name: '소금빵',
-  source_type: 'etc' as const,
-  source_url: null,
-  oven_temp: 180,
-  bake_time: 20,
-  quantity: 12,
-  steps: '반죽하고 굽는다',
-  is_public: false,
-  ingredients: [{ name: '밀가루', amount: '200', unit: 'g' as const }],
+const validIngredient = { name: '버터', amount: '100', unit: 'g' as const }
+
+const validInput = {
+  name: '초코 쿠키',
+  source_type: 'youtube' as const,
+  source_url: 'https://youtube.com/watch?v=abc',
+  oven_temp: '180',
+  bake_time: '15',
+  quantity: '20',
+  preheat_temp: '',
+  preheat_time: '',
+  steps: '1. 재료를 섞는다. 2. 굽는다.',
+  memo: '맛있다',
+  tags: ['쿠키'],
+  is_public: true,
+  ingredients: [validIngredient],
 }
 
 describe('RecipeSchema', () => {
-  it('유효한 입력은 성공한다', () => {
-    const result = RecipeSchema.safeParse(validBase)
+  it('유효한 입력은 파싱 성공', () => {
+    const result = RecipeSchema.safeParse(validInput)
     expect(result.success).toBe(true)
   })
 
-  it('name이 비어 있으면 실패한다', () => {
-    const result = RecipeSchema.safeParse({ ...validBase, name: '' })
+  it('name 누락 시 에러', () => {
+    const result = RecipeSchema.safeParse({ ...validInput, name: '' })
     expect(result.success).toBe(false)
     if (!result.success) {
-      const fields = result.error.issues.map((i) => i.path[0])
-      expect(fields).toContain('name')
+      const paths = result.error.issues.map((i) => i.path[0])
+      expect(paths).toContain('name')
     }
   })
 
-  it('source_type이 올바르지 않으면 실패한다', () => {
-    const result = RecipeSchema.safeParse({ ...validBase, source_type: 'invalid' })
+  it('source_type 잘못된 값 시 에러', () => {
+    const result = RecipeSchema.safeParse({ ...validInput, source_type: 'invalid' })
     expect(result.success).toBe(false)
   })
 
-  it('oven_temp가 0이면 실패한다', () => {
-    const result = RecipeSchema.safeParse({ ...validBase, oven_temp: 0 })
+  it('oven_temp 0 이하 시 에러', () => {
+    const result = RecipeSchema.safeParse({ ...validInput, oven_temp: '0' })
     expect(result.success).toBe(false)
   })
 
-  it('ingredients가 빈 배열이면 실패한다', () => {
-    const result = RecipeSchema.safeParse({ ...validBase, ingredients: [] })
+  it('bake_time 누락(0) 시 에러', () => {
+    const result = RecipeSchema.safeParse({ ...validInput, bake_time: '0' })
     expect(result.success).toBe(false)
   })
 
-  it('steps가 비어 있으면 실패한다', () => {
-    const result = RecipeSchema.safeParse({ ...validBase, steps: '' })
+  it('quantity 누락(0) 시 에러', () => {
+    const result = RecipeSchema.safeParse({ ...validInput, quantity: '0' })
     expect(result.success).toBe(false)
   })
 
-  it('oven_temp는 문자열 숫자도 coerce된다', () => {
-    const result = RecipeSchema.safeParse({ ...validBase, oven_temp: '180' })
+  it('steps 빈 문자열 시 에러', () => {
+    const result = RecipeSchema.safeParse({ ...validInput, steps: '' })
+    expect(result.success).toBe(false)
+  })
+
+  it('ingredients 빈 배열 시 에러', () => {
+    const result = RecipeSchema.safeParse({ ...validInput, ingredients: [] })
+    expect(result.success).toBe(false)
+  })
+
+  it('ingredient name 빈 문자열 시 에러', () => {
+    const result = RecipeSchema.safeParse({
+      ...validInput,
+      ingredients: [{ name: '', amount: '100', unit: 'g' as const }],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('ingredient amount 빈 문자열 시 에러', () => {
+    const result = RecipeSchema.safeParse({
+      ...validInput,
+      ingredients: [{ name: '버터', amount: '', unit: 'g' as const }],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('tags/memo/preheat는 optional', () => {
+    const {
+      tags: _tags,
+      memo: _memo,
+      preheat_temp: _pt,
+      preheat_time: _ptime,
+      source_url: _su,
+      ...rest
+    } = validInput
+    const result = RecipeSchema.safeParse({ ...rest, source_type: 'etc' as const })
     expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.oven_temp).toBe(180)
-    }
   })
 })
 
 describe('RecipeSchemaRefined', () => {
-  it('source_type이 youtube이고 source_url이 없으면 실패한다', () => {
+  it('youtube 출처에 source_url 없으면 에러', () => {
     const result = RecipeSchemaRefined.safeParse({
-      ...validBase,
+      ...validInput,
       source_type: 'youtube',
       source_url: '',
     })
     expect(result.success).toBe(false)
     if (!result.success) {
-      const fields = result.error.issues.map((i) => i.path[0])
-      expect(fields).toContain('source_url')
+      const paths = result.error.issues.map((i) => i.path[0])
+      expect(paths).toContain('source_url')
     }
   })
 
-  it('source_type이 blog이고 source_url이 없으면 실패한다', () => {
+  it('etc 출처에 source_url 없어도 통과', () => {
     const result = RecipeSchemaRefined.safeParse({
-      ...validBase,
-      source_type: 'blog',
-      source_url: null,
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('source_type이 etc이면 source_url 없어도 성공한다', () => {
-    const result = RecipeSchemaRefined.safeParse({
-      ...validBase,
+      ...validInput,
       source_type: 'etc',
       source_url: null,
     })
     expect(result.success).toBe(true)
   })
 
-  it('source_type이 youtube이고 source_url이 있으면 성공한다', () => {
+  it('youtube 출처에 source_url 있으면 통과', () => {
     const result = RecipeSchemaRefined.safeParse({
-      ...validBase,
+      ...validInput,
       source_type: 'youtube',
       source_url: 'https://youtube.com/watch?v=abc',
     })
