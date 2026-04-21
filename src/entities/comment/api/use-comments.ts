@@ -10,12 +10,15 @@ export function useInfiniteComments(recipeId: string, enabled = true) {
     Error,
     CommentsPage,
     ReturnType<typeof commentKeys.infinite>,
-    string | null
+    { ts: string; id: string } | null
   >({
     queryKey: commentKeys.infinite(recipeId),
     queryFn: ({ pageParam }) => fetchComments({ recipeId, limit: PAGE_SIZE, cursor: pageParam }),
     initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) =>
+      lastPage.nextCursor && lastPage.nextCursorId
+        ? { ts: lastPage.nextCursor, id: lastPage.nextCursorId }
+        : null,
     enabled,
   })
 }
