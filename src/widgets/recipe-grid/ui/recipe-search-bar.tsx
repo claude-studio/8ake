@@ -35,6 +35,7 @@ export function RecipeSearchBar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="레시피 검색..."
+          aria-label="레시피 검색"
           className="w-full bg-transparent border-0 border-b border-border pl-5 pb-2 pr-6 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary transition-colors"
         />
         {search.length > 0 && (

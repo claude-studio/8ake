@@ -162,7 +162,7 @@ export function RecipeGrid({ initialTag }: RecipeGridProps) {
       {hasNextPage && (
         <div ref={sentinelRef} className="h-10 mt-4">
           {isFetchingMore && (
-            <div className="flex justify-center">
+            <div className="flex justify-center" role="status" aria-label="검색 중">
               <div className="size-6 rounded-full border-2 animate-spin border-border border-t-primary" />
             </div>
           )}
