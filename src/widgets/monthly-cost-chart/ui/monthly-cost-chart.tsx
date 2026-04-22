@@ -6,6 +6,11 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 
 import { supabase } from '@/shared/api'
 
+const monthlyCostKeys = {
+  all: ['monthly-costs'] as const,
+  list: (months: number) => [...monthlyCostKeys.all, months] as const,
+}
+
 const AMOUNT_RE = /^(\d+(?:\.\d+)?)/
 
 interface MonthlyData {
@@ -83,7 +88,7 @@ async function fetchMonthlyCosts(months: number): Promise<MonthlyData[]> {
 export function MonthlyCostChart() {
   const [months] = useState(6)
   const { data, isLoading } = useQuery({
-    queryKey: ['monthly-costs', months],
+    queryKey: monthlyCostKeys.list(months),
     queryFn: () => fetchMonthlyCosts(months),
   })
 

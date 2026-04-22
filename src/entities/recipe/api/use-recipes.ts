@@ -2,14 +2,13 @@ import { useMemo } from 'react'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { fetchRecipes, PAGE_SIZE, recipeKeys, type RecipeCursor } from './recipe-api'
-
-import type { Recipe, RecipePhoto } from '../model/types'
-
-interface RecipeRow extends Recipe {
-  recipe_photos: RecipePhoto[]
-  total_score: number | null
-}
+import {
+  fetchRecipes,
+  PAGE_SIZE,
+  recipeKeys,
+  type RecipeCursor,
+  type RecipeListItem,
+} from './recipe-api'
 
 export function useRecipes(search: string, sortBy: 'created_at' | 'total_score', tags?: string[]) {
   const query = useInfiniteQuery({
@@ -24,7 +23,7 @@ export function useRecipes(search: string, sortBy: 'created_at' | 'total_score',
     initialPageParam: undefined as RecipeCursor | undefined,
     getNextPageParam: (lastPage) => {
       if (lastPage.length < PAGE_SIZE) return undefined
-      const last = lastPage[lastPage.length - 1] as RecipeRow
+      const last = lastPage[lastPage.length - 1] as RecipeListItem
       if (sortBy === 'total_score') {
         return { total_score: last.total_score, id: last.id }
       }
@@ -32,10 +31,7 @@ export function useRecipes(search: string, sortBy: 'created_at' | 'total_score',
     },
   })
 
-  const items = useMemo(
-    () => (query.data?.pages.flat() ?? []) as unknown as RecipeRow[],
-    [query.data]
-  )
+  const items = useMemo<RecipeListItem[]>(() => query.data?.pages.flat() ?? [], [query.data])
 
   return {
     items,

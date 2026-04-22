@@ -1,4 +1,5 @@
 export type { Recipe, RecipeIngredient, RecipePhoto, RecipeWithDetails } from './model/types'
+export type { RecipeListItem } from './api/recipe-api'
 export {
   fetchRecipe,
   fetchRecipes,
