@@ -64,12 +64,15 @@ export async function fetchCalendarEntries(year: number, month: number) {
 
   // 리뷰 = 회고 기록
   for (const r of reviewsResult.data ?? []) {
+    const recipeName = Array.isArray(r.recipes)
+      ? (r.recipes[0]?.name ?? '')
+      : (r.recipes?.name ?? '')
     entries.push({
       id: r.id,
       date: r.date ?? toLocalDate(r.created_at),
       type: 'review',
       recipe_id: r.recipe_id,
-      recipe_name: (r.recipes as unknown as { name: string })?.name ?? '',
+      recipe_name: recipeName,
       total_score: r.total_score,
       created_at: r.created_at,
     })

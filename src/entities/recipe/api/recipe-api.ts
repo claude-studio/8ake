@@ -2,7 +2,13 @@ import { supabase } from '@/shared/api'
 import type { TablesInsert, TablesUpdate } from '@/shared/api/database.types'
 import { handleSupabaseError } from '@/shared/lib/handle-error'
 
-import type { RecipeWithDetails } from '../model/types'
+import type { Recipe, RecipeWithDetails } from '../model/types'
+
+/** fetchRecipes 응답 형태: recipe_photos는 선택한 컬럼만 포함, total_score는 DB 집계 컬럼 */
+export interface RecipeListItem extends Recipe {
+  recipe_photos: { id: string; order: number; storage_path: string }[]
+  total_score: number | null
+}
 
 export const recipeKeys = {
   all: ['recipes'] as const,
@@ -29,7 +35,7 @@ export async function fetchRecipes({
   sortBy: 'created_at' | 'total_score'
   cursor?: RecipeCursor
   tags?: string[]
-}) {
+}): Promise<RecipeListItem[]> {
   let query = supabase
     .from('recipes')
     .select('*, recipe_photos!recipe_photos_recipe_id_fkey(id, order, storage_path)')
@@ -64,7 +70,7 @@ export async function fetchRecipes({
 
   const { data, error } = await query
   if (error) handleSupabaseError(error, '레시피 목록 조회')
-  return data ?? []
+  return (data ?? []) as RecipeListItem[]
 }
 
 export async function fetchRecipe(id: string): Promise<RecipeWithDetails> {
