@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockNavigate = vi.fn()
 const mockSetSession = vi.fn()
@@ -15,6 +15,9 @@ vi.mock('@/features/auth', () => ({
 }))
 
 const signInMock = vi.fn()
+const getRememberPreferenceMock = vi.fn()
+const setRememberPreferenceMock = vi.fn()
+const clearOppositeBackendMock = vi.fn()
 
 vi.mock('@/shared/api', () => ({
   supabase: {
@@ -22,16 +25,19 @@ vi.mock('@/shared/api', () => ({
       signInWithPassword: (...args: unknown[]) => signInMock(...args),
     },
   },
-  createLoginClient: () => ({
-    auth: {
-      signInWithPassword: (...args: unknown[]) => signInMock(...args),
-    },
-  }),
+  getRememberPreference: () => getRememberPreferenceMock(),
+  setRememberPreference: (...args: unknown[]) => setRememberPreferenceMock(...args),
+  clearOppositeBackend: () => clearOppositeBackendMock(),
 }))
 
 import { LoginPage } from '../login-page'
 
 describe('LoginPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    getRememberPreferenceMock.mockReturnValue(true)
+  })
+
   it('이메일/비밀번호 입력 필드와 로그인 버튼 렌더링', () => {
     render(React.createElement(LoginPage))
     expect(screen.getByPlaceholderText('example@email.com')).toBeTruthy()
@@ -79,6 +85,10 @@ describe('LoginPage', () => {
         password: 'password123',
       })
     })
+    expect(setRememberPreferenceMock).toHaveBeenCalledWith(true)
+    expect(setRememberPreferenceMock.mock.invocationCallOrder[0]).toBeLessThan(
+      signInMock.mock.invocationCallOrder[0]!
+    )
   })
 
   it('로그인 실패 시 에러 메시지 표시', async () => {
@@ -102,6 +112,32 @@ describe('LoginPage', () => {
     })
   })
 
+  it('로그인 실패 시 변경한 remember preference를 이전 값으로 롤백한다', async () => {
+    getRememberPreferenceMock.mockReturnValue(true)
+    signInMock.mockResolvedValueOnce({
+      data: { session: null },
+      error: { message: 'Invalid login credentials' },
+    })
+
+    render(React.createElement(LoginPage))
+    fireEvent.change(screen.getByPlaceholderText('example@email.com'), {
+      target: { value: 'test@example.com' },
+    })
+    fireEvent.change(screen.getByPlaceholderText('비밀번호'), {
+      target: { value: 'wrongpassword' },
+    })
+    fireEvent.click(screen.getByRole('checkbox'))
+    fireEvent.submit(screen.getByPlaceholderText('example@email.com').closest('form')!)
+
+    await waitFor(() => {
+      expect(setRememberPreferenceMock).toHaveBeenNthCalledWith(1, false)
+      expect(setRememberPreferenceMock).toHaveBeenNthCalledWith(2, true)
+    })
+    expect(setRememberPreferenceMock.mock.invocationCallOrder[0]).toBeLessThan(
+      signInMock.mock.invocationCallOrder[0]!
+    )
+  })
+
   it('로그인 성공 시 /home으로 이동', async () => {
     signInMock.mockResolvedValueOnce({
       data: { session: { access_token: 'token' } },
@@ -121,5 +157,6 @@ describe('LoginPage', () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith({ to: '/home' })
     })
+    expect(clearOppositeBackendMock).toHaveBeenCalledOnce()
   })
 })
