@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { supabase } from '@/shared/api'
+import { clearAllAuthStorage, supabase } from '@/shared/api'
 import { toastSupabaseError } from '@/shared/lib/handle-error'
 
 import type { Session, User } from '@supabase/supabase-js'
@@ -27,6 +27,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const { error } = await supabase.auth.signOut()
       if (error) toastSupabaseError(error, '로그아웃')
     } finally {
+      clearAllAuthStorage()
       set({ user: null, session: null })
     }
   },
@@ -38,7 +39,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       if (!authListenerRegistered) {
         authListenerRegistered = true
-        supabase.auth.onAuthStateChange((_event, session) => {
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_OUT') {
+            // Each tab must clear its own sessionStorage + shared localStorage
+            // so foreign-tab tokens cannot revive after refresh.
+            clearAllAuthStorage()
+          }
           set({ session, user: session?.user ?? null })
         })
       }
