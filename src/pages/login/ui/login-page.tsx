@@ -6,7 +6,12 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/features/auth'
-import { createLoginClient, supabase } from '@/shared/api'
+import {
+  clearOppositeBackend,
+  getRememberPreference,
+  setRememberPreference,
+  supabase,
+} from '@/shared/api'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -27,20 +32,30 @@ export function LoginPage() {
     setIsLoading(true)
     setErrorMsg('')
 
-    // rememberMe=false → sessionStorage 클라이언트(탭 종료 시 세션 만료)
-    // rememberMe=true  → 기본 클라이언트(localStorage, 브라우저 재시작 후에도 유지)
-    const client = rememberMe ? supabase : createLoginClient()
-    const { data, error } = await client.auth.signInWithPassword({
+    // Capture prior preference so failed login does not leave a flipped backend.
+    const previousPreference = getRememberPreference()
+    setRememberPreference(rememberMe)
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: trimmedEmail,
       password: trimmedPassword,
     })
 
     if (error) {
+      setRememberPreference(previousPreference)
       setIsLoading(false)
       setErrorMsg(error.message)
-    } else if (data.session) {
+      return
+    }
+
+    if (data.session) {
+      // After successful sign-in, drop stale tokens on the opposite backend only.
+      clearOppositeBackend()
       setSession(data.session)
       router.navigate({ to: '/home' })
+    } else {
+      setRememberPreference(previousPreference)
+      setIsLoading(false)
     }
   }
 

@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
+import { AUTH_STORAGE_KEY, authStorage, resolveAmbiguousLegacySessions } from './auth-storage'
+
 import type { Database } from './database.types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
@@ -9,22 +11,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
+// Prefer safe boot if both storages hold conflicting legacy tokens
+resolveAmbiguousLegacySessions()
+
+/**
+ * App-wide singleton. Session persistence is routed by remember-me preference
+ * via authStorage (localStorage when ON, sessionStorage when OFF).
+ * A single client owns login, restore, and app-wide authenticated requests.
+ */
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    storage: localStorage,
+    autoRefreshToken: true,
+    storage: authStorage,
+    storageKey: AUTH_STORAGE_KEY,
   },
 })
-
-/**
- * rememberMe=false 시 localStorage 대신 sessionStorage를 사용하는 임시 클라이언트.
- * 로그인 완료 후 버려지므로 앱 전체 인스턴스와 충돌하지 않는다.
- */
-export function createLoginClient() {
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      storage: sessionStorage,
-    },
-  })
-}

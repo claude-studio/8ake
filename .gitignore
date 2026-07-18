@@ -97,3 +97,4 @@ Desktop.ini
 supabase/.temp/
 supabase/migrations/*.local.sql
 .vercel
+.scv/
